@@ -1,14 +1,40 @@
-import { Button } from "@/components/ui/button"
+"use client"
 
-export default function Header () {
-    return (
-        <header className="bg-gray-800 text-white p-6 flex justify-between items-center">
-      <h1 className="text-xl font-semibold">Share-Books</h1>
-      <nav className="flex space-x-6">
-        <a href="#" className="hover:underline">Home</a>
-        <a href="#" className="hover:underline">About</a>
-        <a href="#" className="hover:underline">Contact</a>
-      </nav>
+import { Heart, ShoppingCart, User } from "lucide-react";
+import { useState } from "react";
+
+import SearchBar from "../searchBar/SearchBar";
+import Logo from "../logo/Logo";
+
+export default function Header() {
+  const [wishlistCount, setWishlistCount] = useState(5);
+  const [cartCount, setCartCount] = useState(3);
+
+  return (
+    <header className="flex items-center justify-between p-6 bg-white shadow">
+      <Logo />
+
+      <SearchBar />
+
+      <div className="flex items-center space-x-4">
+        <User className="w-6 h-6 text-gray-600" />
+        <div className="relative">
+          <Heart className="w-6 h-6 text-gray-600" />
+          {wishlistCount > 0 && (
+            <span className="absolute -top-2 -right-2 bg-red-600 text-white text-xs rounded-full px-1">
+              {wishlistCount}
+            </span>
+          )}
+        </div>
+        <div className="relative">
+          <ShoppingCart className="w-6 h-6 text-gray-600" />
+          {cartCount > 0 && (
+            <span className="absolute -top-2 -right-2 bg-red-600 text-white text-xs rounded-full px-1">
+              {cartCount}
+            </span>
+          )}
+        </div>
+      </div>
     </header>
-    )
+  );
 }
