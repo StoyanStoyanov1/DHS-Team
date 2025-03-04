@@ -9,31 +9,28 @@ import Register from "@/components/auth/register";
 export default function Header() {
   const [isOpen, setIsOpen] = useState(false);
 
-  // Ref за проследяване на иконата на потребителя и самия Register компонент
   const userRef = useRef<HTMLDivElement>(null);
   const registerRef = useRef<HTMLDivElement>(null);
 
-  // Функция, която затваря формуляра ако е кликнато извън него
   const handleClickOutside = (e: MouseEvent) => {
-    // Проверяваме дали кликът е извън потребителската икона и самия Register компонент
     if (
       userRef.current && !userRef.current.contains(e.target as Node) &&
       registerRef.current && !registerRef.current.contains(e.target as Node)
     ) {
-      setIsOpen(false); // Затваряме менюто
+      setIsOpen(false);
     }
   };
 
-  // Добавяне и премахване на слушател за клик извън компонента
   useEffect(() => {
-    document.addEventListener("click", handleClickOutside);
+    document.addEventListener("click", handleClickOutside, true);
     return () => {
-      document.removeEventListener("click", handleClickOutside);
+      document.removeEventListener("click", handleClickOutside, true);
     };
   }, []);
+  
 
   return (
-    <header className="relative flex items-center justify-between p-6 bg-white shadow">
+    <header className="relative flex items-center justify-between p-4 bg-white shadow">
       <Logo />
       <SearchBar />
 
@@ -45,7 +42,7 @@ export default function Header() {
         {isOpen && (
           <div
             ref={registerRef}
-            className="absolute right-0 mt-2 w-80 bg-white shadow-lg rounded-lg p-2 z-20"
+            className="absolute right-0 mt-2 w-65 bg-white shadow-lg rounded-lg p-1 z-20"
           >
             <Register />
           </div>
