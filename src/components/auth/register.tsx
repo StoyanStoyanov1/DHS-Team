@@ -6,6 +6,8 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { authValidateForm } from "@/utils/validation/authValidateForm";
 import { AiFillEye, AiFillEyeInvisible } from "react-icons/ai"; 
+import { useLanguage } from "@/context/language/LanguageContext";
+import authTranslate from "@/utils/translate/authTranslate";
 
 interface FormState {
   email: string;
@@ -19,6 +21,8 @@ export default function Register() {
     password: "",
     confirmPassword: "",
   });
+
+  const { language } = useLanguage();
 
   const [errors, setErrors] = useState<any>({});
   const [showPassword, setShowPassword] = useState<boolean>(false);
@@ -58,7 +62,7 @@ export default function Register() {
   return (
     <Card className="w-full max-w-md p-4 shadow-lg">
       <CardHeader>
-        <CardTitle className="text-center text-2xl text-gray-700">Register</CardTitle>
+        <CardTitle className="text-center text-2xl text-gray-700">{authTranslate[language].register}</CardTitle>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-3">
@@ -66,7 +70,7 @@ export default function Register() {
           <div>
             <Input
               name="email"
-              placeholder="Email"
+              placeholder={authTranslate[language].email}
               value={form.email}
               onChange={handleChange}
               className="bg-white text-gray-800 border border-gray-300 focus:ring-2 focus:ring-gray-200"
@@ -78,7 +82,7 @@ export default function Register() {
             <Input
               name="password"
               type={showPassword ? "text" : "password"}
-              placeholder="Password"
+              placeholder={authTranslate[language].password}
               value={form.password}
               onChange={handleChange}
               className="bg-white text-gray-800 border border-gray-300 focus:ring-2 focus:ring-gray-200"
@@ -102,7 +106,7 @@ export default function Register() {
             <Input
               name="confirmPassword"
               type={showConfirmPassword ? "text" : "password"}
-              placeholder="Confirm Password"
+              placeholder={authTranslate[language].confirmPassword}
               value={form.confirmPassword}
               onChange={handleChange}
               className="bg-white text-gray-800 border border-gray-300 focus:ring-2 focus:ring-gray-200"
@@ -125,7 +129,7 @@ export default function Register() {
           </div>
 
           <Button type="submit" className="w-full text-white bg-gray-500">
-            Register
+            {authTranslate[language].createAccount}
           </Button>
         </form>
       </CardContent>
