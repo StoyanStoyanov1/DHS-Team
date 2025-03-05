@@ -3,8 +3,8 @@ import { Button } from "@/components/ui/button";
 
 export default function SearchBar() {
   return (
-    <div className="flex items-center w-full sm:w-1/3 border rounded-full overflow-hidden shadow-lg bg-white">
-      <select className="w-1/4 p-3 bg-gray-50 border-r text-gray-600 rounded-l-full focus:outline-none focus:ring-2 focus:ring-gray-200">
+    <div className="flex items-center w-full sm:w-1/3 h-8 border rounded-full overflow-hidden shadow-lg bg-white">
+      <select className="w-1/4 p-1 bg-gray-50 border-r text-gray-600 rounded-l-full focus:outline-none focus:ring-2 focus:ring-gray-200">
         <option>Books</option>
         <option>Authors</option>
       </select>

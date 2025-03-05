@@ -1,6 +1,4 @@
-"use client";
-
-import { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -8,6 +6,7 @@ import { authValidateForm } from "@/utils/validation/authValidateForm";
 import { AiFillEye, AiFillEyeInvisible } from "react-icons/ai"; 
 import { useLanguage } from "@/context/language/LanguageContext";
 import authTranslate from "@/utils/translate/authTranslate";
+import { X, Check } from "lucide-react";
 
 interface FormState {
   email: string;
@@ -22,6 +21,14 @@ export default function Register() {
     confirmPassword: "",
   });
 
+  const getIcon = (isTrue: boolean): React.ReactElement => {
+    if (!isTrue) {
+      return <X className="text-red-500 text-xs w-3 h-3" />;
+    }
+    
+    return <Check className="text-green-500 text-xs w-3 h-3" />;
+  }
+
   const { language } = useLanguage();
 
   const [errors, setErrors] = useState<any>({});
@@ -30,6 +37,10 @@ export default function Register() {
 
   const passwordButtonRef = useRef<HTMLButtonElement>(null); 
   const confirmPasswordButtonRef = useRef<HTMLButtonElement>(null);
+
+  const emailInputRef = useRef<HTMLInputElement>(null);
+  const passwordInputRef = useRef<HTMLInputElement>(null);
+  const confirmPasswordInputRef = useRef<HTMLInputElement>(null);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value.trim() });
@@ -59,13 +70,36 @@ export default function Register() {
     setShowConfirmPassword((prev) => !prev);
   };
 
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "ArrowDown") {
+      if (document.activeElement === emailInputRef.current) {
+        passwordInputRef.current?.focus();
+      } else if (document.activeElement === passwordInputRef.current) {
+        confirmPasswordInputRef.current?.focus();
+      }
+    } else if (e.key === "ArrowUp") {
+      if (document.activeElement === confirmPasswordInputRef.current) {
+        passwordInputRef.current?.focus();
+      } else if (document.activeElement === passwordInputRef.current) {
+        emailInputRef.current?.focus();
+      }
+    }
+  };
+
+  useEffect(() => {
+    document.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, []);
+
   return (
-    <Card className="w-full max-w-md p-4 shadow-lg">
+    <Card className="w-full shadow-none">
       <CardHeader>
-        <CardTitle className="text-center text-2xl text-gray-700">{authTranslate[language].register}</CardTitle>
+        <CardTitle className="text-center text-sm text-gray-700">{authTranslate[language].register}</CardTitle>
       </CardHeader>
       <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-3">
+        <form onSubmit={handleSubmit} className="space-y-2">
 
           <div>
             <Input
@@ -73,9 +107,9 @@ export default function Register() {
               placeholder={authTranslate[language].email}
               value={form.email}
               onChange={handleChange}
-              className="bg-white text-gray-800 border border-gray-300 focus:ring-2 focus:ring-gray-200"
+              ref={emailInputRef}
+              className="bg-white text-gray-800 border border-gray-300 focus:ring-1 focus:ring-gray-200 text-[10px] py-1 px-2 h-6" 
             />
-            {errors.email && <p className="text-red-500 text-sm">{errors.email}</p>}
           </div>
 
           <div className="relative">
@@ -85,21 +119,21 @@ export default function Register() {
               placeholder={authTranslate[language].password}
               value={form.password}
               onChange={handleChange}
-              className="bg-white text-gray-800 border border-gray-300 focus:ring-2 focus:ring-gray-200"
+              ref={passwordInputRef}
+              className="bg-white text-gray-800 border border-gray-300 focus:ring-1 focus:ring-gray-200 text-[10px] py-1 px-2 h-6" // Намален размер на шрифта
             />
             <button
               type="button"
               onClick={handlePasswordClick}
               ref={passwordButtonRef}
-              className="absolute right-3 top-1/2 transform -translate-y-1/2"
+              className="absolute right-2 top-1/2 transform -translate-y-1/2"
             >
               {showPassword ? (
-                <AiFillEyeInvisible className="text-gray-500" />
+                <AiFillEyeInvisible className="text-gray-500 text-sm" />
               ) : (
-                <AiFillEye className="text-gray-500" />
+                <AiFillEye className="text-gray-500 text-sm" />
               )}
             </button>
-            {errors.password && <p className="text-red-500 text-sm">{errors.password}</p>}
           </div>
 
           <div className="relative">
@@ -109,28 +143,52 @@ export default function Register() {
               placeholder={authTranslate[language].confirmPassword}
               value={form.confirmPassword}
               onChange={handleChange}
-              className="bg-white text-gray-800 border border-gray-300 focus:ring-2 focus:ring-gray-200"
+              ref={confirmPasswordInputRef}
+              className="bg-white text-gray-800 border border-gray-300 focus:ring-1 focus:ring-gray-200 text-[10px] py-1 px-2 h-6" // Намален размер на шрифта
             />
             <button
               type="button"
               onClick={handleConfirmPasswordClick}
               ref={confirmPasswordButtonRef}
-              className="absolute right-3 top-1/2 transform -translate-y-1/2"
+              className="absolute right-2 top-1/2 transform -translate-y-1/2"
             >
               {showConfirmPassword ? (
-                <AiFillEyeInvisible className="text-gray-500" />
+                <AiFillEyeInvisible className="text-gray-500 text-sm" />
               ) : (
-                <AiFillEye className="text-gray-500" />
+                <AiFillEye className="text-gray-500 text-sm" />
               )}
             </button>
-            {errors.confirmPassword && (
-              <p className="text-red-500 text-sm">{errors.confirmPassword}</p>
-            )}
           </div>
 
-          <Button type="submit" className="w-full text-white bg-gray-500">
-            {authTranslate[language].createAccount}
-          </Button>
+          <div className="text-[8px] text-blue-500 mt-1 space-y-1">
+          <p className="inline-flex items-center">
+              {getIcon(false)} {authTranslate[language].emailFormat}
+            </p>
+            <p className="inline-flex items-center">
+              {getIcon(false)} {authTranslate[language].passwordLength}
+            </p>
+            <p className="inline-flex items-center">
+              {getIcon(true)} {authTranslate[language].passwordUppercase}
+            </p>
+            <p className="inline-flex items-center">
+              {getIcon(false)} {authTranslate[language].passwordLowercase}
+            </p>
+            <p className="inline-flex items-center">
+              {getIcon(true)} {authTranslate[language].passwordNumber}
+            </p>
+          </div>
+
+          <div className="flex justify-center">
+            <div className="flex justify-center">
+              <Button
+                type="submit"
+                className="w-[120px] text-white bg-[#9B1C31] text-xs py-[0.25rem] mx-auto cursor-pointer hover:bg-[#7A1426] transition-colors"
+              >
+                {authTranslate[language].createAccount}
+              </Button>
+            </div>
+          </div>
+
         </form>
       </CardContent>
     </Card>

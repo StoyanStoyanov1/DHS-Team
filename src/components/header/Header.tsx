@@ -30,11 +30,11 @@ export default function Header() {
   }, []);
 
   return (
-    <header className="relative flex items-center justify-between p-4 bg-white shadow">
+    <header className="relative flex items-center justify-between p-3 bg-white shadow">
       <Logo />
       <SearchBar />
       
-      <div className="absolute top-4 right-4">
+      <div className="absolute top-1 right-6">
         <LanguageSelector />
       </div>
 
@@ -46,7 +46,7 @@ export default function Header() {
         {isOpen && (
           <div
             ref={registerRef}
-            className="absolute right-0 mt-2 w-65 bg-white shadow-lg rounded-lg p-1 z-20"
+            className="absolute right-0 mt-2 w-52 bg-white shadow-lg rounded-lg p-1 z-20"
           >
             <Register />
           </div>
