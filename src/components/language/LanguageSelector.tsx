@@ -11,7 +11,6 @@ const languageOptions = [
   { value: "bg", flag: "BG" },
 ];
 
-// Форматиране на опциите (само флаг)
 const formatOptionLabel = ({ flag }: { flag: string }) => (
   <div style={{ display: "flex", alignItems: "center", gap: "8px", fontSize: "16px" }}>
     <Flag code={flag} style={{ width: 25, height: 18 }} />
