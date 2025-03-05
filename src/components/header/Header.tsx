@@ -5,6 +5,7 @@ import { User } from "lucide-react";
 import SearchBar from "../searchBar/SearchBar";
 import Logo from "../logo/Logo";
 import Register from "@/components/auth/register";
+import LanguageSelector from "../language/LanguageSelector";
 
 export default function Header() {
   const [isOpen, setIsOpen] = useState(false);
@@ -27,12 +28,15 @@ export default function Header() {
       document.removeEventListener("click", handleClickOutside, true);
     };
   }, []);
-  
 
   return (
     <header className="relative flex items-center justify-between p-4 bg-white shadow">
       <Logo />
       <SearchBar />
+      
+      <div className="absolute top-4 right-4">
+        <LanguageSelector />
+      </div>
 
       <div className="relative" ref={userRef}>
         <User
