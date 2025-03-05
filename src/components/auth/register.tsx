@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { authValidateForm } from "@/utils/validation/authValidateForm";
-import { AiFillEye, AiFillEyeInvisible } from "react-icons/ai"; // Импортирай иконите
+import { AiFillEye, AiFillEyeInvisible } from "react-icons/ai"; 
 
 interface FormState {
   email: string;
@@ -24,8 +24,8 @@ export default function Register() {
   const [showPassword, setShowPassword] = useState<boolean>(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState<boolean>(false);
 
-  const passwordButtonRef = useRef<HTMLButtonElement>(null); // Реф за бутона за парола
-  const confirmPasswordButtonRef = useRef<HTMLButtonElement>(null); // Реф за бутона за потвърждение на парола
+  const passwordButtonRef = useRef<HTMLButtonElement>(null); 
+  const confirmPasswordButtonRef = useRef<HTMLButtonElement>(null);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value.trim() });
