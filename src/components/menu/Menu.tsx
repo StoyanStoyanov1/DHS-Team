@@ -13,6 +13,14 @@ import {
     User,
     UserPlus,
     Users,
+    BookOpen,
+    BookHeart,
+    Bookmark,
+    Pen,
+    Clock,
+    Triangle,
+    AlertCircle,
+    AlertTriangle,
   } from "lucide-react"
   
   import { Button } from "@/components/ui/button"
@@ -38,83 +46,70 @@ import {
           <Button variant="outline">Menu</Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent className="w-56">
-          <DropdownMenuLabel>My Account</DropdownMenuLabel>
+          <DropdownMenuLabel>example@email.com</DropdownMenuLabel>
           <DropdownMenuSeparator />
           <DropdownMenuGroup>
             <DropdownMenuItem>
-              <User />
-              <span>Profile</span>
-              <DropdownMenuShortcut>⇧⌘P</DropdownMenuShortcut>
+            <BookOpen />
+            <span>My Books</span>
             </DropdownMenuItem>
             <DropdownMenuItem>
-              <CreditCard />
-              <span>Billing</span>
-              <DropdownMenuShortcut>⌘B</DropdownMenuShortcut>
+              <BookHeart  />
+              <span>Favorite Books</span>
             </DropdownMenuItem>
             <DropdownMenuItem>
-              <Settings />
-              <span>Settings</span>
-              <DropdownMenuShortcut>⌘S</DropdownMenuShortcut>
-            </DropdownMenuItem>
-            <DropdownMenuItem>
-              <Keyboard />
-              <span>Keyboard shortcuts</span>
-              <DropdownMenuShortcut>⌘K</DropdownMenuShortcut>
+              <Bookmark />
+              <span>Favorite Genres</span>
             </DropdownMenuItem>
           </DropdownMenuGroup>
           <DropdownMenuSeparator />
           <DropdownMenuGroup>
-            <DropdownMenuItem>
-              <Users />
-              <span>Team</span>
-            </DropdownMenuItem>
             <DropdownMenuSub>
               <DropdownMenuSubTrigger>
-                <UserPlus />
-                <span>Invite users</span>
+                <Plus />
+                <span>Create</span>
               </DropdownMenuSubTrigger>
               <DropdownMenuPortal>
                 <DropdownMenuSubContent>
                   <DropdownMenuItem>
-                    <Mail />
-                    <span>Email</span>
+                    <Bookmark />
+                    <span>Genre</span>
                   </DropdownMenuItem>
                   <DropdownMenuItem>
-                    <MessageSquare />
-                    <span>Message</span>
+                    <Pen />
+                    <span>Author</span>
                   </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem>
-                    <PlusCircle />
-                    <span>More...</span>
-                  </DropdownMenuItem>
+                 
                 </DropdownMenuSubContent>
               </DropdownMenuPortal>
             </DropdownMenuSub>
             <DropdownMenuItem>
-              <Plus />
-              <span>New Team</span>
-              <DropdownMenuShortcut>⌘+T</DropdownMenuShortcut>
+              <Clock />
+              <span>Pending books</span>
+            </DropdownMenuItem>
+            <DropdownMenuItem>
+              <AlertTriangle />
+              <span>Reported Issues</span>
             </DropdownMenuItem>
           </DropdownMenuGroup>
           <DropdownMenuSeparator />
           <DropdownMenuItem>
-            <Github />
-            <span>GitHub</span>
+            <Users />
+            <span>Users</span>
           </DropdownMenuItem>
           <DropdownMenuItem>
             <LifeBuoy />
             <span>Support</span>
           </DropdownMenuItem>
-          <DropdownMenuItem disabled>
-            <Cloud />
-            <span>API</span>
-          </DropdownMenuItem>
+         
           <DropdownMenuSeparator />
+          <DropdownMenuItem>
+            <Settings />
+            <span>Settings</span>
+          </DropdownMenuItem>
           <DropdownMenuItem>
             <LogOut />
             <span>Log out</span>
-            <DropdownMenuShortcut>⇧⌘Q</DropdownMenuShortcut>
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
