@@ -1,26 +1,16 @@
 import {
-    Cloud,
-    CreditCard,
-    Github,
-    Keyboard,
     LifeBuoy,
     LogOut,
-    Mail,
-    MessageSquare,
     Plus,
-    PlusCircle,
     Settings,
-    User,
-    UserPlus,
     Users,
     BookOpen,
     BookHeart,
     Bookmark,
     Pen,
     Clock,
-    Triangle,
-    AlertCircle,
     AlertTriangle,
+    LogIn,
   } from "lucide-react"
   
   import { Button } from "@/components/ui/button"
@@ -110,6 +100,10 @@ import {
           <DropdownMenuItem>
             <LogOut />
             <span>Log out</span>
+          </DropdownMenuItem>
+          <DropdownMenuItem>
+            <LogIn />
+            <span>Log in</span>
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
