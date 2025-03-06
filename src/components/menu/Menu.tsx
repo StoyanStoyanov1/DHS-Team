@@ -27,29 +27,35 @@ import {
     DropdownMenuSubContent,
     DropdownMenuSubTrigger,
     DropdownMenuTrigger,
-  } from "@/components/ui/dropdown-menu"
+  } from "@/components/ui/dropdown-menu";
+
+  import { useLanguage } from "@/context/language/LanguageContext";
+
+  import menuTranslate from "@/utils/translate/menuTranslate";
   
   export default function Menu() {
+    const { language } = useLanguage();
+
     return (
-      <DropdownMenu>
+      <DropdownMenu >
         <DropdownMenuTrigger asChild>
-          <Button variant="outline">Menu</Button>
+          <Button variant="outline" className="cursor-pointer">{menuTranslate[language].menu}</Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent className="w-56">
           <DropdownMenuLabel>example@email.com</DropdownMenuLabel>
           <DropdownMenuSeparator />
-          <DropdownMenuGroup>
-            <DropdownMenuItem>
+          <DropdownMenuGroup >
+            <DropdownMenuItem >
             <BookOpen />
-            <span>My Books</span>
+            <span>{menuTranslate[language].myBooks}</span>
             </DropdownMenuItem>
             <DropdownMenuItem>
               <BookHeart  />
-              <span>Favorite Books</span>
+              <span>{menuTranslate[language].favoriteBooks}</span>
             </DropdownMenuItem>
             <DropdownMenuItem>
               <Bookmark />
-              <span>Favorite Genres</span>
+              <span>{menuTranslate[language].favoriteGenres}</span>
             </DropdownMenuItem>
           </DropdownMenuGroup>
           <DropdownMenuSeparator />
@@ -57,17 +63,17 @@ import {
             <DropdownMenuSub>
               <DropdownMenuSubTrigger>
                 <Plus />
-                <span>Create</span>
+                <span>{menuTranslate[language].create}</span>
               </DropdownMenuSubTrigger>
               <DropdownMenuPortal>
                 <DropdownMenuSubContent>
                   <DropdownMenuItem>
                     <Bookmark />
-                    <span>Genre</span>
+                    <span>{menuTranslate[language].genre}</span>
                   </DropdownMenuItem>
                   <DropdownMenuItem>
                     <Pen />
-                    <span>Author</span>
+                    <span>{menuTranslate[language].author}</span>
                   </DropdownMenuItem>
                  
                 </DropdownMenuSubContent>
@@ -75,35 +81,36 @@ import {
             </DropdownMenuSub>
             <DropdownMenuItem>
               <Clock />
-              <span>Pending books</span>
+              <span>{menuTranslate[language].pendingBooks}</span>
             </DropdownMenuItem>
             <DropdownMenuItem>
               <AlertTriangle />
-              <span>Reported Issues</span>
+              <span>{menuTranslate[language].reportedIssues}</span>
             </DropdownMenuItem>
           </DropdownMenuGroup>
           <DropdownMenuSeparator />
           <DropdownMenuItem>
             <Users />
-            <span>Users</span>
+            <span>{menuTranslate[language].users}</span>
           </DropdownMenuItem>
-          <DropdownMenuItem>
-            <LifeBuoy />
-            <span>Support</span>
-          </DropdownMenuItem>
-         
+          
           <DropdownMenuSeparator />
           <DropdownMenuItem>
             <Settings />
-            <span>Settings</span>
+            <span>{menuTranslate[language].settings}</span>
           </DropdownMenuItem>
           <DropdownMenuItem>
+            <LifeBuoy />
+            <span>{menuTranslate[language].support}</span>
+          </DropdownMenuItem>
+         
+          <DropdownMenuItem>
             <LogOut />
-            <span>Log out</span>
+            <span>{menuTranslate[language].logOut}</span>
           </DropdownMenuItem>
           <DropdownMenuItem>
             <LogIn />
-            <span>Log in</span>
+            <span>{menuTranslate[language].logIn}</span>
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
