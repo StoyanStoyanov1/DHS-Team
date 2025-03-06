@@ -8,7 +8,7 @@ interface AuthTranslate {
     passwordUppercase: string; 
     passwordLowercase: string; 
     passwordNumber: string; 
-    emailFormat: string;  // Добавяме ново поле за формат на имейл
+    emailFormat: string;
 }
 
 interface LanguageAuthTranslate {
