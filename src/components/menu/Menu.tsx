@@ -11,6 +11,7 @@ import {
     Clock,
     AlertTriangle,
     LogIn,
+    Clipboard 
   } from "lucide-react"
   
   import { Button } from "@/components/ui/button"
@@ -62,9 +63,9 @@ import {
           <DropdownMenuGroup>
             <DropdownMenuSub>
               <DropdownMenuSubTrigger>
-                <Plus />
-                <span>{menuTranslate[language].create}</span>
-              </DropdownMenuSubTrigger>
+                <Plus size={19} />
+                <span style={{ marginLeft: "6px" }}>{menuTranslate[language].create}</span>
+                </DropdownMenuSubTrigger>
               <DropdownMenuPortal>
                 <DropdownMenuSubContent>
                   <DropdownMenuItem>
