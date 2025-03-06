@@ -4,8 +4,9 @@ import { useState, useRef, useEffect } from "react";
 import { User } from "lucide-react";
 import SearchBar from "../searchBar/SearchBar";
 import Logo from "../logo/Logo";
-import Register from "@/components/auth/register";
+import LoginForm from "@/components/auth/login-form";
 import LanguageSelector from "../language/LanguageSelector";
+import Menu from "@/components/menu/Menu";
 
 export default function Header() {
   const [isOpen, setIsOpen] = useState(false);
@@ -31,6 +32,7 @@ export default function Header() {
 
   return (
     <header className="relative flex items-center justify-between p-3 bg-white shadow">
+      <Menu />
       <Logo />
       <SearchBar />
       
@@ -39,16 +41,13 @@ export default function Header() {
       </div>
 
       <div className="relative" ref={userRef}>
-        <User
-          className="w-6 h-6 text-gray-600 cursor-pointer"
-          onClick={() => setIsOpen(!isOpen)}
-        />
+        
         {isOpen && (
           <div
             ref={registerRef}
             className="absolute right-0 mt-2 w-52 bg-white shadow-lg rounded-lg p-1 z-20"
           >
-            <Register />
+            <LoginForm />
           </div>
         )}
       </div>
