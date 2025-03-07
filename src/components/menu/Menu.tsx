@@ -30,12 +30,21 @@ import {
     DropdownMenuTrigger,
   } from "@/components/ui/dropdown-menu";
 
+  import { useRouter } from "next/navigation"; 
+  import routes from "@/utils/routes";
+
+
   import { useLanguage } from "@/context/language/LanguageContext";
 
   import menuTranslate from "@/utils/translate/menuTranslate";
   
   export default function Menu() {
     const { language } = useLanguage();
+    const router = useRouter();
+
+    const navigateToRoute = (route: string) => {
+        router.push(route);
+    }
 
     return (
       <DropdownMenu >
@@ -109,10 +118,11 @@ import {
             <LogOut />
             <span>{menuTranslate[language].logOut}</span>
           </DropdownMenuItem>
-          <DropdownMenuItem>
+          <DropdownMenuItem onSelect={() => navigateToRoute(routes.login)}>
             <LogIn />
             <span>{menuTranslate[language].logIn}</span>
-          </DropdownMenuItem>
+            </DropdownMenuItem>
+
         </DropdownMenuContent>
       </DropdownMenu>
     )
