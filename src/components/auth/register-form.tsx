@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Eye, EyeOff } from "lucide-react" 
 
-export default function LoginForm({
+export default function RegisterForm({
   className,
   ...props
 }: React.ComponentPropsWithoutRef<"form">) {
@@ -20,9 +20,9 @@ export default function LoginForm({
   return (
     <form className={cn("flex flex-col gap-6", className)} {...props}>
       <div className="flex flex-col items-center gap-2 text-center">
-        <h1 className="text-2xl font-bold">Login to your account</h1>
+        <h1 className="text-2xl font-bold">Register to your account</h1>
         <p className="text-balance text-sm text-muted-foreground">
-          Enter your email below to login to your account
+          Enter your email below to register to your account
         </p>
       </div>
       <div className="grid gap-6">
@@ -33,12 +33,6 @@ export default function LoginForm({
         <div className="grid gap-2">
           <div className="flex items-center justify-between">
             <Label htmlFor="password">Password</Label>
-            <a
-              href="#"
-              className="text-sm underline-offset-4 hover:underline"
-            >
-              Forgot your password?
-            </a>
           </div>
           <div className="relative">
             <Input
@@ -48,16 +42,27 @@ export default function LoginForm({
               placeholder="Enter your password"
             />
             <div
-  className="absolute right-2 top-1/2 transform -translate-y-1/2 cursor-pointer"
-  onClick={togglePasswordVisibility}
->
-  {showPassword ? (
-    <EyeOff className="h-5 w-5" />
-  ) : (
-    <Eye className="h-5 w-5" />
-  )}
-</div>
+                className="absolute right-2 top-1/2 transform -translate-y-1/2 cursor-pointer"
+                onClick={togglePasswordVisibility}
+                >
+                {showPassword ? (
+                    <EyeOff className="h-5 w-5" />
+                ) : (
+                    <Eye className="h-5 w-5" />
+                )}
+            </div>
 
+          </div>
+          <div className="flex items-center justify-between">
+            <Label htmlFor="confirm-password">Confirm Password</Label>
+          </div>
+          <div className="relative">
+            <Input
+              id="confirm-password"
+              type={showPassword ? "text" : "password"}
+              required
+              placeholder="Confirm your password"
+            />
           </div>
         </div>
         <Button type="submit" className="w-full">
@@ -81,12 +86,6 @@ export default function LoginForm({
           </svg>
           Login with Google
         </Button>
-        <div className="text-center text-sm">
-          Don&apos;t have an account?{" "}
-          <a href="#" className="underline underline-offset-4">
-            Sign up
-          </a>
-        </div>
       </div>
     </form>
   )

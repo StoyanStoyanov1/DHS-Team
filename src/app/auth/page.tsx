@@ -18,7 +18,8 @@ import {
   TabsList,
   TabsTrigger,
 } from "@/components/ui/tabs"
-import LoginForm from "@/components/auth/login-form"
+import LoginForm from "@/components/auth/login-form";
+import RegisterForm from "@/components/auth/register-form"
 
 export default function TabsDemo() {
   return (
@@ -31,27 +32,7 @@ export default function TabsDemo() {
         <LoginForm />
       </TabsContent>
       <TabsContent value="register">
-        <Card>
-          <CardHeader>
-            <CardTitle>Password</CardTitle>
-            <CardDescription>
-              Change your password here. After saving, you'll be logged out.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-2">
-            <div className="space-y-1">
-              <Label htmlFor="current">Current password</Label>
-              <Input id="current" type="password" />
-            </div>
-            <div className="space-y-1">
-              <Label htmlFor="new">New password</Label>
-              <Input id="new" type="password" />
-            </div>
-          </CardContent>
-          <CardFooter>
-            <Button>Save password</Button>
-          </CardFooter>
-        </Card>
+          <RegisterForm />
       </TabsContent>
     </Tabs>
   )
