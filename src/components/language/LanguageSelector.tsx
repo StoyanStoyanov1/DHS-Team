@@ -1,103 +1,50 @@
 "use client";
 
-import Select, { SingleValue } from "react-select";
-import { useLanguage } from "@/context/language/LanguageContext";
-import { useEffect, useState } from "react";
-import Flag from "react-world-flags"; 
+import 'flag-icons/css/flag-icons.min.css';
+import React from "react";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from "@/components/ui/dropdown-menu";
+import { Button } from "@/components/ui/button";
+import {ChevronDownIcon} from "lucide-react";
+import { useLanguage } from '@/context/language/LanguageContext';
 
-const languageOptions = [
-  { value: "en", flag: "GB" },
-  { value: "de", flag: "DE" },
-  { value: "bg", flag: "BG" },
-];
+type Language = 'de' | 'en' | 'bg';
 
-const formatOptionLabel = ({ flag }: { flag: string }) => (
-  <div style={{ display: "flex", alignItems: "center" }}>
-    <Flag code={flag} style={{ width: 20, height: 15 }} />
-  </div>
-);
+interface Languages {
+  [key: string]: string;
+}
 
-const customSingleValue = ({ data }: any) => (
-  <div style={{ display: "flex", alignItems: "center" }}>
-    <Flag code={data.flag} style={{ width: 20, height: 15 }} />
-  </div>
-);
+export default function LanguageDropdown() {
+  const languages: Languages = {
+    de: "fi fi-de",
+    en: "fi fi-gb",
+    bg: "fi fi-bg"
+  }
 
-export default function LanguageSelector() {
-  const { language, setLanguage } = useLanguage();
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  if (!mounted) return null; 
-
-  const handleChange = (selectedOption: SingleValue<{ value: string; flag: string }>) => {
-    if (selectedOption) {
-      setLanguage(selectedOption.value);
-    }
-  };
+  const {language, setLanguage} = useLanguage();
 
   return (
-    <Select
-      options={languageOptions}
-      value={languageOptions.find((option) => option.value === language)}
-      onChange={handleChange}
-      formatOptionLabel={formatOptionLabel}
-      components={{ SingleValue: customSingleValue }}
-      isSearchable={false}
-      styles={{
-        control: (base) => ({
-          ...base,
-          width: 30,  
-          height: 5, 
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          cursor: "pointer",
-          fontSize: "0px", 
-          borderRadius: "6px",
-          border: "1px solid #dcdcdc",
-          background: "#f9f9f9",
-          boxShadow: "0 2px 5px rgba(0,0,0,0.1)",
-          padding: "0",
-          margin: 0,
-          transition: "border 0.3s, box-shadow 0.3s",
-          '&:hover': {
-            borderColor: "#aaa",
-            boxShadow: "0 2px 10px rgba(0,0,0,0.2)",
-          }
-        }),
-        dropdownIndicator: (base) => ({
-          ...base,
-          display: "none", 
-        }),
-        indicatorSeparator: () => ({
-          display: "none",
-        }),
-        menu: (base) => ({
-          ...base,
-          boxShadow: "0 4px 10px rgba(0,0,0,0.1)", 
-          padding: "5px 0",
-          borderRadius: "8px", 
-          backgroundColor: "#fff",
-          zIndex: 1000, 
-        }),
-        option: (provided, state) => ({
-          ...provided,
-          padding: "5px 10px",
-          backgroundColor: state.isSelected ? "#e0e0e0" : "transparent",
-          cursor: "pointer",
-          display: "flex",
-          alignItems: "center",
-          fontSize: "0px", 
-          gap: "5px",
-          '&:hover': {
-            backgroundColor: "#f5f5f5",
-          },
-        }),
-      }}
-    />
+    <div className="sm:block">
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant="outline" className="flex items-center gap-1 p-2 text-sm">
+            <span className={languages[language]}></span>
+            <ChevronDownIcon className="h-3 w-3" />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end" className="w-16 text-sm min-w-0">
+          {Object.keys(languages).map((lang) => (
+            <DropdownMenuItem  onClick={() => setLanguage(lang as Language)} key={lang} className="flex items-center justify-between">
+              <span className={languages[lang as Language]}></span>
+              <span>{lang.toUpperCase()}</span>
+          </DropdownMenuItem>
+          ))}
+        </DropdownMenuContent>
+      </DropdownMenu>
+    </div>
   );
 }

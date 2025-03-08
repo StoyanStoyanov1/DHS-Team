@@ -11,7 +11,8 @@ import {
     Clock,
     AlertTriangle,
     LogIn,
-    Clipboard 
+    Clipboard,
+    User,
   } from "lucide-react"
   
   import { Button } from "@/components/ui/button"
@@ -33,6 +34,8 @@ import {
   import { useRouter } from "next/navigation"; 
   import routes from "@/utils/routes";
 
+  import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+  import { faUserCircle, faSignInAlt } from '@fortawesome/free-solid-svg-icons';
 
   import { useLanguage } from "@/context/language/LanguageContext";
 
@@ -49,7 +52,7 @@ import {
     return (
       <DropdownMenu >
         <DropdownMenuTrigger asChild>
-          <Button variant="outline" className="cursor-pointer">{menuTranslate[language].menu}</Button>
+        <FontAwesomeIcon icon={faUserCircle} size="2x" style={{ color: '#4CAF50', transition: '0.3s' }} />
         </DropdownMenuTrigger>
         <DropdownMenuContent className="w-56">
           <DropdownMenuLabel>example@email.com</DropdownMenuLabel>
@@ -119,7 +122,8 @@ import {
             <span>{menuTranslate[language].logOut}</span>
           </DropdownMenuItem>
           <DropdownMenuItem onSelect={() => navigateToRoute(routes.login)}>
-            <LogIn />
+          <FontAwesomeIcon icon={faSignInAlt} size="2x" style={{ color: '#4CAF50', transition: '0.3s' }} />
+
             <span>{menuTranslate[language].logIn}</span>
             </DropdownMenuItem>
 
