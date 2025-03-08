@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import {ChangeEvent, useState } from "react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -8,22 +8,42 @@ import { Label } from "@/components/ui/label"
 import { Eye, EyeOff } from "lucide-react" 
 import authTranslate from "@/utils/translate/authTranslate";
 import { useLanguage } from "@/context/language/LanguageContext";
-import PasswordStrengthMeter from "../password/PasswordStrengthMeter"
+import PasswordStrengthMeter from "../password/PasswordStrengthMeter";
+import {passwordValidation, PasswordValidationInterface} from "@/utils/validation/passwordValidation"
 
 export default function RegisterForm({
   className,
   ...props
 }: React.ComponentPropsWithoutRef<"form">) {
-  const {language} = useLanguage();
-  const [showPassword, setShowPassword] = useState(false);
 
+  const {language} = useLanguage();
+
+  const passwordLevelInWords = [
+    authTranslate[language].veryWeak,
+    authTranslate[language].weak,
+    authTranslate[language].average,
+    authTranslate[language].strong,
+    authTranslate[language].veryStrong,
+]
+  const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-
+  const [passwordLevel, setPasswordLevel] = useState(0);
 
   const togglePasswordVisibility = () => {
     setShowPassword((prev) => !prev)
+  }
+
+  const onChangePassword = (e: ChangeEvent<HTMLInputElement>) => {
+    const newPassword = e.target.value;
+
+    const testPassword: PasswordValidationInterface = passwordValidation(newPassword);
+    const newPasswordLevel = Object.keys(testPassword).filter(key => testPassword[key as keyof PasswordValidationInterface] === true).length
+    setPasswordLevel(newPasswordLevel)
+    setPassword(e.target.value);
+
+
   }
 
   return (
@@ -51,7 +71,7 @@ export default function RegisterForm({
               type={showPassword ? "text" : "password"}
               required
               placeholder={authTranslate[language].enterYourPassword}
-              onChange={(e) => setPassword(e.target.value)}
+              onChange={onChangePassword}
               value={password}
             />
 
@@ -81,8 +101,12 @@ export default function RegisterForm({
             />
 
           </div>
-
-              <PasswordStrengthMeter passwordStrengthValue={2}/>
+            {passwordLevel > 0 && (
+                <>
+                <p className="text-xs">{authTranslate[language].yourPasswordIs}: {passwordLevelInWords[passwordLevel - 1]} </p>
+                <PasswordStrengthMeter passwordStrengthValue={passwordLevel}/>
+              </>
+            )}
             
         </div>
         <Button type="submit" className="w-full cursor-pointer">

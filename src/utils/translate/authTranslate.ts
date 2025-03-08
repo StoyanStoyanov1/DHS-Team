@@ -16,6 +16,12 @@ interface AuthTranslate {
     forgotYourPassword: string;
     welcomeBack: string;
     noAccount: string;
+    yourPasswordIs: string;
+    veryWeak: string;
+    weak: string;
+    average: string;
+    strong: string;
+    veryStrong: string;
 }
 
 interface LanguageAuthTranslate {
@@ -41,6 +47,12 @@ const authTranslate: LanguageAuthTranslate = {
         forgotYourPassword: "Forgot Your Password?",
         welcomeBack: "Great to have you back! Just enter your details and let's get started.",
         noAccount: "Don't have an account? Join our book community in a few easy steps.",
+        yourPasswordIs: "Your password is",
+        veryWeak: "Very weak",
+        weak: "Weak",
+        average: "Average",
+        strong: "Strong",
+        veryStrong: "Very strong",
     },
     bg: {
         register: "Регистрация",
@@ -60,6 +72,12 @@ const authTranslate: LanguageAuthTranslate = {
         forgotYourPassword: "Забравена парола?",
         welcomeBack: "Супер, че се върнахте! Просто въведете данните си и нека започнем.",
         noAccount: "Нямате акаунт? Присъединете се към нашето книжно общество с няколко лесни стъпки.",
+        yourPasswordIs: "Вашата парола е",
+        veryWeak: "Много слаба",
+        weak: "Слаба",
+        average: "Средно",
+        strong: "Силна",
+        veryStrong: "Много силна",
     },
     de: {
         register: "Registrieren",
@@ -79,6 +97,12 @@ const authTranslate: LanguageAuthTranslate = {
         forgotYourPassword: "Passwort vergessen?",
         welcomeBack: "Super, dass du zurück bist! Gib einfach deine Daten ein und lass uns loslegen.",
         noAccount: "Kein Konto? Tritt unserer Buchgemeinschaft in wenigen einfachen Schritten bei.",
+        yourPasswordIs: "Ihr Passwort ist",
+        veryWeak: "Sehr schwach",
+        weak: "Schwach",
+        average: "Durchschnitt",
+        strong: "Stark",
+        veryStrong: "Sehr stark",
     },
 };
 

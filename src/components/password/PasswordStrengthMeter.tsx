@@ -14,9 +14,11 @@ const PasswordStrengthMeter: React.FC<PasswordStrengthMeterProps> = ({ passwordS
       case 2:
         return "bg-yellow-500";
       case 3:
-        return "bg-green-500";
-      default:
         return "bg-blue-500";
+      case 4:
+        return "bg-green-500"
+      default:
+        return "bg-green-800";
     }
   };
 
@@ -24,7 +26,7 @@ const PasswordStrengthMeter: React.FC<PasswordStrengthMeterProps> = ({ passwordS
     <div className="mt-2 h-1 w-full bg-gray-300 rounded">
       <div
         className={`h-full rounded ${getStrengthColor(passwordStrengthValue)}`}
-        style={{ width: `${(passwordStrengthValue / 4) * 100}%` }}
+        style={{ width: `${(passwordStrengthValue / 5) * 100}%` }}
       />
     </div>
   );
