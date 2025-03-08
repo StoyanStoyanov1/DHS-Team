@@ -20,7 +20,7 @@ export default function Header() {
   return (
     <header className="relative flex items-center justify-between p-2 bg-white shadow">
       <div className="flex gap-5">
-      <Logo/>
+      <Logo onClick={() => router.push(routes.home)}/>
       <LanguageSelector />
 
       </div>
