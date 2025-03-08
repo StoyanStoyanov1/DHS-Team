@@ -27,6 +27,7 @@ export default function LoginForm({
         <p className="text-balance text-sm text-muted-foreground">
           {authTranslate[language].welcomeBack}
         </p>
+        
       </div>
       <div className="grid gap-6">
         <div className="grid gap-2">
@@ -51,6 +52,7 @@ export default function LoginForm({
               placeholder={authTranslate[language].enterYourPassword}
             />
             <div
+            
   className="absolute right-2 top-1/2 transform -translate-y-1/2 cursor-pointer"
   onClick={togglePasswordVisibility}
 >

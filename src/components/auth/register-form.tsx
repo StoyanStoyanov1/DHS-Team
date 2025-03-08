@@ -7,14 +7,20 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Eye, EyeOff } from "lucide-react" 
 import authTranslate from "@/utils/translate/authTranslate";
-import { useLanguage } from "@/context/language/LanguageContext"
+import { useLanguage } from "@/context/language/LanguageContext";
+import PasswordStrengthMeter from "../password/PasswordStrengthMeter"
 
 export default function RegisterForm({
   className,
   ...props
 }: React.ComponentPropsWithoutRef<"form">) {
   const {language} = useLanguage();
-  const [showPassword, setShowPassword] = useState(false)
+  const [showPassword, setShowPassword] = useState(false);
+
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+
 
   const togglePasswordVisibility = () => {
     setShowPassword((prev) => !prev)
@@ -27,12 +33,14 @@ export default function RegisterForm({
         <p className="text-balance text-sm text-muted-foreground">
           {authTranslate[language].noAccount}
         </p>
+        
       </div>
       <div className="grid gap-6">
         <div className="grid gap-2">
           <Label htmlFor="email">{authTranslate[language].email}</Label>
-          <Input id="email" type="email" placeholder="user@example.com" required />
+          <Input value={email} onChange={(e) => setEmail(e.target.value)} id="email" type="email" placeholder="user@example.com" required />
         </div>
+        
         <div className="grid gap-2">
           <div className="flex items-center justify-between">
             <Label htmlFor="password">{authTranslate[language].password}</Label>
@@ -43,7 +51,10 @@ export default function RegisterForm({
               type={showPassword ? "text" : "password"}
               required
               placeholder={authTranslate[language].enterYourPassword}
+              onChange={(e) => setPassword(e.target.value)}
+              value={password}
             />
+
             <div
                 className="absolute right-2 top-1/2 transform -translate-y-1/2 cursor-pointer"
                 onClick={togglePasswordVisibility}
@@ -65,15 +76,21 @@ export default function RegisterForm({
               type={showPassword ? "text" : "password"}
               required
               placeholder={authTranslate[language].confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              value={confirmPassword}
             />
+
           </div>
+
+              <PasswordStrengthMeter passwordStrengthValue={2}/>
+            
         </div>
         <Button type="submit" className="w-full cursor-pointer">
           {authTranslate[language].createAccount}
         </Button>
         <div className="relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t after:border-border">
           <span className="relative z-10 bg-background px-2 text-muted-foreground">
-            Or continue with
+            {authTranslate[language].orContinueWith}
           </span>
         </div>
         <Button variant="outline" className="w-full cursor-pointer">
