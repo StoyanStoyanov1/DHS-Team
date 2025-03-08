@@ -21,12 +21,12 @@ import {
 import LoginForm from "@/components/auth/login-form";
 import RegisterForm from "@/components/auth/register-form"
 
-export default function TabsDemo() {
+export default function Auth() {
   return (
-    <Tabs defaultValue="account" className="w-[400px] flex justify-center mx-auto p-10">
+    <Tabs defaultValue="login" className="w-[400px] flex justify-center mx-auto p-10">
       <TabsList className="grid w-full grid-cols-2">
-        <TabsTrigger value="login">Login</TabsTrigger>
-        <TabsTrigger value="register">Register</TabsTrigger>
+        <TabsTrigger value="login" className="cursor-pointer">Login</TabsTrigger>
+        <TabsTrigger value="register" className="cursor-pointer">Register</TabsTrigger>
       </TabsList>
       <TabsContent value="login">
         <LoginForm />

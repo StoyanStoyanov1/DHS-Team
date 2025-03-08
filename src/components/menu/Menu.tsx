@@ -10,12 +10,8 @@ import {
     Pen,
     Clock,
     AlertTriangle,
-    LogIn,
-    Clipboard,
-    User,
   } from "lucide-react"
   
-  import { Button } from "@/components/ui/button"
   import {
     DropdownMenu,
     DropdownMenuContent,
@@ -121,12 +117,6 @@ import {
             <LogOut />
             <span>{menuTranslate[language].logOut}</span>
           </DropdownMenuItem>
-          <DropdownMenuItem onSelect={() => navigateToRoute(routes.login)}>
-          <FontAwesomeIcon icon={faSignInAlt} size="2x" style={{ color: '#4CAF50', transition: '0.3s' }} />
-
-            <span>{menuTranslate[language].logIn}</span>
-            </DropdownMenuItem>
-
         </DropdownMenuContent>
       </DropdownMenu>
     )

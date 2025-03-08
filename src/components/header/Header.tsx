@@ -26,7 +26,7 @@ export default function Header() {
       </div>
             
       <div>
-                  <FontAwesomeIcon onClick={() => router.push(routes.login)} icon={faSignInAlt} size="2x" style={{ color: '#4CAF50', transition: '0.3s' }} />
+                  <FontAwesomeIcon onClick={() => router.push(routes.auth)} icon={faSignInAlt} size="2x" style={{ color: '#4CAF50', transition: '0.3s' }} />
                   <Menu />
       </div>
       
