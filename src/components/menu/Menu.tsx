@@ -28,7 +28,6 @@ import {
   } from "@/components/ui/dropdown-menu";
 
   import { useRouter } from "next/navigation"; 
-  import routes from "@/utils/routes";
 
   import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
   import { faUserCircle, faSignInAlt } from '@fortawesome/free-solid-svg-icons';
@@ -36,14 +35,11 @@ import {
   import { useLanguage } from "@/context/language/LanguageContext";
 
   import menuTranslate from "@/utils/translate/menuTranslate";
+import routes from "@/utils/routes";
   
   export default function Menu() {
     const { language } = useLanguage();
     const router = useRouter();
-
-    const navigateToRoute = (route: string) => {
-        router.push(route);
-    }
 
     return (
       <DropdownMenu >
@@ -56,7 +52,7 @@ import {
           <DropdownMenuGroup >
             <DropdownMenuItem >
             <BookOpen />
-            <span>{menuTranslate[language].myBooks}</span>
+            <span onClick={() => router.push(routes.myBooks)}>{menuTranslate[language].myBooks}</span>
             </DropdownMenuItem>
             <DropdownMenuItem>
               <BookHeart  />
