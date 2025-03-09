@@ -1,24 +1,51 @@
 "use client"
 
-import { useState } from "react"
+import {ChangeEvent, useState } from "react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Eye, EyeOff } from "lucide-react" 
 import authTranslate from "@/utils/translate/authTranslate";
-import { useLanguage } from "@/context/language/LanguageContext"
+import { useLanguage } from "@/context/language/LanguageContext";
+import { EmailValidation } from "@/utils/validation/auth/emailValidation";
 
 export default function LoginForm({
   className,
   ...props
 }: React.ComponentPropsWithoutRef<"form">) {
   const {language} = useLanguage();
-  const [showPassword, setShowPassword] = useState(false)
+  const [showPassword, setShowPassword] = useState<boolean>(false);
+
+  const [email, setEmail] = useState<string>('');
+  const [password, setPassword] = useState<string>('');
+  const [emailIsValid, setEmailIsValid] = useState<boolean>(true);
+
 
   const togglePasswordVisibility = () => {
     setShowPassword((prev) => !prev)
   }
+
+    const onSumbitHandler = (e: React.FormEvent): void => {
+      e.preventDefault();
+  
+      const { emailIsValid } = EmailValidation(email);
+  
+      setEmailIsValid(emailIsValid);
+      
+    }
+  
+    const onChangeEmail = (e: ChangeEvent<HTMLInputElement>): void => {
+      const newEmail = e.target.value;
+  
+      if (!emailIsValid) {
+        const { emailIsValid } = EmailValidation(newEmail);
+        setEmailIsValid(emailIsValid);
+      }
+  
+      setEmail(newEmail);
+    }
+  
 
   return (
     <form className={cn("flex flex-col gap-6", className)} {...props}>
@@ -30,9 +57,19 @@ export default function LoginForm({
         
       </div>
       <div className="grid gap-6">
-        <div className="grid gap-2">
+      <div className="grid gap-2">
           <Label htmlFor="email">{authTranslate[language].email}</Label>
-          <Input id="email" type="email" placeholder="user@example.com" required />
+          <Input 
+          value={email} 
+          onChange={onChangeEmail} 
+          id="email" 
+          type="text" 
+          placeholder="user@example.com" 
+          className={emailIsValid ? "" : "border-red-500"}
+           />
+        {emailIsValid ||
+          <p className="text-red-500 text-xs">{authTranslate[language].emailFormat}</p>
+        }
         </div>
         <div className="grid gap-2">
           <div className="flex items-center justify-between">
@@ -48,8 +85,9 @@ export default function LoginForm({
             <Input
               id="password"
               type={showPassword ? "text" : "password"}
-              required
               placeholder={authTranslate[language].enterYourPassword}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
             />
             <div
             
@@ -65,7 +103,7 @@ export default function LoginForm({
 
           </div>
         </div>
-        <Button type="submit" className="w-full cursor-pointer">
+        <Button type="submit" className="w-full cursor-pointer" onClick={onSumbitHandler}>
           {authTranslate[language].login}
         </Button>
         <div className="relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t after:border-border">

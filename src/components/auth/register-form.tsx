@@ -44,11 +44,11 @@ export default function RegisterForm({
   const [passwordsMatch, setPasswordMatch] = useState<boolean>(true);
   const [passwordIsStrong, setPasswordIsStrong] = useState<boolean>(true);
 
-  const togglePasswordVisibility = () => {
+  const togglePasswordVisibility = (): void => {
     setShowPassword((prev) => !prev)
   }
 
-  const onSumbitHandler = (e: React.FormEvent) => {
+  const onSumbitHandler = (e: React.FormEvent): void => {
     e.preventDefault();
 
     const { emailIsValid } = EmailValidation(email);
@@ -58,7 +58,7 @@ export default function RegisterForm({
     setPasswordIsStrong(passwordLevel > 3);
   }
 
-  const onChangeEmail = (e: ChangeEvent<HTMLInputElement>) => {
+  const onChangeEmail = (e: ChangeEvent<HTMLInputElement>): void => {
     const newEmail = e.target.value;
 
     if (!emailIsValid) {
@@ -69,7 +69,7 @@ export default function RegisterForm({
     setEmail(newEmail);
   }
 
-  const onChangePassword = (e: ChangeEvent<HTMLInputElement>) => {
+  const onChangePassword = (e: ChangeEvent<HTMLInputElement>): void => {
 
     const newPassword = e.target.value;
 
