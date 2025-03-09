@@ -11,6 +11,7 @@ import { useLanguage } from "@/context/language/LanguageContext";
 import PasswordStrengthMeter from "../password/PasswordStrengthMeter";
 import {passwordValidation, PasswordValidationInterface} from "@/utils/validation/auth/passwordValidation"
 import { EmailValidation } from "@/utils/validation/auth/emailValidation"
+import { HoverMessage } from "../messages/hoverMessage"
 
 export default function RegisterForm({
   className,
@@ -18,6 +19,13 @@ export default function RegisterForm({
 }: React.ComponentPropsWithoutRef<"form">) {
 
   const {language} = useLanguage();
+
+  const passwordRequirementsMessage = [
+    authTranslate[language].passwordLength,
+    authTranslate[language].passwordLowercase,
+    authTranslate[language].passwordUppercase,
+    authTranslate[language].passwordNumber,
+  ]
 
   const passwordLevelInWords = [
     authTranslate[language].veryWeak,
@@ -81,7 +89,6 @@ export default function RegisterForm({
         <p className="text-balance text-sm text-muted-foreground">
           {authTranslate[language].noAccount}
         </p>
-        
       </div>
       <div className="grid gap-6">
         <div className="grid gap-2">
@@ -113,9 +120,14 @@ export default function RegisterForm({
               className={passwordIsStrong ? "" : "border-red-500"}
               
             />
-             {passwordIsStrong ||
-              <p className="text-red-500 text-xs">{authTranslate[language].passwordDoesNotMeetRequirements}</p>
-            }
+
+            {passwordIsStrong || (
+              <div className="text-red-500 text-xs inline-flex items-center">
+                {authTranslate[language].passwordDoesNotMeetRequirements}
+                <HoverMessage title={authTranslate[language].passwordRequirements} messages={passwordRequirementsMessage} />
+              </div>
+            )}
+
 
             <div
                 className={`absolute right-2 top-1/2 transform -translate-y-${passwordIsStrong? 2 : 5} cursor-pointer`}
@@ -142,12 +154,12 @@ export default function RegisterForm({
               className={passwordsMatch ? "" : "border-red-500"}
             />
              {passwordsMatch ||
-              <p className="text-red-500 text-xs">{authTranslate[language].passwordsDoNotMatch}</p>
+              <div className="text-red-500 text-xs">{authTranslate[language].passwordsDoNotMatch}</div>
             }
           </div>
             {passwordLevel > 0 && (
                 <>
-                <p className="text-xs">{authTranslate[language].yourPasswordIs}: {passwordLevelInWords[passwordLevel - 1]} </p>
+                <div className="text-xs">{authTranslate[language].yourPasswordIs}: {passwordLevelInWords[passwordLevel - 1]} </div>
                 <PasswordStrengthMeter passwordStrengthValue={passwordLevel}/>
               </>
             )}

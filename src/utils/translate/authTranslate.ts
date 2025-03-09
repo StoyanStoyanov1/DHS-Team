@@ -24,6 +24,7 @@ interface AuthTranslate {
     veryStrong: string;
     passwordsDoNotMatch: string;
     passwordDoesNotMeetRequirements: string;
+    passwordRequirements: string;
 }
 
 interface LanguageAuthTranslate {
@@ -37,10 +38,10 @@ const authTranslate: LanguageAuthTranslate = {
         email: "Email",
         password: "Password",
         confirmPassword: "Confirm Password",
-        passwordLength: "Password: Min 8 characters", 
-        passwordUppercase: "Password: At least one uppercase letter", 
-        passwordLowercase: "Password: At least one lowercase letter", 
-        passwordNumber: "Password: At least one number", 
+        passwordLength: "Min 8 characters", 
+        passwordUppercase: "At least one uppercase letter", 
+        passwordLowercase: "At least one lowercase letter", 
+        passwordNumber: "At least one number", 
         emailFormat: "Valid format user@domain.com",
         loginToYourAccount: "Login to your account",
         enterYourPassword: "Enter Your Password",
@@ -56,7 +57,8 @@ const authTranslate: LanguageAuthTranslate = {
         strong: "Strong",
         veryStrong: "Very strong",
         passwordsDoNotMatch: "Passwords do not match",
-        passwordDoesNotMeetRequirements: "Your password does not meet the minimum security requirements."
+        passwordDoesNotMeetRequirements: "Your password does not meet the minimum security requirements.",
+        passwordRequirements: "Password requirements"
     },
     bg: {
         register: "Регистрация",
@@ -64,10 +66,10 @@ const authTranslate: LanguageAuthTranslate = {
         email: "Имейл",
         password: "Парола",
         confirmPassword: "Потвърди паролата",
-        passwordLength: "Парола: Мин. 8 символа",
-        passwordUppercase: "Парола: Поне една главна буква",
-        passwordLowercase: "Парола: Поне една малка буква",
-        passwordNumber: "Парола: Поне една цифра",
+        passwordLength: "Мин. 8 символа",
+        passwordUppercase: "Поне една главна буква",
+        passwordLowercase: "Поне една малка буква",
+        passwordNumber: "Поне една цифра",
         emailFormat: "Валиден формат user@domain.com",
         loginToYourAccount: "Влезте в акаунта си",
         enterYourPassword: "Въведете паролата си",
@@ -83,7 +85,8 @@ const authTranslate: LanguageAuthTranslate = {
         strong: "Силна",
         veryStrong: "Много силна",
         passwordsDoNotMatch: "Паролите не съвпадат",
-        passwordDoesNotMeetRequirements: "Паролата Ви не отговаря на минималните изисквания за сигурност."
+        passwordDoesNotMeetRequirements: "Паролата Ви не отговаря на минималните изисквания за сигурност.",
+        passwordRequirements: "Изисквания за парола"
     },
     de: {
         register: "Registrieren",
@@ -91,10 +94,10 @@ const authTranslate: LanguageAuthTranslate = {
         email: "E-Mail",
         password: "Passwort",
         confirmPassword: "Passwort bestätigen",
-        passwordLength: "Passwort: Mind. 8 Zeichen",
-        passwordUppercase: "Passwort: Mind. ein Großbuchstabe",
-        passwordLowercase: "Passwort: Mind. ein Kleinbuchstabe",
-        passwordNumber: "Passwort: Mind. eine Zahl",
+        passwordLength: "Mind. 8 Zeichen",
+        passwordUppercase: "Mind. ein Großbuchstabe",
+        passwordLowercase: "Mind. ein Kleinbuchstabe",
+        passwordNumber: "Mind. eine Zahl",
         emailFormat: "Gültigen Format user@domain.com",
         loginToYourAccount: "Melden Sie sich bei Ihrem Konto an",
         enterYourPassword: "Geben Sie Ihr Passwort ein",
@@ -110,7 +113,8 @@ const authTranslate: LanguageAuthTranslate = {
         strong: "Stark",
         veryStrong: "Sehr stark",
         passwordsDoNotMatch: "Passwörter stimmen nicht überein",
-        passwordDoesNotMeetRequirements: "Ihr Passwort entspricht nicht den Mindestanforderungen an die Sicherheit. Bitte stellen Sie sicher, dass es mindestens 8 Zeichen enthält, darunter Groß- und Kleinbuchstaben, Zahlen und Sonderzeichen."
+        passwordDoesNotMeetRequirements: "Ihr Passwort entspricht nicht den Mindestanforderungen an die Sicherheit.",
+        passwordRequirements: "Passwortanforderungen"
     },
 };
 
