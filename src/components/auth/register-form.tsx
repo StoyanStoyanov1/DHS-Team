@@ -9,7 +9,8 @@ import { Eye, EyeOff } from "lucide-react"
 import authTranslate from "@/utils/translate/authTranslate";
 import { useLanguage } from "@/context/language/LanguageContext";
 import PasswordStrengthMeter from "../password/PasswordStrengthMeter";
-import {passwordValidation, PasswordValidationInterface} from "@/utils/validation/passwordValidation"
+import {passwordValidation, PasswordValidationInterface} from "@/utils/validation/auth/passwordValidation"
+import { EmailValidation } from "@/utils/validation/auth/emailValidation"
 
 export default function RegisterForm({
   className,
@@ -25,25 +26,52 @@ export default function RegisterForm({
     authTranslate[language].strong,
     authTranslate[language].veryStrong,
 ]
-  const [showPassword, setShowPassword] = useState(false);
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [passwordLevel, setPasswordLevel] = useState(0);
+  const [showPassword, setShowPassword] = useState<boolean>(false);
+  const [email, setEmail] = useState<string>('');
+  const [password, setPassword] = useState<string>('');
+  const [confirmPassword, setConfirmPassword] = useState<string>('');
+  const [passwordLevel, setPasswordLevel] = useState<number>(0);
+
+  const [emailIsValid, setEmailIsValid] = useState<boolean>(true);
+  const [passwordsMatch, setPasswordMatch] = useState<boolean>(true);
+  const [passwordIsStrong, setPasswordIsStrong] = useState<boolean>(true);
 
   const togglePasswordVisibility = () => {
     setShowPassword((prev) => !prev)
   }
 
+  const onSumbitHandler = (e: React.FormEvent) => {
+    e.preventDefault();
+
+    const { emailIsValid } = EmailValidation(email);
+
+    setEmailIsValid(emailIsValid);
+    setPasswordMatch(password === confirmPassword);
+    setPasswordIsStrong(passwordLevel > 3);
+  }
+
+  const onChangeEmail = (e: ChangeEvent<HTMLInputElement>) => {
+    const newEmail = e.target.value;
+
+    if (!emailIsValid) {
+      const { emailIsValid } = EmailValidation(newEmail);
+      setEmailIsValid(emailIsValid);
+    }
+
+    setEmail(newEmail);
+  }
+
   const onChangePassword = (e: ChangeEvent<HTMLInputElement>) => {
+
     const newPassword = e.target.value;
 
     const testPassword: PasswordValidationInterface = passwordValidation(newPassword);
-    const newPasswordLevel = Object.keys(testPassword).filter(key => testPassword[key as keyof PasswordValidationInterface] === true).length
+    const newPasswordLevel = Object.keys(testPassword).filter(key => testPassword[key as keyof PasswordValidationInterface] === true).length;
+    if (!passwordIsStrong) {
+      setPasswordIsStrong(newPasswordLevel > 3);
+    }
     setPasswordLevel(newPasswordLevel)
     setPassword(e.target.value);
-
-
   }
 
   return (
@@ -58,7 +86,17 @@ export default function RegisterForm({
       <div className="grid gap-6">
         <div className="grid gap-2">
           <Label htmlFor="email">{authTranslate[language].email}</Label>
-          <Input value={email} onChange={(e) => setEmail(e.target.value)} id="email" type="email" placeholder="user@example.com" required />
+          <Input 
+          value={email} 
+          onChange={onChangeEmail} 
+          id="email" 
+          type="text" 
+          placeholder="user@example.com" 
+          className={emailIsValid ? "" : "border-red-500"}
+           />
+        {emailIsValid ||
+          <p className="text-red-500 text-xs">{authTranslate[language].emailFormat}</p>
+        }
         </div>
         
         <div className="grid gap-2">
@@ -69,14 +107,18 @@ export default function RegisterForm({
             <Input
               id="password"
               type={showPassword ? "text" : "password"}
-              required
               placeholder={authTranslate[language].enterYourPassword}
               onChange={onChangePassword}
               value={password}
+              className={passwordIsStrong ? "" : "border-red-500"}
+              
             />
+             {passwordIsStrong ||
+              <p className="text-red-500 text-xs">{authTranslate[language].passwordDoesNotMeetRequirements}</p>
+            }
 
             <div
-                className="absolute right-2 top-1/2 transform -translate-y-1/2 cursor-pointer"
+                className={`absolute right-2 top-1/2 transform -translate-y-${passwordIsStrong? 2 : 5} cursor-pointer`}
                 onClick={togglePasswordVisibility}
                 >
                 {showPassword ? (
@@ -94,12 +136,14 @@ export default function RegisterForm({
             <Input
               id="confirm-password"
               type={showPassword ? "text" : "password"}
-              required
               placeholder={authTranslate[language].confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
               value={confirmPassword}
+              className={passwordsMatch ? "" : "border-red-500"}
             />
-
+             {passwordsMatch ||
+              <p className="text-red-500 text-xs">{authTranslate[language].passwordsDoNotMatch}</p>
+            }
           </div>
             {passwordLevel > 0 && (
                 <>
@@ -109,7 +153,7 @@ export default function RegisterForm({
             )}
             
         </div>
-        <Button type="submit" className="w-full cursor-pointer">
+        <Button type="submit" className="w-full cursor-pointer" onClick={onSumbitHandler}>
           {authTranslate[language].createAccount}
         </Button>
         <div className="relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t after:border-border">
@@ -117,7 +161,10 @@ export default function RegisterForm({
             {authTranslate[language].orContinueWith}
           </span>
         </div>
-        <Button variant="outline" className="w-full cursor-pointer">
+        <Button 
+        variant="outline" 
+        className="w-full cursor-pointer" 
+        >
           <svg
             xmlns="http://www.w3.org/2000/svg"
             viewBox="0 0 24 24"

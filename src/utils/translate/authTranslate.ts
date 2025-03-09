@@ -22,6 +22,8 @@ interface AuthTranslate {
     average: string;
     strong: string;
     veryStrong: string;
+    passwordsDoNotMatch: string;
+    passwordDoesNotMeetRequirements: string;
 }
 
 interface LanguageAuthTranslate {
@@ -39,7 +41,7 @@ const authTranslate: LanguageAuthTranslate = {
         passwordUppercase: "Password: At least one uppercase letter", 
         passwordLowercase: "Password: At least one lowercase letter", 
         passwordNumber: "Password: At least one number", 
-        emailFormat: "Email: valid format user@domain.com",
+        emailFormat: "Valid format user@domain.com",
         loginToYourAccount: "Login to your account",
         enterYourPassword: "Enter Your Password",
         login: "Login",
@@ -53,6 +55,8 @@ const authTranslate: LanguageAuthTranslate = {
         average: "Average",
         strong: "Strong",
         veryStrong: "Very strong",
+        passwordsDoNotMatch: "Passwords do not match",
+        passwordDoesNotMeetRequirements: "Your password does not meet the minimum security requirements."
     },
     bg: {
         register: "Регистрация",
@@ -64,7 +68,7 @@ const authTranslate: LanguageAuthTranslate = {
         passwordUppercase: "Парола: Поне една главна буква",
         passwordLowercase: "Парола: Поне една малка буква",
         passwordNumber: "Парола: Поне една цифра",
-        emailFormat: "Имейл: Валиден формат user@domain.com",
+        emailFormat: "Валиден формат user@domain.com",
         loginToYourAccount: "Влезте в акаунта си",
         enterYourPassword: "Въведете паролата си",
         login: "Вход",
@@ -78,6 +82,8 @@ const authTranslate: LanguageAuthTranslate = {
         average: "Средно",
         strong: "Силна",
         veryStrong: "Много силна",
+        passwordsDoNotMatch: "Паролите не съвпадат",
+        passwordDoesNotMeetRequirements: "Паролата Ви не отговаря на минималните изисквания за сигурност."
     },
     de: {
         register: "Registrieren",
@@ -89,7 +95,7 @@ const authTranslate: LanguageAuthTranslate = {
         passwordUppercase: "Passwort: Mind. ein Großbuchstabe",
         passwordLowercase: "Passwort: Mind. ein Kleinbuchstabe",
         passwordNumber: "Passwort: Mind. eine Zahl",
-        emailFormat: "E-Mail: gültigen Format user@domain.com",
+        emailFormat: "Gültigen Format user@domain.com",
         loginToYourAccount: "Melden Sie sich bei Ihrem Konto an",
         enterYourPassword: "Geben Sie Ihr Passwort ein",
         login: "Anmelden",
@@ -103,6 +109,8 @@ const authTranslate: LanguageAuthTranslate = {
         average: "Durchschnitt",
         strong: "Stark",
         veryStrong: "Sehr stark",
+        passwordsDoNotMatch: "Passwörter stimmen nicht überein",
+        passwordDoesNotMeetRequirements: "Ihr Passwort entspricht nicht den Mindestanforderungen an die Sicherheit. Bitte stellen Sie sicher, dass es mindestens 8 Zeichen enthält, darunter Groß- und Kleinbuchstaben, Zahlen und Sonderzeichen."
     },
 };
 

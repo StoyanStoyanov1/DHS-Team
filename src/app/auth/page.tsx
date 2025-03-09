@@ -1,4 +1,3 @@
-
 "use client"
 
 import {
@@ -11,12 +10,14 @@ import LoginForm from "@/components/auth/login-form";
 import RegisterForm from "@/components/auth/register-form"
 import authTranslate from "@/utils/translate/authTranslate";
 import { useLanguage } from "@/context/language/LanguageContext"
+import { useState } from "react";
 
 export default function Auth() {
   const { language } = useLanguage();
+  const [activeTab, setActiveTab] = useState("login"); 
 
   return (
-    <Tabs defaultValue="login" className="w-[400px] flex justify-center mx-auto p-10">
+    <Tabs value={activeTab} onValueChange={setActiveTab} className="w-[400px] flex justify-center mx-auto p-10">
       <TabsList className="grid w-full grid-cols-2">
         <TabsTrigger value="login" className="cursor-pointer">{authTranslate[language].login}</TabsTrigger>
         <TabsTrigger value="register" className="cursor-pointer">{authTranslate[language].register}</TabsTrigger>
@@ -25,7 +26,7 @@ export default function Auth() {
         <LoginForm />
       </TabsContent>
       <TabsContent value="register">
-          <RegisterForm />
+        <RegisterForm />
       </TabsContent>
     </Tabs>
   )
