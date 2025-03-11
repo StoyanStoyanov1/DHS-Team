@@ -60,27 +60,17 @@ export default function AlertInfo({ title, description, type }: AlertInfoProps) 
   const { bgColor, borderColor, textColor, icon } = getAlertStyles();
 
   return (
-    <AnimatePresence>
-      {isVisible && (
-        <motion.div
-          initial={{ y: -30, opacity: 0, scale: 0.95 }}
-          animate={{ y: 0, opacity: 1, scale: 1 }}
-          exit={{ y: -30, opacity: 0, scale: 0.95 }}
-          transition={{ duration: 0.6, ease: "easeInOut" }}
-          className="fixed top-6 left-1/2 transform -translate-x-1/2 z-50"
-        >
-          <Alert
-            variant="destructive"
-            className={`shadow-lg w-[280px] ${bgColor} ${borderColor} ${textColor} rounded-lg px-3 py-2 flex items-center gap-2`}
-          >
-            {icon}
-            <div className="flex flex-col">
-              <AlertTitle className="text-xs font-semibold">{title}</AlertTitle>
-              <AlertDescription className="text-xs opacity-80">{description}</AlertDescription>
-            </div>
-          </Alert>
-        </motion.div>
-      )}
-    </AnimatePresence>
+    <div
+      role="alert"
+      className={`fixed bottom-4 right-4 flex items-start gap-2 rounded border p-4 shadow-lg transition-opacity duration-500 ${
+        isVisible ? "opacity-100" : "opacity-0"
+      } ${bgColor} ${borderColor} ${textColor}`}
+    >
+      {icon}
+      <div className="grid gap-1">
+        <h3 className="font-medium">{title}</h3>
+        <p className="text-sm">{description}</p>
+      </div>
+    </div>
   );
 }
