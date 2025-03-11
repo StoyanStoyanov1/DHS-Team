@@ -5,126 +5,196 @@ import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Eye, EyeOff } from "lucide-react" 
+import { Eye, EyeOff, Mail, Lock } from "lucide-react" 
 import authTranslate from "@/utils/translate/authTranslate";
 import { useLanguage } from "@/context/language/LanguageContext";
 import { EmailValidation } from "@/utils/validation/auth/emailValidation";
+import { motion } from "framer-motion";
 
-export default function LoginForm({
-  className,
-  ...props
-}: React.ComponentPropsWithoutRef<"form">) {
+const inputVariants = {
+  focus: { scale: 1.02, transition: { duration: 0.2 } },
+  blur: { scale: 1, transition: { duration: 0.2 } }
+};
+
+const formVariants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.5 } }
+};
+
+interface LoginFormProps extends React.ComponentPropsWithoutRef<"form"> {
+  className?: string;
+}
+
+export default function LoginForm({ className, ...props }: LoginFormProps) {
   const {language} = useLanguage();
   const [showPassword, setShowPassword] = useState<boolean>(false);
-
   const [email, setEmail] = useState<string>('');
   const [password, setPassword] = useState<string>('');
   const [emailIsValid, setEmailIsValid] = useState<boolean>(true);
-
+  const [isFocused, setIsFocused] = useState<string>('');
 
   const togglePasswordVisibility = () => {
     setShowPassword((prev) => !prev)
   }
 
-    const onSumbitHandler = (e: React.FormEvent): void => {
-      e.preventDefault();
-  
-      const { emailIsValid } = EmailValidation(email);
-  
+  const onSumbitHandler = (e: React.FormEvent): void => {
+    e.preventDefault();
+    const { emailIsValid } = EmailValidation(email);
+    setEmailIsValid(emailIsValid);
+  }
+
+  const onChangeEmail = (e: ChangeEvent<HTMLInputElement>): void => {
+    const newEmail = e.target.value;
+    if (!emailIsValid) {
+      const { emailIsValid } = EmailValidation(newEmail);
       setEmailIsValid(emailIsValid);
-      
     }
-  
-    const onChangeEmail = (e: ChangeEvent<HTMLInputElement>): void => {
-      const newEmail = e.target.value;
-  
-      if (!emailIsValid) {
-        const { emailIsValid } = EmailValidation(newEmail);
-        setEmailIsValid(emailIsValid);
-      }
-  
-      setEmail(newEmail);
-    }
-  
+    setEmail(newEmail);
+  }
 
   return (
-    <form className={cn("flex flex-col gap-6", className)} {...props}>
-      <div className="flex flex-col items-center gap-2 text-center">
-        <h1 className="text-2xl font-bold">{authTranslate[language].loginToYourAccount}</h1>
-        <p className="text-balance text-sm text-muted-foreground">
-          {authTranslate[language].welcomeBack}
-        </p>
-        
-      </div>
-      <div className="grid gap-6">
-      <div className="grid gap-2">
-          <Label htmlFor="email">{authTranslate[language].email}</Label>
-          <Input 
-          value={email} 
-          onChange={onChangeEmail} 
-          id="email" 
-          type="text" 
-          placeholder="user@example.com" 
-          className={emailIsValid ? "" : "border-red-500"}
-           />
-        {emailIsValid ||
-          <p className="text-red-500 text-xs">{authTranslate[language].emailFormat}</p>
-        }
-        </div>
-        <div className="grid gap-2">
-          <div className="flex items-center justify-between">
-            <Label htmlFor="password">{authTranslate[language].password}</Label>
-            <a
-              href="#"
-              className="text-sm underline-offset-4 hover:underline"
-            >
-              {authTranslate[language].forgotYourPassword}
-            </a>
-          </div>
-          <div className="relative">
-            <Input
-              id="password"
-              type={showPassword ? "text" : "password"}
-              placeholder={authTranslate[language].enterYourPassword}
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
-            <div
-            
-  className="absolute right-2 top-1/2 transform -translate-y-1/2 cursor-pointer"
-  onClick={togglePasswordVisibility}
->
-  {showPassword ? (
-    <EyeOff className="h-5 w-5" />
-  ) : (
-    <Eye className="h-5 w-5" />
-  )}
-</div>
-
-          </div>
-        </div>
-        <Button type="submit" className="w-full cursor-pointer" onClick={onSumbitHandler}>
-          {authTranslate[language].login}
-        </Button>
-        <div className="relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t after:border-border">
-          <span className="relative z-10 bg-background px-2 text-muted-foreground">
-            {authTranslate[language].orContinueWith}
-          </span>
-        </div>
-        <Button variant="outline" className="w-full cursor-pointer">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 24 24"
-            className="h-5 w-5 mr-2"
+    <motion.div
+      initial="hidden"
+      animate="visible"
+      variants={formVariants}
+      className={cn("w-full max-w-md mx-auto", className)}
+    >
+      <form {...props} className="flex flex-col gap-4 p-6 bg-white rounded-xl shadow-xl">
+        <div className="flex flex-col items-center gap-2 text-center">
+          <motion.h1 
+            initial={{ scale: 0.9 }}
+            animate={{ scale: 1 }}
+            className="text-2xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent"
           >
-            <path
-              fill="currentColor"
-              d="M12 12v-2.5h10.92c.09.51.15 1.04.15 1.75 0 2.34-.84 4.3-2.23 5.71C19.49 18.99 16.98 20 14 20c-4 0-7.37-2.67-8.57-6.32-1.2-3.64.14-7.64 3.3-9.95 3.17-2.31 7.57-2.31 10.74 0l-1.88 1.86c-2.2-1.5-5.13-1.5-7.2 0-2.06 1.5-3.04 4.17-2.3 6.68.74 2.5 3.03 4.23 5.63 4.23 1.63 0 3.03-.49 4.15-1.37.85-.65 1.47-1.58 1.72-2.64H12z"
-            />
-          </svg>
-          Google
-        </Button>
-      </div>
-    </form>
+            {authTranslate[language].loginToYourAccount}
+          </motion.h1>
+          <p className="text-balance text-sm text-muted-foreground">
+            {authTranslate[language].welcomeBack}
+          </p>
+        </div>
+
+        <div className="grid gap-4">
+          <div className="grid gap-1.5">
+            <Label htmlFor="email" className="text-sm font-medium">
+              {authTranslate[language].email}
+            </Label>
+            <div className="relative">
+              <div className="relative">
+                <Mail className="absolute left-3 top-1/2 h-[16px] w-[16px] -translate-y-1/2 text-gray-400 pointer-events-none" />
+                <motion.div
+                  variants={inputVariants}
+                  animate={isFocused === 'email' ? 'focus' : 'blur'}
+                >
+                  <Input 
+                    value={email} 
+                    onChange={onChangeEmail} 
+                    onFocus={() => setIsFocused('email')}
+                    onBlur={() => setIsFocused('')}
+                    id="email" 
+                    type="text" 
+                    placeholder="user@example.com" 
+                    className={cn(
+                      "pl-10 transition-all duration-200",
+                      emailIsValid ? "border-input hover:border-primary" : "border-red-500"
+                    )}
+                  />
+                </motion.div>
+              </div>
+              {!emailIsValid && (
+                <motion.p 
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="absolute text-red-500 text-xs mt-1"
+                >
+                  {authTranslate[language].emailFormat}
+                </motion.p>
+              )}
+            </div>
+          </div>
+
+          <div className="grid gap-1.5">
+            <div className="flex items-center justify-between">
+              <Label htmlFor="password" className="text-sm font-medium">
+                {authTranslate[language].password}
+              </Label>
+              <a
+                href="#"
+                className="text-sm text-primary hover:text-primary/80 transition-colors"
+              >
+                {authTranslate[language].forgotYourPassword}
+              </a>
+            </div>
+            <div className="relative">
+              <div className="relative">
+                <Lock className="absolute left-3 top-1/2 h-[16px] w-[16px] -translate-y-1/2 text-gray-400 pointer-events-none" />
+                <motion.div
+                  variants={inputVariants}
+                  animate={isFocused === 'password' ? 'focus' : 'blur'}
+                >
+                  <Input
+                    id="password"
+                    type={showPassword ? "text" : "password"}
+                    placeholder={authTranslate[language].enterYourPassword}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    onFocus={() => setIsFocused('password')}
+                    onBlur={() => setIsFocused('')}
+                    className="pl-10 pr-10 transition-all duration-200 border-input hover:border-primary"
+                  />
+                </motion.div>
+                <button
+                  type="button"
+                  onClick={togglePasswordVisibility}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                >
+                  {showPassword ? (
+                    <EyeOff className="h-[16px] w-[16px]" />
+                  ) : (
+                    <Eye className="h-[16px] w-[16px]" />
+                  )}
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <Button 
+            type="submit" 
+            onClick={onSumbitHandler}
+            className="w-full bg-primary hover:bg-primary/90 text-white transition-all duration-200 transform hover:scale-[1.02]"
+          >
+            {authTranslate[language].login}
+          </Button>
+
+          <div className="relative text-center">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-gray-200"></div>
+            </div>
+            <div className="relative">
+              <span className="bg-white px-4 text-sm text-gray-500">
+                {authTranslate[language].orContinueWith}
+              </span>
+            </div>
+          </div>
+
+          <Button 
+            variant="outline" 
+            className="w-full border-2 hover:bg-gray-50 transition-all duration-200 transform hover:scale-[1.02]"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              className="h-5 w-5 mr-2"
+            >
+              <path
+                fill="currentColor"
+                d="M12 12v-2.5h10.92c.09.51.15 1.04.15 1.75 0 2.34-.84 4.3-2.23 5.71C19.49 18.99 16.98 20 14 20c-4 0-7.37-2.67-8.57-6.32-1.2-3.64.14-7.64 3.3-9.95 3.17-2.31 7.57-2.31 10.74 0l-1.88 1.86c-2.2-1.5-5.13-1.5-7.2 0-2.06 1.5-3.04 4.17-2.3 6.68.74 2.5 3.03 4.23 5.63 4.23 1.63 0 3.03-.49 4.15-1.37.85-.65 1.47-1.58 1.72-2.64H12z"
+              />
+            </svg>
+            Google
+          </Button>
+        </div>
+      </form>
+    </motion.div>
   )
 }

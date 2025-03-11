@@ -25,6 +25,7 @@ interface AuthTranslate {
     passwordsDoNotMatch: string;
     passwordDoesNotMeetRequirements: string;
     passwordRequirements: string;
+    username: string;
 }
 
 interface LanguageAuthTranslate {
@@ -58,7 +59,8 @@ const authTranslate: LanguageAuthTranslate = {
         veryStrong: "Very strong",
         passwordsDoNotMatch: "Passwords do not match",
         passwordDoesNotMeetRequirements: "Your password does not meet the minimum security requirements.",
-        passwordRequirements: "Password requirements"
+        passwordRequirements: "Password requirements",
+        username: "Username"
     },
     bg: {
         register: "Регистрация",
@@ -72,7 +74,7 @@ const authTranslate: LanguageAuthTranslate = {
         passwordNumber: "Поне една цифра",
         emailFormat: "Валиден формат user@domain.com",
         loginToYourAccount: "Влезте в акаунта си",
-        enterYourPassword: "Въведете паролата си",
+        enterYourPassword: "Въведете вашата парола",
         login: "Вход",
         orContinueWith: "Или продължете с",
         forgotYourPassword: "Забравена парола?",
@@ -86,7 +88,8 @@ const authTranslate: LanguageAuthTranslate = {
         veryStrong: "Много силна",
         passwordsDoNotMatch: "Паролите не съвпадат",
         passwordDoesNotMeetRequirements: "Паролата Ви не отговаря на минималните изисквания за сигурност.",
-        passwordRequirements: "Изисквания за парола"
+        passwordRequirements: "Изисквания за парола",
+        username: "Потребителско име"
     },
     de: {
         register: "Registrieren",
@@ -114,7 +117,8 @@ const authTranslate: LanguageAuthTranslate = {
         veryStrong: "Sehr stark",
         passwordsDoNotMatch: "Passwörter stimmen nicht überein",
         passwordDoesNotMeetRequirements: "Ihr Passwort entspricht nicht den Mindestanforderungen an die Sicherheit.",
-        passwordRequirements: "Passwortanforderungen"
+        passwordRequirements: "Passwortanforderungen",
+        username: "Benutzername"
     },
 };
 
