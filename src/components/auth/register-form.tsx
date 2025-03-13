@@ -12,6 +12,17 @@ import { EmailValidation } from "@/utils/validation/auth/emailValidation"
 import { motion } from "framer-motion"
 import PasswordStrengthMeter from "@/components/password/PasswordStrengthMeter"
 
+const getStrengPasswordText = (level: number, language: string): string => {
+    switch (level) {
+      case 1: return authTranslate[language].veryWeak;
+      case 2: return authTranslate[language].weak;
+      case 3: return authTranslate[language].average;
+      case 4: return authTranslate[language].strong;
+      case 5: return authTranslate[language].veryStrong;
+      default: return "";
+    }
+}
+
 const inputVariants = {
   focus: { scale: 1.02, transition: { duration: 0.2 } },
   blur: { scale: 1, transition: { duration: 0.2 } }
@@ -178,7 +189,7 @@ export default function RegisterForm({ className, ...props }: RegisterFormProps)
                   )}
                 </button>
               </div>
-              <PasswordStrengthMeter passwordStrengthValue={passwordStrength} password={password} />
+              <PasswordStrengthMeter passwordStrengthValue={passwordStrength} password={password} text={getStrengPasswordText(passwordStrength, language)}/>
             </div>
           </div>
 

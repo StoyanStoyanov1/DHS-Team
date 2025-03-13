@@ -1,67 +1,37 @@
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import LoginForm from './login-form';
 import { LanguageProvider } from '@/context/language/LanguageContext';
+import userEvent from '@testing-library/user-event';
 
-// Mock the translations
 jest.mock('@/utils/translate/authTranslate', () => ({
-  __esModule: true,
   default: {
     en: {
       loginToYourAccount: 'Login to your account',
-      welcomeBack: 'Welcome back',
-      email: 'Email',
-      password: 'Password',
-      enterYourPassword: 'Enter your password',
-      forgotYourPassword: 'Forgot your password?',
-      login: 'Login',
-      orContinueWith: 'Or continue with',
-      emailFormat: 'Please enter a valid email address'
+      // other translations
     },
     bg: {
-      loginToYourAccount: 'Влезте в профила си',
-      welcomeBack: 'Добре дошли отново',
-      email: 'Имейл',
-      password: 'Парола',
-      enterYourPassword: 'Въведете вашата парола',
-      forgotYourPassword: 'Забравена парола?',
-      login: 'Вход',
-      orContinueWith: 'Или продължете с',
-      emailFormat: 'Моля, въведете валиден имейл адрес'
+      // translations
     }
   }
 }));
 
-// Mock the language context
-jest.mock('@/context/language/LanguageContext', () => ({
-  useLanguage: () => ({ language: 'en' }),
-  LanguageProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>
-}));
-
-// Mock framer-motion
-jest.mock('framer-motion', () => ({
-  motion: {
-    div: ({ children, variants, animate, ...props }: any) => (
-      <div data-testid="motion-div" data-animate={animate} {...props}>
-        {children}
-      </div>
-    ),
-    h1: ({ children, ...props }: any) => <h1 {...props}>{children}</h1>,
-    p: ({ children, ...props }: any) => <p {...props}>{children}</p>
-  }
-}));
-
-const renderLoginForm = () => {
-  return render(
-    <LanguageProvider>
-      <LoginForm />
-    </LanguageProvider>
-  );
-};
-
 describe('LoginForm', () => {
+  beforeEach(() => {
+    // Reset mocks before each test
+    jest.clearAllMocks();
+  });
+
+  const renderLoginForm = () => {
+    return render(
+      <LanguageProvider>
+        <LoginForm />
+      </LanguageProvider>
+    );
+  };
+
   test('renders login form with all elements', () => {
-    render(<LoginForm />);
+    renderLoginForm();
 
     // Check for main headings
     expect(screen.getByText('Login to your account')).toBeInTheDocument();
@@ -74,105 +44,133 @@ describe('LoginForm', () => {
     expect(screen.getByPlaceholderText('Enter your password')).toBeInTheDocument();
 
     // Check for buttons and links
-    expect(screen.getByText('Login')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Login' })).toBeInTheDocument();
     expect(screen.getByText('Forgot your password?')).toBeInTheDocument();
     expect(screen.getByText('Or continue with')).toBeInTheDocument();
     expect(screen.getByText('Google')).toBeInTheDocument();
   });
 
-  test('toggles password visibility', () => {
-    render(<LoginForm />);
+  test('toggles password visibility', async () => {
+    renderLoginForm();
+    const user = userEvent.setup();
     
     const passwordInput = screen.getByLabelText('Password');
     const toggleButton = screen.getByLabelText('Show password');
     
     expect(passwordInput).toHaveAttribute('type', 'password');
-    expect(toggleButton).toBeInTheDocument();
 
-    fireEvent.click(toggleButton);
+    // Use userEvent instead of fireEvent for better simulation
+    await user.click(toggleButton);
     
     expect(passwordInput).toHaveAttribute('type', 'text');
     expect(screen.getByLabelText('Hide password')).toBeInTheDocument();
 
-    fireEvent.click(screen.getByLabelText('Hide password'));
+    await user.click(screen.getByLabelText('Hide password'));
     
     expect(passwordInput).toHaveAttribute('type', 'password');
     expect(screen.getByLabelText('Show password')).toBeInTheDocument();
   });
 
-  test('validates email format', () => {
-    render(<LoginForm />);
+  test('validates email format', async () => {
+    renderLoginForm();
+    const user = userEvent.setup();
     
     const emailInput = screen.getByLabelText('Email');
-    const submitButton = screen.getByText('Login');
+    const submitButton = screen.getByRole('button', { name: 'Login' });
 
     // Test invalid email
-    fireEvent.change(emailInput, { target: { value: 'invalid-email' } });
-    fireEvent.click(submitButton);
+    await user.type(emailInput, 'invalid-email');
+    await user.click(submitButton);
     
     expect(screen.getByText('Please enter a valid email address')).toBeInTheDocument();
 
-    // Test valid email
-    fireEvent.change(emailInput, { target: { value: 'test@example.com' } });
-    fireEvent.click(submitButton);
+    // Clear and test valid email
+    await user.clear(emailInput);
+    await user.type(emailInput, 'test@example.com');
+    await user.click(submitButton);
     
     expect(screen.queryByText('Please enter a valid email address')).not.toBeInTheDocument();
   });
 
-  test('handles form input changes', () => {
-    render(<LoginForm />);
+  test('handles form input changes', async () => {
+    renderLoginForm();
+    const user = userEvent.setup();
     
     const emailInput = screen.getByLabelText('Email');
     const passwordInput = screen.getByLabelText('Password');
 
-    fireEvent.change(emailInput, { target: { value: 'test@example.com' } });
-    fireEvent.change(passwordInput, { target: { value: 'password123' } });
+    await user.type(emailInput, 'test@example.com');
+    await user.type(passwordInput, 'password123');
 
     expect(emailInput).toHaveValue('test@example.com');
     expect(passwordInput).toHaveValue('password123');
   });
 
-  test('applies focus animations', () => {
-    render(<LoginForm />);
+  test('applies focus animations', async () => {
+    renderLoginForm();
+    const user = userEvent.setup();
     
     const emailInput = screen.getByLabelText('Email');
     const passwordInput = screen.getByLabelText('Password');
 
     // Focus email input
-    fireEvent.focus(emailInput);
+    await user.click(emailInput);
     const emailMotionDivs = screen.getAllByTestId('motion-div');
     const emailMotionDiv = emailMotionDivs.find(div => 
       div.contains(emailInput) && !div.contains(passwordInput)
     );
-    expect(emailMotionDiv).toBeTruthy();
-    expect(emailMotionDiv?.getAttribute('data-animate')).toBe('focus');
+    expect(emailMotionDiv).toHaveAttribute('data-animate', 'focus');
 
     // Focus password input
-    fireEvent.focus(passwordInput);
+    await user.click(passwordInput);
     const passwordMotionDivs = screen.getAllByTestId('motion-div');
     const passwordMotionDiv = passwordMotionDivs.find(div => 
       div.contains(passwordInput) && !div.contains(emailInput)
     );
-    expect(passwordMotionDiv).toBeTruthy();
-    expect(passwordMotionDiv?.getAttribute('data-animate')).toBe('focus');
+    expect(passwordMotionDiv).toHaveAttribute('data-animate', 'focus');
 
-    // Blur inputs
-    fireEvent.blur(emailInput);
-    expect(emailMotionDiv?.getAttribute('data-animate')).toBe('blur');
-
-    fireEvent.blur(passwordInput);
-    expect(passwordMotionDiv?.getAttribute('data-animate')).toBe('blur');
+    // Blur inputs by clicking elsewhere
+    await user.click(document.body);
+    expect(emailMotionDiv).toHaveAttribute('data-animate', 'blur');
+    expect(passwordMotionDiv).toHaveAttribute('data-animate', 'blur');
   });
 
-  test('prevents form submission with invalid email', () => {
-    render(<LoginForm />);
+  test('submits form with valid data', async () => {
+    const mockSubmit = jest.fn();
+    // Mock form submission
+    jest.spyOn(HTMLFormElement.prototype, 'submit').mockImplementation(mockSubmit);
+    
+    renderLoginForm();
+    const user = userEvent.setup();
     
     const emailInput = screen.getByLabelText('Email');
-    const submitButton = screen.getByText('Login');
+    const passwordInput = screen.getByLabelText('Password');
+    const submitButton = screen.getByRole('button', { name: 'Login' });
     
-    fireEvent.change(emailInput, { target: { value: 'invalid-email' } });
-    fireEvent.click(submitButton);
+    await user.type(emailInput, 'test@example.com');
+    await user.type(passwordInput, 'password123');
+    await user.click(submitButton);
     
-    expect(screen.getByText('Please enter a valid email address')).toBeInTheDocument();
+    // Check if form would submit with valid data
+    await waitFor(() => {
+      expect(screen.queryByText('Please enter a valid email address')).not.toBeInTheDocument();
+    });
   });
-}); 
+
+  test('handles Google login button click', async () => {
+    const mockGoogleLogin = jest.fn();
+    // You might need to mock your Google login function
+    global.window.open = mockGoogleLogin;
+    
+    renderLoginForm();
+    const user = userEvent.setup();
+    
+    const googleButton = screen.getByText('Google').closest('button');
+    expect(googleButton).toBeInTheDocument();
+    
+    if (googleButton) {
+      await user.click(googleButton);
+      expect(mockGoogleLogin).toHaveBeenCalled();
+    }
+  });
+});
