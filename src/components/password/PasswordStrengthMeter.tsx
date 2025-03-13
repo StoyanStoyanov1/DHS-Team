@@ -10,31 +10,31 @@ interface PasswordStrengthMeterProps {
 const PasswordStrengthMeter: React.FC<PasswordStrengthMeterProps> = ({ passwordStrengthValue, password, text}) => {
   const getStrengthColor = (strength: number) => {
     switch (strength) {
-      case 0:
+      case 1:
         return {
           gradient: "from-red-200 via-red-400 to-red-500",
           shadow: "shadow-red-200",
           width: "w-[20%]",
         };
-      case 1:
+      case 2:
         return {
           gradient: "from-orange-200 via-orange-400 to-orange-500",
           shadow: "shadow-orange-200",
           width: "w-[40%]",
         };
-      case 2:
+      case 3:
         return {
           gradient: "from-yellow-200 via-yellow-400 to-yellow-500",
           shadow: "shadow-yellow-200",
           width: "w-[60%]",
         };
-      case 3:
+      case 4:
         return {
           gradient: "from-blue-200 via-blue-400 to-blue-500",
           shadow: "shadow-blue-200",
           width: "w-[80%]",
         };
-      case 4:
+      case 5:
         return {
           gradient: "from-green-200 via-green-400 to-green-500",
           shadow: "shadow-green-200",
@@ -67,9 +67,9 @@ const PasswordStrengthMeter: React.FC<PasswordStrengthMeterProps> = ({ passwordS
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         className={`text-xs font-medium ${
-          passwordStrengthValue <= 1 ? "text-red-500" :
-          passwordStrengthValue === 2 ? "text-yellow-600" :
-          passwordStrengthValue === 3 ? "text-blue-600" :
+          passwordStrengthValue <= 2 ? "text-red-500" :
+          passwordStrengthValue === 3 ? "text-yellow-600" :
+          passwordStrengthValue === 4 ? "text-blue-600" :
           "text-green-600"
         }`}
       >
