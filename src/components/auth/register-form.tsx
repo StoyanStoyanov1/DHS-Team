@@ -6,19 +6,17 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Eye, EyeOff, Mail, Lock } from "lucide-react" 
-import authTranslate from "@/utils/translate/authTranslate"
-import { useLanguage } from "@/context/language/LanguageContext"
 import { EmailValidation } from "@/utils/validation/auth/emailValidation"
 import { motion } from "framer-motion"
 import PasswordStrengthMeter from "@/components/password/PasswordStrengthMeter"
 
-const getStrengPasswordText = (level: number, language: string): string => {
+const getStrengPasswordText = (level: number): string => {
     switch (level) {
-      case 1: return authTranslate[language].veryWeak;
-      case 2: return authTranslate[language].weak;
-      case 3: return authTranslate[language].average;
-      case 4: return authTranslate[language].strong;
-      case 5: return authTranslate[language].veryStrong;
+      case 1: return "Sehr schwach";
+      case 2: return "Schwach";
+      case 3: return "Durchschnitt";
+      case 4: return "Stark";
+      case 5: return "Sehr stark";
       default: return "";
     }
 }
@@ -38,7 +36,6 @@ interface RegisterFormProps extends React.ComponentPropsWithoutRef<"form"> {
 }
 
 export default function RegisterForm({ className, ...props }: RegisterFormProps) {
-  const {language} = useLanguage();
   const [showPassword, setShowPassword] = useState<boolean>(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState<boolean>(false);
   const [email, setEmail] = useState<string>('');
@@ -108,17 +105,17 @@ export default function RegisterForm({ className, ...props }: RegisterFormProps)
             animate={{ scale: 1 }}
             className="text-2xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent"
           >
-            {authTranslate[language].createAccount}
+            Konto erstellen
           </motion.h1>
           <p className="text-balance text-sm text-muted-foreground">
-            {authTranslate[language].noAccount}
+          Kein Konto? Vereinbare jetzt deinen Termin und werde Teil unserer exklusiven Beauty-Community – in nur wenigen Schritten!
           </p>
         </div>
 
         <div className="grid gap-4">
           <div className="grid gap-1.5">
             <Label htmlFor="email" className="text-sm font-medium">
-              {authTranslate[language].email}
+              E-Mail
             </Label>
             <div className="relative">
               <div className="relative">
@@ -148,7 +145,7 @@ export default function RegisterForm({ className, ...props }: RegisterFormProps)
                   animate={{ opacity: 1, y: 0 }}
                   className="absolute text-red-500 text-xs mt-1"
                 >
-                  {authTranslate[language].emailFormat}
+                  Gültigen Format user@domain.com
                 </motion.p>
               )}
             </div>
@@ -156,7 +153,7 @@ export default function RegisterForm({ className, ...props }: RegisterFormProps)
 
           <div className="grid gap-1.5">
             <Label htmlFor="password" className="text-sm font-medium">
-              {authTranslate[language].password}
+              Passwort
             </Label>
             <div className="relative">
               <div className="relative">
@@ -168,7 +165,7 @@ export default function RegisterForm({ className, ...props }: RegisterFormProps)
                   <Input
                     id="password"
                     type={showPassword ? "text" : "password"}
-                    placeholder={authTranslate[language].enterYourPassword}
+                    placeholder="Geben Sie Ihr Passwort ein"
                     value={password}
                     onChange={onChangePassword}
                     onFocus={() => setIsFocused('password')}
@@ -176,26 +173,28 @@ export default function RegisterForm({ className, ...props }: RegisterFormProps)
                     className="pl-10 pr-10 transition-all duration-200 border-input hover:border-primary"
                   />
                 </motion.div>
-                <button
+                <Button
                   type="button"
-                  onClick={togglePasswordVisibility}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
-                  aria-label={showPassword ? "Hide password" : "Show password"}
+                  variant="ghost"
+                  size="icon"
+                  className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                  onClick={() => setShowPassword(!showPassword)}
+                  aria-label={showPassword ? "Passwort ausblenden" : "Passwort anzeigen"}
                 >
                   {showPassword ? (
-                    <EyeOff className="h-[16px] w-[16px]" />
+                    <EyeOff className="h-4 w-4 text-gray-500" />
                   ) : (
-                    <Eye className="h-[16px] w-[16px]" />
+                    <Eye className="h-4 w-4 text-gray-500" />
                   )}
-                </button>
+                </Button>
               </div>
-              <PasswordStrengthMeter passwordStrengthValue={passwordStrength} password={password} text={getStrengPasswordText(passwordStrength, language)}/>
+              <PasswordStrengthMeter passwordStrengthValue={passwordStrength} password={password} text={getStrengPasswordText(passwordStrength)}/>
             </div>
           </div>
 
           <div className="grid gap-1.5">
             <Label htmlFor="confirmPassword" className="text-sm font-medium">
-              {authTranslate[language].confirmPassword}
+              Passwort bestätigen
             </Label>
             <div className="relative">
               <div className="relative">
@@ -207,7 +206,7 @@ export default function RegisterForm({ className, ...props }: RegisterFormProps)
                   <Input
                     id="confirmPassword"
                     type={showConfirmPassword ? "text" : "password"}
-                    placeholder={authTranslate[language].confirmPassword}
+                    placeholder="Passwort bestätigen"
                     value={confirmPassword}
                     onChange={(e) => {
                       setConfirmPassword(e.target.value);
@@ -221,18 +220,20 @@ export default function RegisterForm({ className, ...props }: RegisterFormProps)
                     )}
                   />
                 </motion.div>
-                <button
+                <Button
                   type="button"
-                  onClick={toggleConfirmPasswordVisibility}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
-                  aria-label={showConfirmPassword ? "Hide password" : "Show password"}
+                  variant="ghost"
+                  size="icon"
+                  className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  aria-label={showConfirmPassword ? "Passwort ausblenden" : "Passwort anzeigen"}
                 >
                   {showConfirmPassword ? (
-                    <EyeOff className="h-[16px] w-[16px]" />
+                    <EyeOff className="h-4 w-4 text-gray-500" />
                   ) : (
-                    <Eye className="h-[16px] w-[16px]" />
+                    <Eye className="h-4 w-4 text-gray-500" />
                   )}
-                </button>
+                </Button>
               </div>
               {!passwordsMatch && confirmPassword && (
                 <motion.p 
@@ -240,7 +241,7 @@ export default function RegisterForm({ className, ...props }: RegisterFormProps)
                   animate={{ opacity: 1, y: 0 }}
                   className="absolute text-red-500 text-xs mt-1"
                 >
-                  {authTranslate[language].passwordsDoNotMatch}
+                  Passwörter stimmen nicht überein
                 </motion.p>
               )}
             </div>
@@ -251,7 +252,7 @@ export default function RegisterForm({ className, ...props }: RegisterFormProps)
             onClick={onSubmitHandler}
             className="w-full bg-primary hover:bg-primary/90 text-white transition-all duration-200 transform hover:scale-[1.02]"
           >
-            {authTranslate[language].register}
+            Registrieren
           </Button>
 
           <div className="relative text-center">
@@ -260,7 +261,7 @@ export default function RegisterForm({ className, ...props }: RegisterFormProps)
             </div>
             <div className="relative">
               <span className="bg-white px-4 text-sm text-gray-500">
-                {authTranslate[language].orContinueWith}
+                Oder fahren Sie fort mit
               </span>
             </div>
           </div>
@@ -271,12 +272,12 @@ export default function RegisterForm({ className, ...props }: RegisterFormProps)
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 24 24"
+              viewBox="0 0 488 512"
               className="h-5 w-5 mr-2"
             >
               <path
                 fill="currentColor"
-                d="M12 12v-2.5h10.92c.09.51.15 1.04.15 1.75 0 2.34-.84 4.3-2.23 5.71C19.49 18.99 16.98 20 14 20c-4 0-7.37-2.67-8.57-6.32-1.2-3.64.14-7.64 3.3-9.95 3.17-2.31 7.57-2.31 10.74 0l-1.88 1.86c-2.2-1.5-5.13-1.5-7.2 0-2.06 1.5-3.04 4.17-2.3 6.68.74 2.5 3.03 4.23 5.63 4.23 1.63 0 3.03-.49 4.15-1.37.85-.65 1.47-1.58 1.72-2.64H12z"
+                d="M488 261.8C488 403.3 391.1 504 248 504 110.8 504 0 393.2 0 256S110.8 8 248 8c66.8 0 123 24.5 166.3 64.9l-67.5 64.9C258.5 52.6 94.3 116.6 94.3 256c0 86.5 69.1 156.6 153.7 156.6 98.2 0 135-70.4 140.8-106.9H248v-85.3h236.1c2.3 12.7 3.9 24.9 3.9 41.4z"
               />
             </svg>
             Google

@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Header from "@/components/header/Header";
-import { LanguageProvider } from "@/context/language/LanguageContext";
 import HtmlWrapper from "@/components/HtmlWrapper";
 
 const geistSans = Geist({
@@ -16,17 +15,15 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Home",
-  description: "That is a home page",
+  title: "Style Studio - Ihr Friseursalon",
+  description: "Entdecken Sie unsere professionellen Friseurdienstleistungen",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <LanguageProvider> 
-      <HtmlWrapper>
-        <Header />
-        {children}
-      </HtmlWrapper>
-    </LanguageProvider>
+    <HtmlWrapper>
+      <Header />
+      {children}
+    </HtmlWrapper>
   );
 }

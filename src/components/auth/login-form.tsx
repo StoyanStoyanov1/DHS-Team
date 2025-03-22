@@ -6,8 +6,6 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Eye, EyeOff, Mail, Lock } from "lucide-react" 
-import authTranslate from "@/utils/translate/authTranslate";
-import { useLanguage } from "@/context/language/LanguageContext";
 import { EmailValidation } from "@/utils/validation/auth/emailValidation";
 import { motion } from "framer-motion";
 
@@ -26,18 +24,13 @@ interface LoginFormProps extends React.ComponentPropsWithoutRef<"form"> {
 }
 
 export default function LoginForm({ className, ...props }: LoginFormProps) {
-  const {language} = useLanguage();
   const [showPassword, setShowPassword] = useState<boolean>(false);
   const [email, setEmail] = useState<string>('');
   const [password, setPassword] = useState<string>('');
   const [emailIsValid, setEmailIsValid] = useState<boolean>(true);
   const [isFocused, setIsFocused] = useState<string>('');
 
-  const togglePasswordVisibility = () => {
-    setShowPassword((prev) => !prev)
-  }
-
-  const onSumbitHandler = (e: React.FormEvent): void => {
+  const onSubmitHandler = (e: React.FormEvent): void => {
     e.preventDefault();
     const { emailIsValid } = EmailValidation(email);
     setEmailIsValid(emailIsValid);
@@ -66,17 +59,17 @@ export default function LoginForm({ className, ...props }: LoginFormProps) {
             animate={{ scale: 1 }}
             className="text-2xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent"
           >
-            {authTranslate[language].loginToYourAccount}
+            Anmelden
           </motion.h1>
           <p className="text-balance text-sm text-muted-foreground">
-            {authTranslate[language].welcomeBack}
+            Willkommen zurück! Geben Sie einfach Ihre Daten ein und los geht's.
           </p>
         </div>
 
         <div className="grid gap-4">
           <div className="grid gap-1.5">
             <Label htmlFor="email" className="text-sm font-medium">
-              {authTranslate[language].email}
+              E-Mail
             </Label>
             <div className="relative">
               <div className="relative">
@@ -86,13 +79,13 @@ export default function LoginForm({ className, ...props }: LoginFormProps) {
                   animate={isFocused === 'email' ? 'focus' : 'blur'}
                 >
                   <Input 
-                    value={email} 
-                    onChange={onChangeEmail} 
+                    value={email}
+                    onChange={onChangeEmail}
                     onFocus={() => setIsFocused('email')}
                     onBlur={() => setIsFocused('')}
-                    id="email" 
-                    type="text" 
-                    placeholder="user@example.com" 
+                    id="email"
+                    type="text"
+                    placeholder="user@example.com"
                     className={cn(
                       "pl-10 transition-all duration-200",
                       emailIsValid ? "border-input hover:border-primary" : "border-red-500"
@@ -106,24 +99,16 @@ export default function LoginForm({ className, ...props }: LoginFormProps) {
                   animate={{ opacity: 1, y: 0 }}
                   className="absolute text-red-500 text-xs mt-1"
                 >
-                  {authTranslate[language].emailFormat}
+                  Gültigen Format user@domain.com
                 </motion.p>
               )}
             </div>
           </div>
 
           <div className="grid gap-1.5">
-            <div className="flex items-center justify-between">
-              <Label htmlFor="password" className="text-sm font-medium">
-                {authTranslate[language].password}
-              </Label>
-              <a
-                href="#"
-                className="text-sm text-primary hover:text-primary/80 transition-colors"
-              >
-                {authTranslate[language].forgotYourPassword}
-              </a>
-            </div>
+            <Label htmlFor="password" className="text-sm font-medium">
+              Passwort
+            </Label>
             <div className="relative">
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 h-[16px] w-[16px] -translate-y-1/2 text-gray-400 pointer-events-none" />
@@ -134,7 +119,7 @@ export default function LoginForm({ className, ...props }: LoginFormProps) {
                   <Input
                     id="password"
                     type={showPassword ? "text" : "password"}
-                    placeholder={authTranslate[language].enterYourPassword}
+                    placeholder="Geben Sie Ihr Passwort ein"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     onFocus={() => setIsFocused('password')}
@@ -142,28 +127,30 @@ export default function LoginForm({ className, ...props }: LoginFormProps) {
                     className="pl-10 pr-10 transition-all duration-200 border-input hover:border-primary"
                   />
                 </motion.div>
-                <button
+                <Button
                   type="button"
-                  onClick={togglePasswordVisibility}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
-                  aria-label={showPassword ? "Hide password" : "Show password"}
+                  variant="ghost"
+                  size="icon"
+                  className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                  onClick={() => setShowPassword(!showPassword)}
+                  aria-label={showPassword ? "Passwort ausblenden" : "Passwort anzeigen"}
                 >
                   {showPassword ? (
-                    <EyeOff className="h-[16px] w-[16px]" />
+                    <EyeOff className="h-4 w-4 text-gray-500" />
                   ) : (
-                    <Eye className="h-[16px] w-[16px]" />
+                    <Eye className="h-4 w-4 text-gray-500" />
                   )}
-                </button>
+                </Button>
               </div>
             </div>
           </div>
 
           <Button 
-            type="submit" 
-            onClick={onSumbitHandler}
+            type="submit"
+            onClick={onSubmitHandler}
             className="w-full bg-primary hover:bg-primary/90 text-white transition-all duration-200 transform hover:scale-[1.02]"
           >
-            {authTranslate[language].login}
+            Anmelden
           </Button>
 
           <div className="relative text-center">
@@ -172,23 +159,23 @@ export default function LoginForm({ className, ...props }: LoginFormProps) {
             </div>
             <div className="relative">
               <span className="bg-white px-4 text-sm text-gray-500">
-                {authTranslate[language].orContinueWith}
+                Oder fahren Sie fort mit
               </span>
             </div>
           </div>
 
           <Button 
-            variant="outline" 
+            variant="outline"
             className="w-full border-2 hover:bg-gray-50 transition-all duration-200 transform hover:scale-[1.02]"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 24 24"
+              viewBox="0 0 488 512"
               className="h-5 w-5 mr-2"
             >
               <path
                 fill="currentColor"
-                d="M12 12v-2.5h10.92c.09.51.15 1.04.15 1.75 0 2.34-.84 4.3-2.23 5.71C19.49 18.99 16.98 20 14 20c-4 0-7.37-2.67-8.57-6.32-1.2-3.64.14-7.64 3.3-9.95 3.17-2.31 7.57-2.31 10.74 0l-1.88 1.86c-2.2-1.5-5.13-1.5-7.2 0-2.06 1.5-3.04 4.17-2.3 6.68.74 2.5 3.03 4.23 5.63 4.23 1.63 0 3.03-.49 4.15-1.37.85-.65 1.47-1.58 1.72-2.64H12z"
+                d="M488 261.8C488 403.3 391.1 504 248 504 110.8 504 0 393.2 0 256S110.8 8 248 8c66.8 0 123 24.5 166.3 64.9l-67.5 64.9C258.5 52.6 94.3 116.6 94.3 256c0 86.5 69.1 156.6 153.7 156.6 98.2 0 135-70.4 140.8-106.9H248v-85.3h236.1c2.3 12.7 3.9 24.9 3.9 41.4z"
               />
             </svg>
             Google

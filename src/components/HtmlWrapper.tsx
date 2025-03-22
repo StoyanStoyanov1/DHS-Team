@@ -1,12 +1,8 @@
 "use client";
 
-import { useLanguage } from "@/context/language/LanguageContext";
-
 export default function HtmlWrapper({ children }: { children: React.ReactNode }) {
-  const { language } = useLanguage();
-
   return (
-    <html lang={language}>
+    <html lang="de">
       <body>{children}</body>
     </html>
   );
