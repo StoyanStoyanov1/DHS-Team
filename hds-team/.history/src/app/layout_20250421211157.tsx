@@ -47,35 +47,7 @@ export default function RootLayout({
             `,
                 }}
             />
-            <script
-                dangerouslySetInnerHTML={{
-                    __html: `
-              document.addEventListener('DOMContentLoaded', function() {
-                // Функция за наблюдаване на елементи с клас 'reveal'
-                function checkReveal() {
-                  var reveals = document.querySelectorAll('.reveal');
-                  
-                  reveals.forEach(function(reveal) {
-                    var windowHeight = window.innerHeight;
-                    var elementTop = reveal.getBoundingClientRect().top;
-                    var elementVisible = 150;
-                    
-                    if (elementTop < windowHeight - elementVisible) {
-                      reveal.classList.add('active');
-                    }
-                  });
-                }
-                
-                // Първоначално проверяваме всички елементи
-                checkReveal();
-                
-                // Проверяваме при скролиране
-                window.addEventListener('scroll', checkReveal);
-              });
-            `,
-                }}
-            />
-            <title>SparkDev</title>
+            <title>Hallo</title>
         </head>
         <body
             className={`${geistSans.variable} ${geistMono.variable} font-sans antialiased`}

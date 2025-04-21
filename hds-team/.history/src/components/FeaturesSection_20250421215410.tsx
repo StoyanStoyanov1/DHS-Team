@@ -68,8 +68,8 @@ const FeaturesSection: React.FC = () => {
             <div className="absolute -bottom-10 -left-10 w-72 h-72 bg-purple-500/20 dark:bg-purple-500/10 rounded-full blur-3xl"></div>
 
             <div className="container mx-auto px-4">
-                {/* Feature cards from hero section - always visible */}
-                <div className="relative mb-24">
+                {/* Feature cards from hero section */}
+                <div className="relative mb-24 reveal">
                     <div className="absolute inset-0 bg-gradient-radial from-secondary/20 to-transparent rounded-full blur-3xl"></div>
                     <div className="relative bg-white/80 dark:bg-gray-900/80 backdrop-blur-md rounded-2xl p-6 shadow-xl border border-gray-200 dark:border-gray-800 transition-all duration-300">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -120,7 +120,7 @@ const FeaturesSection: React.FC = () => {
                     </div>
                 </div>
 
-                <div className="text-center mb-12 reveal active">
+                <div className="text-center mb-12">
                     <h2 className="text-3xl md:text-4xl font-bold mb-4 text-gray-900 dark:text-white">Нашите <span className="text-gradient">услуги</span></h2>
                     <p className="text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
                         Комбинираме традиционен подход и изкуствен интелект за създаване на
@@ -128,7 +128,7 @@ const FeaturesSection: React.FC = () => {
                     </p>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 reveal active">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {features.map((feature, index) => (
                         <FeatureCard
                             key={index}

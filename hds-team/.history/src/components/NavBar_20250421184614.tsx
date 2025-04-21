@@ -103,19 +103,19 @@ const NavBar: React.FC = () => {
                     <nav className="hidden md:flex items-center gap-8">
                         <button
                             onClick={handleHome}
-                            className={`nav-link font-medium ${activeSection === 'home' ? 'active' : ''}`}
+                            className={`nav-link font-medium transition-colors text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white ${activeSection === 'home' ? 'text-gray-900 dark:text-white' : ''}`}
                         >
                             Начало
                         </button>
                         <button
                             onClick={() => scrollToSection('features')}
-                            className={`nav-link font-medium ${activeSection === 'features' ? 'active' : ''}`}
+                            className={`nav-link font-medium transition-colors text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white ${activeSection === 'features' ? 'text-gray-900 dark:text-white' : ''}`}
                         >
                             Услуги
                         </button>
                         <button
                             onClick={() => scrollToSection('contact')}
-                            className={`nav-link font-medium ${activeSection === 'contact' ? 'active' : ''}`}
+                            className={`nav-link font-medium transition-colors text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white ${activeSection === 'contact' ? 'text-gray-900 dark:text-white' : ''}`}
                         >
                             Контакти
                         </button>
