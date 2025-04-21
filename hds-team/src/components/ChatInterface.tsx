@@ -1,4 +1,6 @@
-import React from 'react';
+"use client"
+
+import React, { useRef, useEffect } from 'react';
 import { Bot, Send, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useChat } from '@/context/ChatContext';
@@ -10,10 +12,45 @@ interface ChatInterfaceProps {
 
 const ChatInterface = ({ className = "" }: ChatInterfaceProps) => {
     const { messages, input, setInput, isTyping, handleSendMessage } = useChat();
+    const messagesEndRef = useRef<HTMLDivElement>(null);
+    const scrollAreaRef = useRef<HTMLDivElement>(null);
+    
+    // Скролиране до дъното при ново съобщение или при промяна на typing състоянието
+    useEffect(() => {
+        scrollToBottom();
+    }, [messages, isTyping]);
+    
+    // Функция за скролиране до дъното
+    const scrollToBottom = () => {
+        if (messagesEndRef.current) {
+            messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
+        }
+        
+        // Допълнителен метод за скролиране в случай, че ScrollArea не скролира правилно
+        if (scrollAreaRef.current) {
+            const scrollContainer = scrollAreaRef.current.querySelector('[data-radix-scroll-area-viewport]');
+            if (scrollContainer) {
+                scrollContainer.scrollTop = scrollContainer.scrollHeight;
+            }
+        }
+    };
+
+    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setInput(e.target.value);
+    };
+
+    const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            handleSendMessage();
+            // Скролиране до дъното след изпращане на съобщение
+            setTimeout(scrollToBottom, 50);
+        }
+    };
 
     return (
-        <div className={`flex flex-col h-full ${className}`}>
-            <ScrollArea className="flex-1 w-full">
+        <div className={`flex flex-col h-full ${className}`} ref={scrollAreaRef}>
+            <ScrollArea className="flex-1 min-h-[350px]">
                 <div className="p-4 space-y-4">
                     {messages.map(message => (
                         <div
@@ -53,21 +90,28 @@ const ChatInterface = ({ className = "" }: ChatInterfaceProps) => {
                             </div>
                         </div>
                     )}
+                    
+                    {/* Невидим елемент за скролиране до дъното */}
+                    <div ref={messagesEndRef} />
                 </div>
             </ScrollArea>
 
-            <div className="p-4 border-t border-gray-100 dark:border-gray-800">
+            <div className="p-3 bg-gray-50 dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800">
                 <div className="flex gap-2">
                     <input
                         type="text"
                         value={input}
-                        onChange={(e) => setInput(e.target.value)}
-                        onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
+                        onChange={handleInputChange}
+                        onKeyDown={handleKeyDown}
                         className="flex-1 px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
                         placeholder="Напишете съобщение..."
                     />
                     <Button
-                        onClick={handleSendMessage}
+                        onClick={() => {
+                            handleSendMessage();
+                            // Скролиране до дъното след изпращане на съобщение
+                            setTimeout(scrollToBottom, 50);
+                        }}
                         className="bg-blue-purple-gradient hover:opacity-90"
                         size="icon"
                     >
