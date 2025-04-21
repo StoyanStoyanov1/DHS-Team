@@ -1,8 +1,9 @@
-import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import type {Metadata} from "next";
+import {Geist, Geist_Mono} from "next/font/google";
 import "./globals.css";
-import { Toaster } from "@/components/ui/toaster";
+import {Toaster} from "@/components/ui/toaster";
 import NavBar from "@/components/NavBar";
+import Footer from "@/components/Footer";
 
 const geistSans = Geist({
     variable: "--font-geist-sans",
@@ -27,7 +28,7 @@ export default function RootLayout({
     return (
         <html lang="bg" suppressHydrationWarning>
         <head>
-            <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+            <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
             <script
                 dangerouslySetInnerHTML={{
                     __html: `
@@ -46,23 +47,25 @@ export default function RootLayout({
             `,
                 }}
             />
+            <title>Hallo</title>
         </head>
         <body
             className={`${geistSans.variable} ${geistMono.variable} font-sans antialiased`}
         >
-        <div className="min-h-screen bg-gradient-radial from-blue-50 to-transparent dark:from-gray-900 dark:to-gray-950">
+        <div
+            className="min-h-screen bg-gradient-radial from-blue-50 to-transparent dark:from-gray-900 dark:to-gray-950">
             <header>
-                <NavBar />
+                <NavBar/>
             </header>
             <main>
                 {children}
             </main>
             <footer>
-
+                <Footer/>
             </footer>
         </div>
 
-        <Toaster />
+        <Toaster/>
         </body>
         </html>
     );
