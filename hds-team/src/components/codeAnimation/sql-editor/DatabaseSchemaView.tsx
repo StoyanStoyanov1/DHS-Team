@@ -1,206 +1,166 @@
-"use client"
+'use client';
 import React from 'react';
 import { Database, Key } from 'lucide-react';
+import { motion } from 'framer-motion';
 
-const DatabaseSchemaView: React.FC = () => {
+const tableFadeIn = (delay: number) => ({
+    initial: { opacity: 0, y: 20 },
+    animate: { opacity: 1, y: 0, transition: { delay, duration: 0.5 } },
+});
+
+const TableBox = ({
+                      title,
+                      iconColor,
+                      fields,
+                      style,
+                      delay,
+                  }: {
+    title: string;
+    iconColor: string;
+    fields: { name: string; type?: string; pk?: boolean; fk?: boolean; color?: string }[];
+    style: React.CSSProperties;
+    delay: number;
+}) => (
+    <motion.div
+        className="absolute w-[180px] bg-gray-900/90 backdrop-blur-sm border border-purple-500/20 shadow-lg rounded-xl p-4"
+        style={style}
+        {...tableFadeIn(delay)}
+    >
+        <div className="flex items-center gap-2 mb-3">
+            <Database className={iconColor} size={18} />
+            <span className={`${iconColor} font-semibold text-sm uppercase tracking-wide`}>
+        {title}
+      </span>
+        </div>
+        <div className="space-y-2 text-sm">
+            {fields.map((f, i) => (
+                <div key={i} className="flex items-center gap-2">
+                    {f.pk ? (
+                        <Key className="text-yellow-400" size={12} />
+                    ) : (
+                        <div className={`w-2 h-2 rounded-full ${f.color ?? 'bg-gray-400'}`} />
+                    )}
+                    <span className="text-gray-300">
+            {f.name}
+                        {f.fk && ' (FK)'}
+                        {f.pk && ' (PK)'}
+          </span>
+                </div>
+            ))}
+        </div>
+    </motion.div>
+);
+
+const DatabaseSchemaView = () => {
     return (
-        <div className="bg-gradient-to-br from-gray-900 to-gray-800 h-[400px] p-4 overflow-hidden">
-            <div className="relative h-full">
-                {/* Users Table */}
-                <div className="absolute top-4 left-4 w-[180px] z-10 bg-gray-800/80 p-3 rounded-lg border border-purple-500/30 shadow-lg animate-fade-in" style={{ animationDelay: '0.1s' }}>
-                    <div className="flex items-center gap-2 mb-2">
-                        <Database className="text-purple-400" size={16} />
-                        <span className="text-purple-400 font-semibold">users</span>
-                    </div>
-                    <div className="space-y-1.5 text-sm">
-                        <div className="flex items-center gap-2">
-                            <Key className="text-yellow-400" size={12} />
-                            <span className="text-gray-300">id (PK)</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                            <div className="w-2 h-2 bg-gray-400 rounded-full" />
-                            <span className="text-gray-300">username</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                            <div className="w-2 h-2 bg-gray-400 rounded-full" />
-                            <span className="text-gray-300">email</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                            <div className="w-2 h-2 bg-gray-400 rounded-full" />
-                            <span className="text-gray-300">created_at</span>
-                        </div>
-                    </div>
-                </div>
+        <div className="relative h-[400px] bg-gradient-to-br from-gray-950 to-gray-900 border border-gray-800 rounded-2xl overflow-hidden p-4">
+            {/* Tables */}
+            <TableBox
+                title="users"
+                iconColor="text-purple-400"
+                delay={0.1}
+                style={{ top: 20, left: 20 }}
+                fields={[
+                    { name: 'id', pk: true },
+                    { name: 'username' },
+                    { name: 'email' },
+                    { name: 'created_at' },
+                ]}
+            />
+            <TableBox
+                title="posts"
+                iconColor="text-purple-400"
+                delay={0.2}
+                style={{ top: 20, right: 20 }}
+                fields={[
+                    { name: 'id', pk: true },
+                    { name: 'user_id', fk: true, color: 'bg-blue-400' },
+                    { name: 'title' },
+                    { name: 'content' },
+                ]}
+            />
+            <TableBox
+                title="comments"
+                iconColor="text-purple-400"
+                delay={0.3}
+                style={{ bottom: 20, left: 20 }}
+                fields={[
+                    { name: 'id', pk: true },
+                    { name: 'post_id', fk: true, color: 'bg-blue-400' },
+                    { name: 'user_id', fk: true, color: 'bg-blue-400' },
+                    { name: 'content' },
+                ]}
+            />
+            <TableBox
+                title="categories"
+                iconColor="text-purple-400"
+                delay={0.4}
+                style={{ bottom: 20, right: 20 }}
+                fields={[
+                    { name: 'id', pk: true },
+                    { name: 'name' },
+                    { name: 'slug' },
+                ]}
+            />
+            <TableBox
+                title="post_categories"
+                iconColor="text-blue-400"
+                delay={0.5}
+                style={{ top: '45%', left: 'calc(50% - 95px)' }}
+                fields={[
+                    { name: 'post_id', fk: true, color: 'bg-blue-400' },
+                    { name: 'category_id', fk: true, color: 'bg-blue-400' },
+                ]}
+            />
 
-                {/* Posts Table */}
-                <div className="absolute top-4 right-4 w-[180px] z-10 bg-gray-800/80 p-3 rounded-lg border border-purple-500/30 shadow-lg animate-fade-in" style={{ animationDelay: '0.2s' }}>
-                    <div className="flex items-center gap-2 mb-2">
-                        <Database className="text-purple-400" size={16} />
-                        <span className="text-purple-400 font-semibold">posts</span>
-                    </div>
-                    <div className="space-y-1.5 text-sm">
-                        <div className="flex items-center gap-2">
-                            <Key className="text-yellow-400" size={12} />
-                            <span className="text-gray-300">id (PK)</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                            <div className="w-2 h-2 bg-blue-400 rounded-full" />
-                            <span className="text-gray-300">user_id (FK)</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                            <div className="w-2 h-2 bg-gray-400 rounded-full" />
-                            <span className="text-gray-300">title</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                            <div className="w-2 h-2 bg-gray-400 rounded-full" />
-                            <span className="text-gray-300">content</span>
-                        </div>
-                    </div>
-                </div>
-
-                {/* Comments Table */}
-                <div className="absolute bottom-4 left-4 w-[180px] z-10 bg-gray-800/80 p-3 rounded-lg border border-purple-500/30 shadow-lg animate-fade-in" style={{ animationDelay: '0.3s' }}>
-                    <div className="flex items-center gap-2 mb-2">
-                        <Database className="text-purple-400" size={16} />
-                        <span className="text-purple-400 font-semibold">comments</span>
-                    </div>
-                    <div className="space-y-1.5 text-sm">
-                        <div className="flex items-center gap-2">
-                            <Key className="text-yellow-400" size={12} />
-                            <span className="text-gray-300">id (PK)</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                            <div className="w-2 h-2 bg-blue-400 rounded-full" />
-                            <span className="text-gray-300">post_id (FK)</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                            <div className="w-2 h-2 bg-blue-400 rounded-full" />
-                            <span className="text-gray-300">user_id (FK)</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                            <div className="w-2 h-2 bg-gray-400 rounded-full" />
-                            <span className="text-gray-300">content</span>
-                        </div>
-                    </div>
-                </div>
-
-                {/* Categories Table */}
-                <div className="absolute bottom-4 right-4 w-[180px] z-10 bg-gray-800/80 p-3 rounded-lg border border-purple-500/30 shadow-lg animate-fade-in" style={{ animationDelay: '0.4s' }}>
-                    <div className="flex items-center gap-2 mb-2">
-                        <Database className="text-purple-400" size={16} />
-                        <span className="text-purple-400 font-semibold">categories</span>
-                    </div>
-                    <div className="space-y-1.5 text-sm">
-                        <div className="flex items-center gap-2">
-                            <Key className="text-yellow-400" size={12} />
-                            <span className="text-gray-300">id (PK)</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                            <div className="w-2 h-2 bg-gray-400 rounded-full" />
-                            <span className="text-gray-300">name</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                            <div className="w-2 h-2 bg-gray-400 rounded-full" />
-                            <span className="text-gray-300">slug</span>
-                        </div>
-                    </div>
-                </div>
-
-                {/* Post_Categories Junction Table */}
-                <div className="absolute left-1/2 transform -translate-x-1/2 top-1/2 -translate-y-1/2 w-[180px] z-10 bg-gray-800/80 p-3 rounded-lg border border-blue-500/30 shadow-lg animate-fade-in" style={{ animationDelay: '0.5s' }}>
-                    <div className="flex items-center gap-2 mb-2">
-                        <Database className="text-blue-400" size={16} />
-                        <span className="text-blue-400 font-semibold">post_categories</span>
-                    </div>
-                    <div className="space-y-1.5 text-sm">
-                        <div className="flex items-center gap-2">
-                            <div className="w-2 h-2 bg-blue-400 rounded-full" />
-                            <span className="text-gray-300">post_id (FK)</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                            <div className="w-2 h-2 bg-blue-400 rounded-full" />
-                            <span className="text-gray-300">category_id (FK)</span>
-                        </div>
-                    </div>
-                </div>
-
-                {/* Relationship Lines */}
-                <svg className="absolute top-0 left-0 w-full h-full z-0 pointer-events-none" xmlns="http://www.w3.org/2000/svg">
-                    {/* Users to Posts (1:N) */}
-                    <path
-                        d="M 170 60 Q 230 60 320 60"
-                        fill="none"
-                        stroke="rgba(147, 51, 234, 0.5)"
-                        strokeWidth="1.5"
-                        strokeDasharray="4"
-                        className="animate-draw-line"
-                        style={{ animationDelay: '0.6s' }}
-                        markerEnd="url(#arrowhead)"
-                    />
-
-                    {/* Users to Comments (1:N) */}
-                    <path
-                        d="M 90 95 Q 90 190 90 270"
-                        fill="none"
-                        stroke="rgba(147, 51, 234, 0.5)"
-                        strokeWidth="1.5"
-                        strokeDasharray="4"
-                        className="animate-draw-line"
-                        style={{ animationDelay: '0.7s' }}
-                        markerEnd="url(#arrowhead)"
-                    />
-
-                    {/* Posts to Comments (1:N) */}
-                    <path
-                        d="M 400 95 Q 400 190 170 270"
-                        fill="none"
-                        stroke="rgba(147, 51, 234, 0.5)"
-                        strokeWidth="1.5"
-                        strokeDasharray="4"
-                        className="animate-draw-line"
-                        style={{ animationDelay: '0.8s' }}
-                        markerEnd="url(#arrowhead)"
-                    />
-
-                    {/* Posts to post_categories (1:N) */}
-                    <path
-                        d="M 400 80 Q 300 150 270 190"
-                        fill="none"
-                        stroke="rgba(147, 51, 234, 0.5)"
-                        strokeWidth="1.5"
-                        strokeDasharray="4"
-                        className="animate-draw-line"
-                        style={{ animationDelay: '0.9s' }}
-                        markerEnd="url(#arrowhead)"
-                    />
-
-                    {/* Categories to post_categories (1:N) */}
-                    <path
-                        d="M 400 300 Q 350 250 270 210"
-                        fill="none"
-                        stroke="rgba(147, 51, 234, 0.5)"
-                        strokeWidth="1.5"
-                        strokeDasharray="4"
-                        className="animate-draw-line"
-                        style={{ animationDelay: '1s' }}
-                        markerEnd="url(#arrowhead)"
-                    />
-
-                    {/* Arrowhead marker definition */}
-                    <defs>
-                        <marker
-                            id="arrowhead"
-                            markerWidth="6"
-                            markerHeight="6"
-                            refX="5"
-                            refY="3"
-                            orient="auto"
-                        >
-                            <polygon points="0 0, 6 3, 0 6" fill="rgba(147, 51, 234, 0.7)" />
-                        </marker>
-                    </defs>
-                </svg>
-            </div>
+            {/* Relationship lines */}
+            <svg className="absolute inset-0 w-full h-full z-0 pointer-events-none">
+                <defs>
+                    <marker id="arrow" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="5" markerHeight="5" orient="auto">
+                        <path d="M 0 0 L 10 5 L 0 10 z" fill="rgba(168, 85, 247, 0.7)" />
+                    </marker>
+                </defs>
+                <path
+                    d="M 190 60 Q 300 60 460 70"
+                    className="animate-pulse"
+                    fill="none"
+                    stroke="rgba(168, 85, 247, 0.5)"
+                    strokeWidth="1.5"
+                    markerEnd="url(#arrow)"
+                />
+                <path
+                    d="M 110 100 Q 110 230 60 260"
+                    className="animate-pulse"
+                    fill="none"
+                    stroke="rgba(168, 85, 247, 0.5)"
+                    strokeWidth="1.5"
+                    markerEnd="url(#arrow)"
+                />
+                <path
+                    d="M 450 100 Q 430 230 190 370"
+                    className="animate-pulse"
+                    fill="none"
+                    stroke="rgba(168, 85, 247, 0.5)"
+                    strokeWidth="1.5"
+                    markerEnd="url(#arrow)"
+                />
+                <path
+                    d="M 460 100 Q 390 120 330 220"
+                    className="animate-pulse"
+                    fill="none"
+                    stroke="rgba(168, 85, 247, 0.5)"
+                    strokeWidth="1.5"
+                    markerEnd="url(#arrow)"
+                />
+                <path
+                    d="M 460 280 Q 370 200 330 250"
+                    className="animate-pulse"
+                    fill="none"
+                    stroke="rgba(168, 85, 247, 0.5)"
+                    strokeWidth="1.5"
+                    markerEnd="url(#arrow)"
+                />
+            </svg>
         </div>
     );
 };
