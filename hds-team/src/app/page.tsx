@@ -1,12 +1,9 @@
-import NavBar from "@/components/NavBar";
 import HeroSection from "@/components/HeroSection";
 
 export default function Home() {
     return (
-      <div className="min-h-screen bg-gradient-radial from-blue-50 to-transparent dark:from-gray-900 dark:to-gray-950">
-        <NavBar />
-        <main>
-          <section className="container mx-auto px-4 pt-20">
+
+          <section className="container mx-auto px-4 pt-40">
             <div className="w-full mb-20 hero-reveal stagger-children text-center">
               <HeroSection />
             </div>
@@ -25,7 +22,5 @@ export default function Home() {
           {/*<section id="contact">*/}
           {/*  <ContactSection />*/}
           </section>
-        </main>
-        </div>
   );
 }

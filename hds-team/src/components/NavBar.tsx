@@ -3,7 +3,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import ThemeToggle from './ThemeToggle';
 import { Button } from '@/components/ui/button';
-import { useToast } from '@/hooks/use-toast';
 import ContactInfo from './ContactInfo';
 import { useRouter, usePathname } from 'next/navigation';
 
@@ -11,7 +10,6 @@ const NavBar: React.FC = () => {
     const [activeSection, setActiveSection] = useState('');
     const router = useRouter();
     const pathname = usePathname();
-    const { toast } = useToast();
 
     useEffect(() => {
         const handleScroll = () => {
@@ -88,36 +86,36 @@ const NavBar: React.FC = () => {
                     if (section) {
                         section.scrollIntoView({ behavior: 'smooth' });
                     }
-                }, 100); // Small delay to ensure DOM is ready
+                }, 100);
             }
             sessionStorage.removeItem('scrollTo');
         }
     }, [pathname]);
 
     return (
-        <header className="fixed top-0 left-0 right-0 z-50 glassmorphism">
+        <header className="fixed top-0 left-0 right-0 z-50 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-b border-gray-200 dark:border-gray-800 shadow-sm">
             <div className="container mx-auto px-4">
                 <div className="py-2 flex items-center justify-between gap-6 text-sm border-b border-gray-200 dark:border-gray-800">
                     <ContactInfo openChat={openAiChat} />
                 </div>
                 <div className="py-4 flex items-center justify-between">
-                    <span className="font-bold text-xl select-none">SparkDev</span>
+                    <span className="font-bold text-xl select-none text-gray-900 dark:text-white">SparkDev</span>
                     <nav className="hidden md:flex items-center gap-8">
                         <button
                             onClick={handleHome}
-                            className={`nav-link font-medium transition-colors ${activeSection === 'home' ? 'active' : ''}`}
+                            className={`nav-link font-medium transition-colors text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white ${activeSection === 'home' ? 'text-gray-900 dark:text-white' : ''}`}
                         >
                             Начало
                         </button>
                         <button
                             onClick={() => scrollToSection('features')}
-                            className={`nav-link font-medium transition-colors ${activeSection === 'features' ? 'active' : ''}`}
+                            className={`nav-link font-medium transition-colors text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white ${activeSection === 'features' ? 'text-gray-900 dark:text-white' : ''}`}
                         >
                             Услуги
                         </button>
                         <button
                             onClick={() => scrollToSection('contact')}
-                            className={`nav-link font-medium transition-colors ${activeSection === 'contact' ? 'active' : ''}`}
+                            className={`nav-link font-medium transition-colors text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white ${activeSection === 'contact' ? 'text-gray-900 dark:text-white' : ''}`}
                         >
                             Контакти
                         </button>
@@ -125,7 +123,7 @@ const NavBar: React.FC = () => {
                     </nav>
                     <div>
                         <Button
-                            className="bg-blue-purple-gradient hover:opacity-90 transition-opacity"
+                            className="bg-gradient-to-r from-blue-600 to-purple-600 hover:opacity-90 transition-opacity text-white px-4 py-2 rounded-md font-medium"
                             onClick={handleStartProject}
                         >
                             Започни проект

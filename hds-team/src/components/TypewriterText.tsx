@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 
 interface TypewriterTextProps {
@@ -33,14 +32,12 @@ const TypewriterText: React.FC<TypewriterTextProps> = ({
                 return;
             }
 
-            // Move to next phrase after deletion
             if (isDeleting && currentText === '' && !isPaused) {
                 setIsDeleting(false);
                 setCurrentPhraseIndex((prevIndex) => (prevIndex + 1) % phrases.length);
                 return;
             }
 
-            // Calculate delay based on typing or deleting
             const delay = isDeleting ? deletingSpeed : typingSpeed;
 
             setTimeout(() => {
@@ -58,10 +55,10 @@ const TypewriterText: React.FC<TypewriterTextProps> = ({
     }, [currentText, isDeleting, currentPhraseIndex, isPaused, phrases, typingSpeed, deletingSpeed, delayAfterPhrase]);
 
     return (
-        <span className="text-gradient">
-      {currentText}
+        <span className="text-gradient inline-block">
+            {currentText}
             <span className="typing-indicator"></span>
-    </span>
+        </span>
     );
 };
 

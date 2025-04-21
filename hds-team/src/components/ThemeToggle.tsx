@@ -5,15 +5,12 @@ import { useEffect, useState } from "react";
 import { Switch } from "@/components/ui/switch";
 
 export default function ThemeToggle() {
-    // Use null as initial state to handle server-side rendering
     const [isDark, setIsDark] = useState<boolean | null>(null);
 
     useEffect(() => {
-        // Get theme from localStorage or system preference
         const savedTheme = localStorage.getItem("theme");
         const systemPrefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
 
-        // Determine the initial theme
         const initialIsDark =
             savedTheme === "dark" ||
             (savedTheme === null && systemPrefersDark);
@@ -39,18 +36,23 @@ export default function ThemeToggle() {
             document.documentElement.classList.remove("dark");
             localStorage.setItem("theme", "light");
         }
+
+        console.log("Theme toggled:", newIsDark ? "dark" : "light");
     };
 
-    // Only render the component after hydration
     if (isDark === null) {
         return null;
     }
 
     return (
         <div className="flex items-center space-x-2">
-        <Sun size={18} className="text-yellow-500" />
-    <Switch checked={isDark} onCheckedChange={toggleTheme} />
-    <Moon size={18} className="text-blue-500" />
+            <Sun size={18} className="text-yellow-500" />
+            <Switch
+                checked={isDark}
+                onCheckedChange={toggleTheme}
+                aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
+            />
+            <Moon size={18} className="text-blue-500" />
         </div>
-);
+    );
 }
