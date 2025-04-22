@@ -13,9 +13,11 @@ const Layout: React.FC<DashboardLayoutProps> = ({ children }) => {
     const [activeSection, setActiveSection] = useState<string>('dashboards');
     const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
     const pathname = usePathname();
-
+    
+    // Check if current path is an auth page
     const isAuthPage = pathname?.startsWith('/auth');
 
+    // Don't show the dashboard layout on auth pages
     if (isAuthPage) {
         return <>{children}</>;
     }

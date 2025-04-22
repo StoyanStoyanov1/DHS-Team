@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
     Grid,
     Mail,
@@ -20,12 +20,10 @@ import {
     ChevronLeft,
     ChevronRight,
     LogIn,
-    UserPlus,
-    ChevronDown,
-    ChevronUp
+    UserPlus
 } from 'lucide-react';
 import NavItem from './NavItem';
-import { useRouter, usePathname } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 
 interface SidebarProps {
     activeSection: string;
@@ -41,32 +39,18 @@ const Sidebar: React.FC<SidebarProps> = ({
     toggleCollapse 
 }) => {
     const router = useRouter();
-    const pathname = usePathname();
     const [isAuthOpen, setIsAuthOpen] = useState(false);
-    
-    // Check if current path is an auth path
-    const isAuthPath = pathname?.startsWith('/auth');
-    
-    // Effect to auto-open auth submenu when on auth pages
-    useEffect(() => {
-        if (isAuthPath) {
-            setIsAuthOpen(true);
-        }
-    }, [pathname, isAuthPath]);
 
     const handleAuthClick = () => {
         setIsAuthOpen(!isAuthOpen);
-        if (!isAuthPath) {
-            setActiveSection('authentication');
-        }
     };
 
     const handleLoginClick = () => {
-        router.push('/auth/login');
+        router.push('/login');
     };
 
     const handleRegisterClick = () => {
-        router.push('/auth/register');
+        router.push('/register');
     };
 
     return (
@@ -216,35 +200,28 @@ const Sidebar: React.FC<SidebarProps> = ({
                         isCollapsed={isCollapsed}
                     />
                     <div className="relative">
-                        <div
-                            className={`flex items-center px-3 py-2 rounded-md cursor-pointer mb-1 ${isAuthPath || activeSection === 'authentication' ? 'bg-gray-100 text-blue-600' : 'text-gray-600 hover:bg-gray-50'}`}
+                        <NavItem
+                            icon={<Key size={18} />}
+                            label="Authentication"
+                            active={activeSection === 'authentication'}
                             onClick={handleAuthClick}
-                        >
-                            <div className="text-gray-500"><Key size={18} /></div>
-                            {!isCollapsed && (
-                                <>
-                                    <span className="ml-3 text-sm font-medium">Authentication</span>
-                                    <div className="ml-auto">
-                                        {isAuthOpen ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
-                                    </div>
-                                </>
-                            )}
-                        </div>
+                            isCollapsed={isCollapsed}
+                        />
                         {!isCollapsed && isAuthOpen && (
                             <div className="ml-4 mt-1 space-y-1">
                                 <button
                                     onClick={handleLoginClick}
-                                    className={`flex items-center w-full px-3 py-2 text-sm rounded-md ${pathname === '/auth/login' ? 'bg-blue-50 text-blue-600' : 'text-gray-600 hover:bg-gray-50'}`}
+                                    className="flex items-center w-full px-3 py-2 text-sm text-gray-600 hover:bg-gray-50 rounded-md"
                                 >
                                     <LogIn size={16} className="mr-2" />
-                                    Login
+                                    Вход
                                 </button>
                                 <button
                                     onClick={handleRegisterClick}
-                                    className={`flex items-center w-full px-3 py-2 text-sm rounded-md ${pathname === '/auth/register' ? 'bg-blue-50 text-blue-600' : 'text-gray-600 hover:bg-gray-50'}`}
+                                    className="flex items-center w-full px-3 py-2 text-sm text-gray-600 hover:bg-gray-50 rounded-md"
                                 >
                                     <UserPlus size={16} className="mr-2" />
-                                    Register
+                                    Регистрация
                                 </button>
                             </div>
                         )}
