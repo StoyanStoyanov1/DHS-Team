@@ -4,7 +4,9 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="e6163370-62f5-49d5-afff-feea4b3f7dbf" name="Changes" comment="" />
+    <list default="true" id="e6163370-62f5-49d5-afff-feea4b3f7dbf" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -48,7 +50,7 @@
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "RunOnceActivity.git.unshallow": "true",
     "git-widget-placeholder": "main",
-    "last_opened_file_path": "C:/Users/Besitzer/Desktop/admin-project-genesis",
+    "last_opened_file_path": "C:/Users/Besitzer/Desktop/StyleUp",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.tslint": "true",
     "node.js.selected.package.eslint": "(autodetect)",
@@ -81,6 +83,7 @@
       <updated>1745238853565</updated>
       <workItem from="1745238855581" duration="6900000" />
       <workItem from="1745247210947" duration="21698000" />
+      <workItem from="1745310860437" duration="1245000" />
     </task>
     <servers />
   </component>
@@ -93,7 +96,6 @@
         <line-breakpoint enabled="true" type="javascript">
           <url>file://$PROJECT_DIR$/hds-team/src/components/codeAnimation/code-editor/WebsitePreview.tsx</url>
           <line>90</line>
-          <properties lambdaOrdinal="-1" />
           <option name="timeStamp" value="1" />
         </line-breakpoint>
       </breakpoints>
