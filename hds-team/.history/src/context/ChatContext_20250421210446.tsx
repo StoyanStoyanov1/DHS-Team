@@ -1,5 +1,5 @@
 "use client"
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState } from 'react';
 
 interface Message {
     id: number;
@@ -16,7 +16,6 @@ interface ChatContextType {
     isTyping: boolean;
     setIsTyping: React.Dispatch<React.SetStateAction<boolean>>;
     handleSendMessage: () => void;
-    resetChat: () => void;
 }
 
 const ChatContext = createContext<ChatContextType | undefined>(undefined);
@@ -34,15 +33,6 @@ export const ChatProvider = ({ children }: { children: React.ReactNode }) => {
         "Разбирам нуждите ви. Кога бихте искали да стартираме проекта?",
         "Благодаря за детайлите! Ще подготвя оферта въз основа на споделената информация и ще ви я изпратя скоро."
     ];
-
-    // Ресетиране на чата
-    const resetChat = () => {
-        setMessages([
-            { id: 1, text: "Здравейте! Аз съм AI асистентът на SparkDev. Как мога да помогна с вашия проект?", isBot: true },
-        ]);
-        setInput("");
-        setIsTyping(false);
-    };
 
     const handleSendMessage = () => {
         if (!input.trim()) return;
@@ -65,29 +55,6 @@ export const ChatProvider = ({ children }: { children: React.ReactNode }) => {
         }, 1500);
     };
 
-    // Ефект който наблюдава за промени в хеш частта на URL-а
-    useEffect(() => {
-        const handleHashChange = () => {
-            if (window.location.hash === '#chat') {
-                // Ако хашът е #chat, активираме чата
-                const chatButton = document.querySelector('button[aria-label="Open AI Chat"]');
-                if (chatButton instanceof HTMLButtonElement && !document.querySelector('.fixed.bottom-24')) {
-                    chatButton.click();
-                }
-            }
-        };
-
-        // Проверяваме при зареждане
-        handleHashChange();
-
-        // Слушаме за промени в хаша
-        window.addEventListener('hashchange', handleHashChange);
-        
-        return () => {
-            window.removeEventListener('hashchange', handleHashChange);
-        };
-    }, []);
-
     return (
         <ChatContext.Provider value={{
             messages,
@@ -96,8 +63,7 @@ export const ChatProvider = ({ children }: { children: React.ReactNode }) => {
             setInput,
             isTyping,
             setIsTyping,
-            handleSendMessage,
-            resetChat
+            handleSendMessage
         }}>
             {children}
         </ChatContext.Provider>

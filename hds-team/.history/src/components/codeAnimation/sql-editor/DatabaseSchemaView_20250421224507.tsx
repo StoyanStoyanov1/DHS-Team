@@ -88,8 +88,7 @@ const EnhancedDatabaseSchemaView: React.FC = () => {
         };
     }, []);
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const getResponsivePosition = (basePosition: Position, _containerSize: ContainerSize): React.CSSProperties => {
+    const getResponsivePosition = (basePosition: Position, containerSize: ContainerSize): React.CSSProperties => {
         const result: Position = {};
         
         if (basePosition.top !== undefined) {
@@ -179,7 +178,7 @@ const EnhancedDatabaseSchemaView: React.FC = () => {
             id: 'post_categories',
             title: 'post_categories',
             iconColor: 'text-purple-400',
-            position: { top: '35%', left: '50%', transform: 'translate(-50%, -50%)' },
+            position: { top: '50%', left: '50%', transform: 'translate(-50%, -50%)' },
             fields: [
                 { name: 'post_id', fk: true, references: 'posts', color: 'bg-green-400' },
                 { name: 'category_id', fk: true, references: 'categories', color: 'bg-yellow-400' },
@@ -414,7 +413,7 @@ const EnhancedDatabaseSchemaView: React.FC = () => {
                             {/* Animated particle along the path */}
                             <circle r="2" fill="#60a5fa">
                                 <animateMotion
-                                    dur="3s"
+                                    dur={`${4 + Math.random() * 3}s`}
                                     repeatCount="indefinite"
                                     path={rel.path}
                                 />

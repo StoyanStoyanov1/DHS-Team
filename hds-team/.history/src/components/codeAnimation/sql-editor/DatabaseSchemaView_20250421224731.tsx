@@ -88,8 +88,7 @@ const EnhancedDatabaseSchemaView: React.FC = () => {
         };
     }, []);
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const getResponsivePosition = (basePosition: Position, _containerSize: ContainerSize): React.CSSProperties => {
+    const getResponsivePosition = (basePosition: Position, containerSize: ContainerSize): React.CSSProperties => {
         const result: Position = {};
         
         if (basePosition.top !== undefined) {
