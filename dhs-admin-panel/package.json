@@ -6,11 +6,13 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
+    "export": "next build",
+    "deploy": "npm run export && firebase deploy",
     "lint": "next lint"
   },
   "dependencies": {
     "lucide-react": "^0.263.1",
-    "next": "14.0.3",
+    "next": "15.2.4",
     "react": "^18",
     "react-dom": "^18"
   },
