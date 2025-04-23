@@ -49,7 +49,7 @@ const Breadcrumb = () => {
         <nav className="mb-4">
             <ol className="flex items-center space-x-2 text-sm text-gray-500">
                 <li>
-                    <Link href="/" className="flex items-center hover:text-blue-600">
+                    <Link href="/dhs-admin-panel/public" className="flex items-center hover:text-blue-600">
                         <Home size={16} />
                         <span className="sr-only">Home</span>
                     </Link>
