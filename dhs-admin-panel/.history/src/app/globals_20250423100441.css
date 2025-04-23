@@ -1,0 +1,131 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+  --sidebar-width: 240px;
+  --sidebar-width-collapsed: 80px;
+  --header-height: 56px;
+  --sidebar-transition: 0.3s ease-in-out;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+  }
+}
+
+html, body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: Arial, Helvetica, sans-serif;
+  height: 100%;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+.auth-page-container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Максимална широчина на контейнера за auth страниците */
+.auth-page-container > div {
+  max-width: 480px;
+  width: 100%;
+}
+
+/* Адаптивност при по-големи екрани */
+@media (min-width: 1280px) {
+  .auth-page-container > div {
+    max-width: 520px;
+  }
+}
+
+@media (min-width: 1536px) {
+  .auth-page-container > div {
+    max-width: 580px;
+  }
+}
+
+/* Стилове за админ панела */
+body {
+  background-color: #f8f9fa;
+}
+
+/* Scrollbar стилове за по-модерен вид */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #d1d5db;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #9ca3af;
+}
+
+/* Стилове за контейнери */
+.page-container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+@media (min-width: 1400px) {
+  .page-container {
+    max-width: 1320px;
+  }
+}
+
+/* Стилове за sidebar */
+.sidebar-hover-effect {
+  transition: width var(--sidebar-transition);
+}
+
+.sidebar-item {
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.sidebar-item-active {
+  background: linear-gradient(to right, rgba(59, 130, 246, 0.05), rgba(59, 130, 246, 0.1));
+  color: #3b82f6;
+  font-weight: 500;
+}
+
+.sidebar-item-active .sidebar-icon {
+  color: #3b82f6;
+}
+
+.sidebar-submenu {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.25s ease-in-out;
+}
+
+.sidebar-submenu.open {
+  max-height: 500px;
+}
+
+.sidebar-toggle-btn {
+  transition: transform 0.3s ease, background-color 0.2s ease;
+}

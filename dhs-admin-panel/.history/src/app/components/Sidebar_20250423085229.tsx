@@ -17,12 +17,14 @@ import {
     Key,
     Wand2,
     Maximize,
+    ChevronLeft,
+    ChevronRight,
     LogIn,
     UserPlus,
     ChevronDown,
     ChevronUp,
-    Pin,
-    PinOff
+    PanelLeftClose,
+    PanelLeftOpen
 } from 'lucide-react';
 import NavItem from './NavItem';
 import { useRouter, usePathname } from 'next/navigation';
@@ -34,35 +36,32 @@ interface SidebarProps {
     toggleCollapse: () => void;
 }
 
-const Sidebar: React.FC<SidebarProps> = ({
-                                             activeSection,
-                                             setActiveSection,
-                                             isCollapsed,
-                                             toggleCollapse
-                                         }) => {
+const Sidebar: React.FC<SidebarProps> = ({ 
+    activeSection, 
+    setActiveSection,
+    isCollapsed,
+    toggleCollapse 
+}) => {
     const router = useRouter();
     const pathname = usePathname();
     const [isAuthOpen, setIsAuthOpen] = useState(false);
-    const [isHovering, setIsHovering] = useState(false);
-    const [isPinned, setIsPinned] = useState(false);
-
-    // Check if current path is an auth path
+    
+    // Check if current path is an auth path and which specific auth page
     const isAuthPath = pathname?.startsWith('/auth');
-    const isLoginPath = pathname === '/auth/login';
-    const isRegisterPath = pathname === '/auth/register';
-
-    // Effect to auto-open auth submenu when on auth pages
+    const isLoginPage = pathname === '/auth/login';
+    const isRegisterPage = pathname === '/auth/register';
+    
+    // Effect to auto-open auth submenu and set active section when on auth pages
     useEffect(() => {
         if (isAuthPath) {
             setIsAuthOpen(true);
+            setActiveSection('authentication');
         }
-    }, [pathname, isAuthPath]);
+    }, [pathname, isAuthPath, setActiveSection]);
 
     const handleAuthClick = () => {
         setIsAuthOpen(!isAuthOpen);
-        if (!isAuthPath) {
-            setActiveSection('authentication');
-        }
+        setActiveSection('authentication');
     };
 
     const handleLoginClick = () => {
@@ -73,70 +72,57 @@ const Sidebar: React.FC<SidebarProps> = ({
         router.push('/auth/register');
     };
 
-    const togglePin = () => {
-        setIsPinned(!isPinned);
+    // Function to determine if a submenu item is active
+    const isSubmenuItemActive = (path: string) => {
+        return pathname === path;
     };
 
-    // Should the sidebar be expanded?
-    const shouldExpand = isPinned || isHovering;
-
     return (
-        <div
-            className={`bg-white border-r border-gray-200 transition-all duration-300 h-screen ${shouldExpand ? 'w-64' : 'w-20'} flex flex-col`}
-            onMouseEnter={() => !isPinned && setIsHovering(true)}
-            onMouseLeave={() => !isPinned && setIsHovering(false)}
-        >
+        <div className={`bg-white border-r border-gray-200 transition-all duration-300 ease-in-out shadow-sm flex flex-col h-full ${isCollapsed ? 'w-20' : 'w-64'}`}>
             {/* Logo and Title */}
-            <div className="sidebar-header relative flex items-center justify-between p-5 border-b border-gray-100">
+            <div className="flex items-center justify-between p-5 border-b border-gray-100">
                 <div className="flex items-center">
-                    <div className="h-10 w-10 rounded bg-blue-500 flex items-center justify-center">
+                    <div className="h-10 w-10 rounded-lg bg-blue-500 flex items-center justify-center shadow-sm">
                         <div className="w-6 h-6 bg-white transform rotate-45"></div>
                     </div>
-                    {shouldExpand && (
+                    {!isCollapsed && (
                         <span className="ml-3 text-xl font-bold text-gray-800">Admin Panel</span>
                     )}
                 </div>
-                <button
-                    onClick={togglePin}
-                    className={`pin-btn ${isPinned ? 'active' : ''} text-gray-500 hover:text-gray-700 hover:bg-gray-100 p-1 rounded-md transition-colors`}
-                    title={isPinned ? "Прибери сайдбара" : "Закачи сайдбара отворен"}
-                >
-                    {isPinned ? <Pin size={20} /> : <PinOff size={20} />}
-                </button>
-                {isPinned && !isHovering && (
-                    <div className="pinned-indicator"></div>
-                )}
             </div>
 
-            {/* Navigation - with scroll support */}
-            <div className="px-4 py-2 overflow-y-auto flex-grow custom-scrollbar">
+            {/* Navigation */}
+            <div className="flex-1 overflow-y-auto px-4 py-4">
                 <div className="mb-6">
                     <NavItem
                         icon={<Grid size={18} />}
                         label="Dashboards"
                         badge="5"
                         active={activeSection === 'dashboards'}
-                        onClick={() => setActiveSection('dashboards')}
-                        isCollapsed={!shouldExpand}
+                        onClick={() => {
+                            setActiveSection('dashboards');
+                            router.push('/dashboard');
+                        }}
+                        isCollapsed={isCollapsed}
                     />
                     <NavItem
                         icon={<Maximize size={18} />}
                         label="Layouts"
                         active={activeSection === 'layouts'}
                         onClick={() => setActiveSection('layouts')}
-                        isCollapsed={!shouldExpand}
+                        isCollapsed={isCollapsed}
                     />
                     <NavItem
                         icon={<File size={18} />}
                         label="Front Pages"
                         active={activeSection === 'frontpages'}
                         onClick={() => setActiveSection('frontpages')}
-                        isCollapsed={!shouldExpand}
+                        isCollapsed={isCollapsed}
                     />
                 </div>
 
                 <div className="mb-6">
-                    {shouldExpand && (
+                    {!isCollapsed && (
                         <div className="text-xs font-semibold text-gray-500 tracking-wider mb-3 px-3">
                             APPS & PAGES
                         </div>
@@ -146,61 +132,61 @@ const Sidebar: React.FC<SidebarProps> = ({
                         label="Email"
                         active={activeSection === 'email'}
                         onClick={() => setActiveSection('email')}
-                        isCollapsed={!shouldExpand}
+                        isCollapsed={isCollapsed}
                     />
                     <NavItem
                         icon={<MessageSquare size={18} />}
                         label="Chat"
                         active={activeSection === 'chat'}
                         onClick={() => setActiveSection('chat')}
-                        isCollapsed={!shouldExpand}
+                        isCollapsed={isCollapsed}
                     />
                     <NavItem
                         icon={<Calendar size={18} />}
                         label="Calendar"
                         active={activeSection === 'calendar'}
                         onClick={() => setActiveSection('calendar')}
-                        isCollapsed={!shouldExpand}
+                        isCollapsed={isCollapsed}
                     />
                     <NavItem
                         icon={<Trello size={18} />}
                         label="Kanban"
                         active={activeSection === 'kanban'}
                         onClick={() => setActiveSection('kanban')}
-                        isCollapsed={!shouldExpand}
+                        isCollapsed={isCollapsed}
                     />
                     <NavItem
                         icon={<ShoppingCart size={18} />}
                         label="eCommerce"
                         active={activeSection === 'ecommerce'}
                         onClick={() => setActiveSection('ecommerce')}
-                        isCollapsed={!shouldExpand}
+                        isCollapsed={isCollapsed}
                     />
                     <NavItem
                         icon={<BookOpen size={18} />}
                         label="Academy"
                         active={activeSection === 'academy'}
                         onClick={() => setActiveSection('academy')}
-                        isCollapsed={!shouldExpand}
+                        isCollapsed={isCollapsed}
                     />
                     <NavItem
                         icon={<Truck size={18} />}
                         label="Logistics"
                         active={activeSection === 'logistics'}
                         onClick={() => setActiveSection('logistics')}
-                        isCollapsed={!shouldExpand}
+                        isCollapsed={isCollapsed}
                     />
                     <NavItem
                         icon={<FileText size={18} />}
                         label="Invoice"
                         active={activeSection === 'invoice'}
                         onClick={() => setActiveSection('invoice')}
-                        isCollapsed={!shouldExpand}
+                        isCollapsed={isCollapsed}
                     />
                 </div>
 
                 <div className="mb-6">
-                    {shouldExpand && (
+                    {!isCollapsed && (
                         <div className="text-xs font-semibold text-gray-500 tracking-wider mb-3 px-3">
                             ACCOUNT MANAGEMENT
                         </div>
@@ -210,19 +196,19 @@ const Sidebar: React.FC<SidebarProps> = ({
                         label="Users"
                         active={activeSection === 'users'}
                         onClick={() => setActiveSection('users')}
-                        isCollapsed={!shouldExpand}
+                        isCollapsed={isCollapsed}
                     />
                     <NavItem
                         icon={<Lock size={18} />}
                         label="Roles & Permissions"
                         active={activeSection === 'roles'}
                         onClick={() => setActiveSection('roles')}
-                        isCollapsed={!shouldExpand}
+                        isCollapsed={isCollapsed}
                     />
                 </div>
 
                 <div className="mb-6">
-                    {shouldExpand && (
+                    {!isCollapsed && (
                         <div className="text-xs font-semibold text-gray-500 tracking-wider mb-3 px-3">
                             PAGES & FEATURES
                         </div>
@@ -232,15 +218,21 @@ const Sidebar: React.FC<SidebarProps> = ({
                         label="Pages"
                         active={activeSection === 'pages'}
                         onClick={() => setActiveSection('pages')}
-                        isCollapsed={!shouldExpand}
+                        isCollapsed={isCollapsed}
                     />
                     <div className="relative">
                         <div
-                            className={`flex items-center px-3 py-2 rounded-md cursor-pointer mb-1 ${isAuthPath || activeSection === 'authentication' ? 'bg-gray-100 text-blue-600' : 'text-gray-600 hover:bg-gray-50'}`}
+                            className={`flex items-center px-3 py-2 rounded-md cursor-pointer mb-1 ${
+                                activeSection === 'authentication' 
+                                ? 'bg-gradient-to-r from-blue-50 to-blue-100 text-blue-700' 
+                                : 'text-gray-600 hover:bg-gray-50'
+                            }`}
                             onClick={handleAuthClick}
                         >
-                            <div className="text-gray-500"><Key size={18} /></div>
-                            {shouldExpand && (
+                            <div className={`${activeSection === 'authentication' ? 'text-blue-600' : 'text-gray-500'}`}>
+                                <Key size={18} />
+                            </div>
+                            {!isCollapsed && (
                                 <>
                                     <span className="ml-3 text-sm font-medium">Authentication</span>
                                     <div className="ml-auto">
@@ -249,20 +241,28 @@ const Sidebar: React.FC<SidebarProps> = ({
                                 </>
                             )}
                         </div>
-                        {shouldExpand && isAuthOpen && (
-                            <div className="ml-4 mt-1 space-y-1">
+                        {!isCollapsed && isAuthOpen && (
+                            <div className="ml-6 mt-1 space-y-1 border-l-2 border-blue-200 pl-2">
                                 <button
                                     onClick={handleLoginClick}
-                                    className={`flex items-center w-full px-3 py-2 text-sm rounded-md ${isLoginPath ? 'bg-blue-50 text-blue-600' : 'text-gray-600 hover:bg-gray-50'}`}
+                                    className={`flex items-center w-full px-3 py-2 text-sm rounded-md transition duration-150 ${
+                                        isLoginPage 
+                                        ? 'bg-blue-50 text-blue-700 font-medium' 
+                                        : 'text-gray-600 hover:bg-gray-50'
+                                    }`}
                                 >
-                                    <LogIn size={16} className="mr-2" />
+                                    <LogIn size={16} className={`mr-2 ${isLoginPage ? 'text-blue-600' : 'text-gray-500'}`} />
                                     Login
                                 </button>
                                 <button
                                     onClick={handleRegisterClick}
-                                    className={`flex items-center w-full px-3 py-2 text-sm rounded-md ${isRegisterPath ? 'bg-blue-50 text-blue-600' : 'text-gray-600 hover:bg-gray-50'}`}
+                                    className={`flex items-center w-full px-3 py-2 text-sm rounded-md transition duration-150 ${
+                                        isRegisterPage 
+                                        ? 'bg-blue-50 text-blue-700 font-medium' 
+                                        : 'text-gray-600 hover:bg-gray-50'
+                                    }`}
                                 >
-                                    <UserPlus size={16} className="mr-2" />
+                                    <UserPlus size={16} className={`mr-2 ${isRegisterPage ? 'text-blue-600' : 'text-gray-500'}`} />
                                     Register
                                 </button>
                             </div>
@@ -270,19 +270,34 @@ const Sidebar: React.FC<SidebarProps> = ({
                     </div>
                     <NavItem
                         icon={<Wand2 size={18} />}
-                        label="Wizard Examples"
-                        active={activeSection === 'wizard'}
-                        onClick={() => setActiveSection('wizard')}
-                        isCollapsed={!shouldExpand}
-                    />
-                    <NavItem
-                        icon={<Maximize size={18} />}
-                        label="Modal Examples"
-                        active={activeSection === 'modal'}
-                        onClick={() => setActiveSection('modal')}
-                        isCollapsed={!shouldExpand}
+                        label="Utilities"
+                        active={activeSection === 'utilities'}
+                        onClick={() => setActiveSection('utilities')}
+                        isCollapsed={isCollapsed}
                     />
                 </div>
+            </div>
+            
+            {/* Collapse Toggle Button at Bottom */}
+            <div className="p-4 border-t border-gray-100">
+                <button 
+                    onClick={toggleCollapse}
+                    className={`w-full flex items-center justify-center p-2 rounded-lg transition-all duration-200 ${
+                        isCollapsed 
+                        ? 'bg-blue-50 text-blue-600 hover:bg-blue-100' 
+                        : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
+                    }`}
+                >
+                    {isCollapsed 
+                        ? <PanelLeftOpen size={22} /> 
+                        : (
+                            <>
+                                <PanelLeftClose size={20} className="mr-2" />
+                                <span className="text-sm font-medium">Collapse Sidebar</span>
+                            </>
+                        )
+                    }
+                </button>
             </div>
         </div>
     );
