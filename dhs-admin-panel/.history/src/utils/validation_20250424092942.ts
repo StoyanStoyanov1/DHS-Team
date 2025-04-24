@@ -47,16 +47,30 @@ export const validatePasswordMatch = (password: string, confirmPassword: string)
     return null;
 };
 
+export const validateName = (name: string, fieldName: string): string | null => {
+    if (!name.trim()) {
+        return `${fieldName} is required`;
+    }
+
+    if (name.length < 2) {
+        return `${fieldName} must be at least 2 characters long`;
+    }
+
+    if (!/^[a-zA-Z\s-']+$/.test(name)) {
+        return `${fieldName} can only contain letters, spaces, hyphens, and apostrophes`;
+    }
+
+    return null;
+};
+
 export const validateLoginForm = (email: string, password: string): ValidationResult => {
     const errors: { [key: string]: string } = {};
 
     const emailError = validateEmail(email);
     if (emailError) errors.email = emailError;
 
-    // Only check if password is empty, no complexity validation for login
-    if (!password) {
-        errors.password = 'Password is required';
-    }
+    const passwordError = validatePassword(password);
+    if (passwordError) errors.password = passwordError;
 
     return {
         valid: Object.keys(errors).length === 0,
@@ -65,11 +79,19 @@ export const validateLoginForm = (email: string, password: string): ValidationRe
 };
 
 export const validateRegistrationForm = (
+    firstName: string,
+    lastName: string,
     email: string,
     password: string,
     confirmPassword: string
 ): ValidationResult => {
     const errors: { [key: string]: string } = {};
+
+    const firstNameError = validateName(firstName, 'First name');
+    if (firstNameError) errors.firstName = firstNameError;
+
+    const lastNameError = validateName(lastName, 'Last name');
+    if (lastNameError) errors.lastName = lastNameError;
 
     const emailError = validateEmail(email);
     if (emailError) errors.email = emailError;

@@ -13,6 +13,8 @@ export default function RegisterPage() {
     const { register, error, loading, validationErrors, clearErrors, user } = useAuth();
 
     const [formData, setFormData] = useState({
+        firstName: '',
+        lastName: '',
         email: '',
         password: '',
         confirmPassword: '',
@@ -21,6 +23,32 @@ export default function RegisterPage() {
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const [formErrors, setFormErrors] = useState<{[key: string]: string}>({});
+    const [currentInput, setCurrentInput] = useState<string | null>(null);
+
+    // Handle keyboard navigation
+    const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+        if (e.key === 'ArrowDown' || e.key === 'Enter') {
+            e.preventDefault();
+            const inputs = ['firstName', 'lastName', 'email', 'password', 'confirmPassword', 'terms'];
+            const currentIndex = inputs.indexOf(currentInput || '');
+            const nextIndex = (currentIndex + 1) % inputs.length;
+            const nextInput = document.getElementById(inputs[nextIndex]);
+            if (nextInput) {
+                nextInput.focus();
+                setCurrentInput(inputs[nextIndex]);
+            }
+        } else if (e.key === 'ArrowUp') {
+            e.preventDefault();
+            const inputs = ['firstName', 'lastName', 'email', 'password', 'confirmPassword', 'terms'];
+            const currentIndex = inputs.indexOf(currentInput || '');
+            const prevIndex = (currentIndex - 1 + inputs.length) % inputs.length;
+            const prevInput = document.getElementById(inputs[prevIndex]);
+            if (prevInput) {
+                prevInput.focus();
+                setCurrentInput(inputs[prevIndex]);
+            }
+        }
+    };
 
     // If user is already logged in, redirect to dashboard
     useEffect(() => {
@@ -52,18 +80,9 @@ export default function RegisterPage() {
         e.preventDefault();
         clearErrors();
 
-        // Additional validation for terms
-        if (!formData.terms) {
-            setFormErrors({
-                ...formErrors,
-                terms: 'You must agree to the Terms of Service and Privacy Policy'
-            });
-            return;
-        }
-
         // Client-side validation
-        const { email, password, confirmPassword } = formData;
-        const validation = validateRegistrationForm(email, password, confirmPassword);
+        const { firstName, lastName, email, password, confirmPassword } = formData;
+        const validation = validateRegistrationForm(firstName, lastName, email, password, confirmPassword);
 
         if (!validation.valid) {
             setFormErrors(validation.errors);
@@ -71,25 +90,8 @@ export default function RegisterPage() {
         }
 
         // Proceed with registration
-        await register({
-            email: formData.email,
-            password: formData.password,
-            password_confirm: formData.confirmPassword
-        });
+        await register({ firstName, lastName, email, password, password_confirm: confirmPassword });
     };
-
-    // Check for server-side validation errors
-    useEffect(() => {
-        if (validationErrors) {
-            const errors: {[key: string]: string} = {};
-
-            Object.entries(validationErrors).forEach(([field, messages]) => {
-                errors[field] = Array.isArray(messages) ? messages[0] : messages;
-            });
-
-            setFormErrors(errors);
-        }
-    }, [validationErrors]);
 
     return (
         <div className="auth-page-container min-h-screen flex items-center justify-center bg-gray-50 p-4">
@@ -119,6 +121,52 @@ export default function RegisterPage() {
                 <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
                     <div className="space-y-5">
                         <div>
+                            <label htmlFor="firstName" className="block text-sm font-medium text-gray-700 mb-1">
+                                First Name
+                            </label>
+                            <input
+                                id="firstName"
+                                name="firstName"
+                                type="text"
+                                required
+                                value={formData.firstName}
+                                onChange={handleInputChange}
+                                onKeyDown={handleKeyDown}
+                                onFocus={() => setCurrentInput('firstName')}
+                                className={`appearance-none relative block w-full px-3 py-2 border ${
+                                    formErrors.firstName ? 'border-red-300 focus:ring-red-500' : 'border-gray-300 focus:ring-blue-500'
+                                } placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:border-transparent transition-all sm:text-sm`}
+                                placeholder="Enter your first name"
+                            />
+                            {formErrors.firstName && (
+                                <p className="mt-1 text-sm text-red-600">{formErrors.firstName}</p>
+                            )}
+                        </div>
+
+                        <div>
+                            <label htmlFor="lastName" className="block text-sm font-medium text-gray-700 mb-1">
+                                Last Name
+                            </label>
+                            <input
+                                id="lastName"
+                                name="lastName"
+                                type="text"
+                                required
+                                value={formData.lastName}
+                                onChange={handleInputChange}
+                                onKeyDown={handleKeyDown}
+                                onFocus={() => setCurrentInput('lastName')}
+                                className={`appearance-none relative block w-full px-3 py-2 border ${
+                                    formErrors.lastName ? 'border-red-300 focus:ring-red-500' : 'border-gray-300 focus:ring-blue-500'
+                                } placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:border-transparent transition-all sm:text-sm`}
+                                placeholder="Enter your last name"
+                            />
+                            {formErrors.lastName && (
+                                <p className="mt-1 text-sm text-red-600">{formErrors.lastName}</p>
+                            )}
+                        </div>
+
+                        <div>
                             <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
                                 Email
                             </label>
@@ -129,6 +177,8 @@ export default function RegisterPage() {
                                 required
                                 value={formData.email}
                                 onChange={handleInputChange}
+                                onKeyDown={handleKeyDown}
+                                onFocus={() => setCurrentInput('email')}
                                 className={`appearance-none relative block w-full px-3 py-2 border ${
                                     formErrors.email ? 'border-red-300 focus:ring-red-500' : 'border-gray-300 focus:ring-blue-500'
                                 } placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:border-transparent transition-all sm:text-sm`}
@@ -151,6 +201,8 @@ export default function RegisterPage() {
                                     required
                                     value={formData.password}
                                     onChange={handleInputChange}
+                                    onKeyDown={handleKeyDown}
+                                    onFocus={() => setCurrentInput('password')}
                                     className={`appearance-none relative block w-full px-3 py-2 border ${
                                         formErrors.password ? 'border-red-300 focus:ring-red-500' : 'border-gray-300 focus:ring-blue-500'
                                     } placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:border-transparent transition-all sm:text-sm`}
@@ -181,6 +233,8 @@ export default function RegisterPage() {
                                     required
                                     value={formData.confirmPassword}
                                     onChange={handleInputChange}
+                                    onKeyDown={handleKeyDown}
+                                    onFocus={() => setCurrentInput('confirmPassword')}
                                     className={`appearance-none relative block w-full px-3 py-2 border ${
                                         formErrors.confirmPassword ? 'border-red-300 focus:ring-red-500' : 'border-gray-300 focus:ring-blue-500'
                                     } placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:border-transparent transition-all sm:text-sm`}
@@ -204,17 +258,17 @@ export default function RegisterPage() {
                                 id="terms"
                                 name="terms"
                                 type="checkbox"
+                                required
                                 checked={formData.terms}
                                 onChange={handleInputChange}
+                                onKeyDown={handleKeyDown}
+                                onFocus={() => setCurrentInput('terms')}
                                 className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                             />
                             <label htmlFor="terms" className="ml-2 block text-sm text-gray-700">
-                                I agree to the <a href="#" className="text-blue-600 hover:text-blue-500">Terms of Service</a> and <a href="#" className="text-blue-600 hover:text-blue-500">Privacy Policy</a>
+                                I agree to the terms and conditions
                             </label>
                         </div>
-                        {formErrors.terms && (
-                            <p className="text-sm text-red-600">{formErrors.terms}</p>
-                        )}
                     </div>
 
                     <button

@@ -1,23 +1,27 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { Eye, EyeOff, LogIn } from 'lucide-react';
+import { useRouter, usePathname } from 'next/navigation';
+import { Eye, EyeOff, UserPlus } from 'lucide-react';
 import Link from 'next/link';
 import { useAuth } from '@/src/hooks/useAuth';
-import { validateLoginForm } from '@/src/utils/validation';
+import { validateRegistrationForm } from '@/src/utils/validation';
 import Alert from '@/src/components/Alert';
 
-export default function LoginPage() {
+export default function RegisterPage() {
     const router = useRouter();
-    const { login, error, loading, validationErrors, clearErrors, user } = useAuth();
+    const pathname = usePathname();
+    const { register, error, loading, validationErrors, clearErrors, user } = useAuth();
+    const [registrationSuccess, setRegistrationSuccess] = useState(false);
 
     const [formData, setFormData] = useState({
         email: '',
         password: '',
-        rememberMe: false
+        confirmPassword: '',
+        terms: false
     });
     const [showPassword, setShowPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const [formErrors, setFormErrors] = useState<{[key: string]: string}>({});
 
     // If user is already logged in, redirect to dashboard
@@ -44,29 +48,40 @@ export default function LoginPage() {
                 [name]: ''
             });
         }
+
+        // Reset success message on new input
+        if (registrationSuccess) setRegistrationSuccess(false);
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         clearErrors();
+        setRegistrationSuccess(false); // Reset success state on new submit
 
-        // Client-side validation
-        const { email, password } = formData;
-        const validation = validateLoginForm(email, password);
+        // Additional validation for terms
+        if (!formData.terms) {
+            setFormErrors({
+                ...formErrors,
+                terms: 'You must agree to the Terms of Service and Privacy Policy'
+            });
+            return;
+        }
+
+        // Client-side validation (only for relevant fields now)
+        const { email, password, confirmPassword } = formData;
+        const validation = validateRegistrationForm(email, password, confirmPassword);
 
         if (!validation.valid) {
             setFormErrors(validation.errors);
             return;
         }
 
-        try {
-            // Proceed with login
-            await login({ email, password });
-        } catch (err) {
-            // Error is already handled by useAuth hook
-            // We don't need to do anything here as the error will be displayed by the Alert component
-            console.error('Login error:', err);
-        }
+        // Proceed with registration (only email and password)
+        await register({
+            email: formData.email,
+            password: formData.password,
+            password_confirm: formData.confirmPassword
+        });
     };
 
     // Check for server-side validation errors
@@ -82,6 +97,15 @@ export default function LoginPage() {
         }
     }, [validationErrors]);
 
+    // Effect to show success message after user state is updated
+    useEffect(() => {
+        if (user && !loading && pathname === '/auth/register') { // Check pathname to avoid showing on redirect
+           setRegistrationSuccess(true);
+           // Optional: Redirect after a short delay
+           // setTimeout(() => router.push('/'), 2000);
+        }
+    }, [user, loading, router, pathname]);
+
     return (
         <div className="auth-page-container min-h-screen flex items-center justify-center bg-gray-50 p-4">
             <div className="max-w-md w-full space-y-8 p-8 bg-white rounded-xl shadow-md">
@@ -92,14 +116,22 @@ export default function LoginPage() {
                         </div>
                     </div>
                     <h2 className="mt-6 text-3xl font-bold text-gray-900">
-                        Welcome back!
+                        Create your account
                     </h2>
                     <p className="mt-2 text-sm text-gray-600">
-                        Sign in to your account to continue
+                        Sign up to get started with our platform
                     </p>
                 </div>
 
-                {error && (
+                {registrationSuccess && (
+                    <Alert
+                        type="success"
+                        message="Registration successful! Redirecting..."
+                        // No onClose needed for success message, or make it dismissible
+                    />
+                )}
+
+                {error && !registrationSuccess && ( // Don't show error if success message is shown
                     <Alert
                         type="error"
                         message={error}
@@ -107,7 +139,8 @@ export default function LoginPage() {
                     />
                 )}
 
-                <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
+                {!registrationSuccess && (
+                   <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
                     <div className="space-y-5">
                         <div>
                             <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
@@ -145,7 +178,7 @@ export default function LoginPage() {
                                     className={`appearance-none relative block w-full px-3 py-2 border ${
                                         formErrors.password ? 'border-red-300 focus:ring-red-500' : 'border-gray-300 focus:ring-blue-500'
                                     } placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:border-transparent transition-all sm:text-sm`}
-                                    placeholder="Enter your password"
+                                    placeholder="Create a password"
                                 />
                                 <button
                                     type="button"
@@ -160,27 +193,55 @@ export default function LoginPage() {
                             )}
                         </div>
 
-                        <div className="flex items-center justify-between">
-                            <div className="flex items-center">
+                        <div>
+                            <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-1">
+                                Confirm Password
+                            </label>
+                            <div className="relative">
                                 <input
-                                    id="remember-me"
-                                    name="rememberMe"
-                                    type="checkbox"
-                                    checked={formData.rememberMe}
+                                    id="confirmPassword"
+                                    name="confirmPassword"
+                                    type={showConfirmPassword ? "text" : "password"}
+                                    required
+                                    value={formData.confirmPassword}
                                     onChange={handleInputChange}
-                                    className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                                    className={`appearance-none relative block w-full px-3 py-2 border ${
+                                        formErrors.confirmPassword ? 'border-red-300 focus:ring-red-500' : 'border-gray-300 focus:ring-blue-500'
+                                    } placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:border-transparent transition-all sm:text-sm`}
+                                    placeholder="Confirm your password"
                                 />
-                                <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-700">
-                                    Remember me
-                                </label>
+                                <button
+                                    type="button"
+                                    className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500 cursor-pointer"
+                                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                                >
+                                    {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                                </button>
                             </div>
-
-                            <div className="text-sm">
-                                <Link href="/auth/forgot-password" className="font-medium text-blue-600 hover:text-blue-500 transition-colors">
-                                    Forgot password?
-                                </Link>
-                            </div>
+                            {formErrors.confirmPassword && (
+                                <p className="mt-1 text-sm text-red-600">{formErrors.confirmPassword}</p>
+                            )}
                         </div>
+
+                        <div className="flex items-center">
+                            <input
+                                id="terms"
+                                name="terms"
+                                type="checkbox"
+                                required
+                                checked={formData.terms}
+                                onChange={handleInputChange}
+                                className={`h-4 w-4 ${
+                                    formErrors.terms ? 'text-red-600 focus:ring-red-500 border-red-300' : 'text-blue-600 focus:ring-blue-500 border-gray-300'
+                                } rounded`}
+                            />
+                            <label htmlFor="terms" className="ml-2 block text-sm text-gray-700">
+                                I agree to the <Link href="#" className="text-blue-600 hover:text-blue-500 transition-colors">Terms of Service</Link> and <Link href="#" className="text-blue-600 hover:text-blue-500 transition-colors">Privacy Policy</Link>
+                            </label>
+                        </div>
+                        {formErrors.terms && (
+                            <p className="mt-1 text-sm text-red-600">{formErrors.terms}</p>
+                        )}
                     </div>
 
                     <button
@@ -191,17 +252,18 @@ export default function LoginPage() {
                         }`}
                     >
                         <span className="absolute left-0 inset-y-0 flex items-center pl-3">
-                            <LogIn size={16} className="text-blue-300" />
+                            <UserPlus size={16} className="text-blue-300" />
                         </span>
-                        {loading ? 'Signing in...' : 'Sign in'}
+                        {loading ? 'Creating Account...' : 'Create Account'}
                     </button>
-                </form>
+                   </form>
+                )}
 
                 <div className="mt-6 text-center">
                     <p className="text-sm text-gray-600">
-                        Don't have an account? {' '}
-                        <Link href="/auth/register" className="font-medium text-blue-600 hover:text-blue-500 transition-colors">
-                            Sign up instead
+                        Already have an account? {' '}
+                        <Link href="/auth/login" className="font-medium text-blue-600 hover:text-blue-500 transition-colors">
+                            Sign in instead
                         </Link>
                     </p>
                 </div>

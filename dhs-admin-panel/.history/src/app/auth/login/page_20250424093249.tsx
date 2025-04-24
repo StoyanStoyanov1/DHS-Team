@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { Eye, EyeOff, LogIn } from 'lucide-react';
 import Link from 'next/link';
 import { useAuth } from '@/src/hooks/useAuth';
@@ -10,7 +10,8 @@ import Alert from '@/src/components/Alert';
 
 export default function LoginPage() {
     const router = useRouter();
-    const { login, error, loading, validationErrors, clearErrors, user } = useAuth();
+    const searchParams = useSearchParams();
+    const { login, error, success, loading, validationErrors, clearErrors, clearSuccess, user } = useAuth();
 
     const [formData, setFormData] = useState({
         email: '',
@@ -19,13 +20,40 @@ export default function LoginPage() {
     });
     const [showPassword, setShowPassword] = useState(false);
     const [formErrors, setFormErrors] = useState<{[key: string]: string}>({});
+    const [currentInput, setCurrentInput] = useState<string | null>(null);
 
-    // If user is already logged in, redirect to dashboard
+    // Handle keyboard navigation
+    const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+        if (e.key === 'ArrowDown' || e.key === 'Enter') {
+            e.preventDefault();
+            const inputs = ['email', 'password', 'rememberMe'];
+            const currentIndex = inputs.indexOf(currentInput || '');
+            const nextIndex = (currentIndex + 1) % inputs.length;
+            const nextInput = document.getElementById(inputs[nextIndex]);
+            if (nextInput) {
+                nextInput.focus();
+                setCurrentInput(inputs[nextIndex]);
+            }
+        } else if (e.key === 'ArrowUp') {
+            e.preventDefault();
+            const inputs = ['email', 'password', 'rememberMe'];
+            const currentIndex = inputs.indexOf(currentInput || '');
+            const prevIndex = (currentIndex - 1 + inputs.length) % inputs.length;
+            const prevInput = document.getElementById(inputs[prevIndex]);
+            if (prevInput) {
+                prevInput.focus();
+                setCurrentInput(inputs[prevIndex]);
+            }
+        }
+    };
+
+    // If user is already logged in, redirect to dashboard or the redirect path
     useEffect(() => {
         if (user) {
-            router.push('/');
+            const redirectPath = searchParams.get('redirect');
+            router.push(redirectPath ? decodeURIComponent(redirectPath) : '/');
         }
-    }, [user, router]);
+    }, [user, router, searchParams]);
 
     // Clear form errors when input changes
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -59,14 +87,8 @@ export default function LoginPage() {
             return;
         }
 
-        try {
-            // Proceed with login
-            await login({ email, password });
-        } catch (err) {
-            // Error is already handled by useAuth hook
-            // We don't need to do anything here as the error will be displayed by the Alert component
-            console.error('Login error:', err);
-        }
+        // Proceed with login
+        await login({ email, password });
     };
 
     // Check for server-side validation errors
@@ -107,6 +129,14 @@ export default function LoginPage() {
                     />
                 )}
 
+                {success && (
+                    <Alert
+                        type="success"
+                        message={success}
+                        onClose={clearSuccess}
+                    />
+                )}
+
                 <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
                     <div className="space-y-5">
                         <div>
@@ -120,6 +150,8 @@ export default function LoginPage() {
                                 required
                                 value={formData.email}
                                 onChange={handleInputChange}
+                                onKeyDown={handleKeyDown}
+                                onFocus={() => setCurrentInput('email')}
                                 className={`appearance-none relative block w-full px-3 py-2 border ${
                                     formErrors.email ? 'border-red-300 focus:ring-red-500' : 'border-gray-300 focus:ring-blue-500'
                                 } placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:border-transparent transition-all sm:text-sm`}
@@ -142,6 +174,8 @@ export default function LoginPage() {
                                     required
                                     value={formData.password}
                                     onChange={handleInputChange}
+                                    onKeyDown={handleKeyDown}
+                                    onFocus={() => setCurrentInput('password')}
                                     className={`appearance-none relative block w-full px-3 py-2 border ${
                                         formErrors.password ? 'border-red-300 focus:ring-red-500' : 'border-gray-300 focus:ring-blue-500'
                                     } placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:border-transparent transition-all sm:text-sm`}
@@ -168,6 +202,8 @@ export default function LoginPage() {
                                     type="checkbox"
                                     checked={formData.rememberMe}
                                     onChange={handleInputChange}
+                                    onKeyDown={handleKeyDown}
+                                    onFocus={() => setCurrentInput('rememberMe')}
                                     className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                                 />
                                 <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-700">

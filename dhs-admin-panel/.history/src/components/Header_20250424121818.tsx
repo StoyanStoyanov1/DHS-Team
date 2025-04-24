@@ -2,22 +2,13 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { SunMoon, LayoutGrid, Bell, Settings, LogOut, User } from 'lucide-react';
-import { useRouter } from 'next/navigation';
 import SearchBar from './SearchBar';
 import { useAuth } from '@/src/hooks/useAuth';
 
 const Header: React.FC = () => {
     const { user, logout } = useAuth();
-    const router = useRouter();
     const [dropdownOpen, setDropdownOpen] = useState(false);
     const dropdownRef = useRef<HTMLDivElement>(null);
-
-    // Check if user is logged in
-    useEffect(() => {
-        if (!user) {
-            router.push('/auth/login');
-        }
-    }, [user, router]);
 
     // Close dropdown when clicking outside
     useEffect(() => {
@@ -36,7 +27,6 @@ const Header: React.FC = () => {
     // Handle logout
     const handleLogout = async () => {
         await logout();
-        router.push('/auth/login');
     };
 
     // Get user initials for avatar
@@ -44,11 +34,6 @@ const Header: React.FC = () => {
         if (!user || !user.email) return 'U';
         return user.email.charAt(0).toUpperCase();
     };
-
-    // If user is not authenticated, don't render the header content
-    if (!user) {
-        return null;
-    }
 
     return (
         <header className="bg-white shadow-sm h-16 flex items-center">

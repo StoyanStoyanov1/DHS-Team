@@ -1,11 +1,10 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { Eye, EyeOff, LogIn } from 'lucide-react';
 import Link from 'next/link';
 import { useAuth } from '@/src/hooks/useAuth';
-import { validateLoginForm } from '@/src/utils/validation';
 import Alert from '@/src/components/Alert';
 
 export default function LoginPage() {
@@ -19,6 +18,7 @@ export default function LoginPage() {
     });
     const [showPassword, setShowPassword] = useState(false);
     const [formErrors, setFormErrors] = useState<{[key: string]: string}>({});
+    const formRef = useRef<HTMLFormElement>(null);
 
     // If user is already logged in, redirect to dashboard
     useEffect(() => {
@@ -49,23 +49,29 @@ export default function LoginPage() {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         clearErrors();
+        setFormErrors({});
 
-        // Client-side validation
         const { email, password } = formData;
-        const validation = validateLoginForm(email, password);
 
-        if (!validation.valid) {
-            setFormErrors(validation.errors);
+        // Basic check for empty fields
+        let currentErrors: {[key: string]: string} = {};
+        if (!email) {
+            currentErrors.email = 'Email is required.';
+        }
+        if (!password) {
+            currentErrors.password = 'Password is required.';
+        }
+
+        if (Object.keys(currentErrors).length > 0) {
+            setFormErrors(currentErrors);
             return;
         }
 
         try {
-            // Proceed with login
             await login({ email, password });
         } catch (err) {
             // Error is already handled by useAuth hook
             // We don't need to do anything here as the error will be displayed by the Alert component
-            console.error('Login error:', err);
         }
     };
 
@@ -81,6 +87,47 @@ export default function LoginPage() {
             setFormErrors(errors);
         }
     }, [validationErrors]);
+
+    // Effect for keyboard navigation
+    useEffect(() => {
+        const handleKeyDown = (event: KeyboardEvent) => {
+            if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+                event.preventDefault();
+                const form = formRef.current;
+                if (!form) return;
+
+                const focusableElements = Array.from(
+                    form.querySelectorAll<HTMLInputElement | HTMLButtonElement | HTMLAnchorElement>(
+                        'input:not([type="hidden"]), button[type="submit"], input[type="checkbox"], a'
+                    )
+                ).filter(el => {
+                    // Check disabled only for relevant elements
+                    if (el instanceof HTMLInputElement || el instanceof HTMLButtonElement) {
+                        return !el.disabled && el.tabIndex !== -1;
+                    }
+                    // For anchors or other elements, just check tabIndex
+                    return el.tabIndex !== -1;
+                });
+
+                const currentIndex = focusableElements.findIndex(el => el === document.activeElement);
+
+                let nextIndex;
+                if (event.key === 'ArrowDown') {
+                    nextIndex = (currentIndex + 1) % focusableElements.length;
+                } else { // ArrowUp
+                    nextIndex = (currentIndex - 1 + focusableElements.length) % focusableElements.length;
+                }
+                focusableElements[nextIndex]?.focus();
+            }
+        };
+
+        const formElement = formRef.current;
+        formElement?.addEventListener('keydown', handleKeyDown);
+
+        return () => {
+            formElement?.removeEventListener('keydown', handleKeyDown);
+        };
+    }, []); // Empty dependency array ensures this runs once
 
     return (
         <div className="auth-page-container min-h-screen flex items-center justify-center bg-gray-50 p-4">
@@ -107,7 +154,7 @@ export default function LoginPage() {
                     />
                 )}
 
-                <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
+                <form ref={formRef} className="mt-8 space-y-6" onSubmit={handleSubmit}>
                     <div className="space-y-5">
                         <div>
                             <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">

@@ -12,11 +12,13 @@ interface AuthContextType {
     user: TokenPayload | null;
     loading: boolean;
     error: string | null;
+    success: string | null;
     validationErrors: ValidationErrors | null;
     login: (credentials: LoginCredentials) => Promise<void>;
     register: (userData: RegisterCredentials) => Promise<void>;
     logout: () => Promise<void>;
     clearErrors: () => void;
+    clearSuccess: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -25,6 +27,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const [user, setUser] = useState<TokenPayload | null>(null);
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
+    const [success, setSuccess] = useState<string | null>(null);
     const [validationErrors, setValidationErrors] = useState<ValidationErrors | null>(null);
     const router = useRouter();
 
@@ -44,16 +47,21 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setLoading(true);
         setError(null);
         setValidationErrors(null);
+        setSuccess(null);
 
         try {
             const user = await authService.login(credentials);
-            if (user) {
-                setUser(user);
-                router.push('/'); // Redirect only on successful login
-            }
+            setUser(user);
+            setSuccess('Successfully logged in!');
+            
+            // Get redirect path from URL or default to dashboard
+            const redirectPath = window.location.search
+                ? new URLSearchParams(window.location.search).get('redirect')
+                : null;
+                
+            router.push(redirectPath ? decodeURIComponent(redirectPath) : '/');
         } catch (err: any) {
             handleAuthError(err);
-            // Don't redirect on error, just show the error message
         } finally {
             setLoading(false);
         }
@@ -100,8 +108,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                 // Validation errors
                 setValidationErrors(data.errors);
             } else if (status === 401) {
-                // Unauthorized - show user-friendly message
-                setError('Invalid email or password. Please try again.');
+                // Unauthorized
+                setError('Invalid credentials');
             } else if (status === 400 && data.message) {
                 // Bad request with message
                 setError(data.message);
@@ -111,7 +119,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             }
         } else if (err.request) {
             // The request was made but no response was received
-            setError('No response from server. Please check your connection and try again.');
+            setError('No response from server. Please try again later.');
         } else {
             // Something happened in setting up the request
             setError('An error occurred. Please try again.');
@@ -124,15 +132,22 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setValidationErrors(null);
     };
 
+    // Clear success message
+    const clearSuccess = () => {
+        setSuccess(null);
+    };
+
     const value = {
         user,
         loading,
         error,
+        success,
         validationErrors,
         login,
         register,
         logout,
-        clearErrors
+        clearErrors,
+        clearSuccess
     };
 
     return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

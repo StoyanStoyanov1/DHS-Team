@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { Eye, EyeOff, LogIn } from 'lucide-react';
 import Link from 'next/link';
 import { useAuth } from '@/src/hooks/useAuth';
@@ -10,7 +10,8 @@ import Alert from '@/src/components/Alert';
 
 export default function LoginPage() {
     const router = useRouter();
-    const { login, error, loading, validationErrors, clearErrors, user } = useAuth();
+    const searchParams = useSearchParams();
+    const { login, error, success, loading, validationErrors, clearErrors, clearSuccess, user } = useAuth();
 
     const [formData, setFormData] = useState({
         email: '',
@@ -20,12 +21,13 @@ export default function LoginPage() {
     const [showPassword, setShowPassword] = useState(false);
     const [formErrors, setFormErrors] = useState<{[key: string]: string}>({});
 
-    // If user is already logged in, redirect to dashboard
+    // If user is already logged in, redirect to dashboard or the redirect path
     useEffect(() => {
         if (user) {
-            router.push('/');
+            const redirectPath = searchParams.get('redirect');
+            router.push(redirectPath ? decodeURIComponent(redirectPath) : '/');
         }
-    }, [user, router]);
+    }, [user, router, searchParams]);
 
     // Clear form errors when input changes
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -59,14 +61,8 @@ export default function LoginPage() {
             return;
         }
 
-        try {
-            // Proceed with login
-            await login({ email, password });
-        } catch (err) {
-            // Error is already handled by useAuth hook
-            // We don't need to do anything here as the error will be displayed by the Alert component
-            console.error('Login error:', err);
-        }
+        // Proceed with login
+        await login({ email, password });
     };
 
     // Check for server-side validation errors
@@ -104,6 +100,14 @@ export default function LoginPage() {
                         type="error"
                         message={error}
                         onClose={clearErrors}
+                    />
+                )}
+
+                {success && (
+                    <Alert
+                        type="success"
+                        message={success}
+                        onClose={clearSuccess}
                     />
                 )}
 

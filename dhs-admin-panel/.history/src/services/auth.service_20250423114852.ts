@@ -61,8 +61,7 @@ class AuthService {
             return this.getDecodedToken() as TokenPayload;
         } catch (error) {
             this.handleAuthError(error as AxiosError);
-            // Return the error response instead of throwing
-            return Promise.reject(error);
+            throw error;
         }
     }
 

@@ -1,6 +1,5 @@
 // src/services/api.ts
 import axios, { AxiosError, AxiosInstance, InternalAxiosRequestConfig, AxiosResponse } from 'axios';
-import { useRouter } from 'next/navigation';
 
 const baseURL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
@@ -35,14 +34,8 @@ api.interceptors.response.use(
     },
     async (error: AxiosError) => {
         const originalRequest = error.config as InternalAxiosRequestConfig & { _retry?: boolean };
-        const url = originalRequest.url || '';
 
-        // Don't try to refresh for auth endpoints to prevent infinite loops
-        const isAuthEndpoint = url.includes('/api/auth/sign-in') || 
-                              url.includes('/api/auth/sign-up') || 
-                              url.includes('/api/auth/refresh');
-
-        if (error.response?.status === 401 && !originalRequest._retry && !isAuthEndpoint) {
+        if (error.response?.status === 401 && !originalRequest._retry) {
             try {
                 originalRequest._retry = true;
 
@@ -57,7 +50,7 @@ api.interceptors.response.use(
                 }
             } catch (refreshError) {
                 localStorage.removeItem('access_token');
-                // Don't redirect here, let the component handle it
+                window.location.href = '/auth/login';
                 return Promise.reject(refreshError);
             }
         }

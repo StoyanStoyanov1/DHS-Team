@@ -47,13 +47,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
         try {
             const user = await authService.login(credentials);
-            if (user) {
-                setUser(user);
-                router.push('/'); // Redirect only on successful login
-            }
+            setUser(user);
+            router.push('/'); // Redirect to dashboard after login
         } catch (err: any) {
             handleAuthError(err);
-            // Don't redirect on error, just show the error message
+            // Prevent the error from propagating and causing a page refresh
+            return;
         } finally {
             setLoading(false);
         }
@@ -100,8 +99,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                 // Validation errors
                 setValidationErrors(data.errors);
             } else if (status === 401) {
-                // Unauthorized - show user-friendly message
-                setError('Invalid email or password. Please try again.');
+                // Unauthorized
+                setError('Invalid credentials');
             } else if (status === 400 && data.message) {
                 // Bad request with message
                 setError(data.message);
@@ -111,7 +110,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             }
         } else if (err.request) {
             // The request was made but no response was received
-            setError('No response from server. Please check your connection and try again.');
+            setError('No response from server. Please try again later.');
         } else {
             // Something happened in setting up the request
             setError('An error occurred. Please try again.');

@@ -9,7 +9,9 @@ export interface LoginCredentials {
     password: string;
 }
 
-export interface RegisterCredentials extends LoginCredentials {
+export interface RegisterCredentials {
+    email: string;
+    password: string;
     password_confirm: string;
 }
 
@@ -61,8 +63,7 @@ class AuthService {
             return this.getDecodedToken() as TokenPayload;
         } catch (error) {
             this.handleAuthError(error as AxiosError);
-            // Return the error response instead of throwing
-            return Promise.reject(error);
+            throw error;
         }
     }
 

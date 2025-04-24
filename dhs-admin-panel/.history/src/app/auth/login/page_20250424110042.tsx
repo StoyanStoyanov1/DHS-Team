@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation';
 import { Eye, EyeOff, LogIn } from 'lucide-react';
 import Link from 'next/link';
 import { useAuth } from '@/src/hooks/useAuth';
-import { validateLoginForm } from '@/src/utils/validation';
 import Alert from '@/src/components/Alert';
 
 export default function LoginPage() {
@@ -49,24 +48,26 @@ export default function LoginPage() {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         clearErrors();
+        setFormErrors({}); // Clear previous errors
 
-        // Client-side validation
         const { email, password } = formData;
-        const validation = validateLoginForm(email, password);
 
-        if (!validation.valid) {
-            setFormErrors(validation.errors);
+        // Basic check for empty fields (HTML required attribute handles this mostly)
+        let currentErrors: {[key: string]: string} = {};
+        if (!email) {
+            currentErrors.email = 'Email is required.';
+        }
+        if (!password) {
+            currentErrors.password = 'Password is required.';
+        }
+
+        if (Object.keys(currentErrors).length > 0) {
+            setFormErrors(currentErrors);
             return;
         }
 
-        try {
-            // Proceed with login
-            await login({ email, password });
-        } catch (err) {
-            // Error is already handled by useAuth hook
-            // We don't need to do anything here as the error will be displayed by the Alert component
-            console.error('Login error:', err);
-        }
+        // Proceed with login
+        await login({ email, password });
     };
 
     // Check for server-side validation errors

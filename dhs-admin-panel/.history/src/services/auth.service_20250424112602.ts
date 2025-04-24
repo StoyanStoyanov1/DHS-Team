@@ -51,7 +51,7 @@ class AuthService {
     /**
      * Authenticate user and store JWT token
      */
-    async login(credentials: LoginCredentials): Promise<TokenPayload> {
+    async login(credentials: LoginCredentials): Promise<TokenPayload | null> {
         try {
             const response = await api.post<AuthResponse>('/api/auth/sign-in', credentials);
             this.setToken(response.data.token);
@@ -61,8 +61,7 @@ class AuthService {
             return this.getDecodedToken() as TokenPayload;
         } catch (error) {
             this.handleAuthError(error as AxiosError);
-            // Return the error response instead of throwing
-            return Promise.reject(error);
+            return null;
         }
     }
 

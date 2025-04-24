@@ -53,10 +53,8 @@ export const validateLoginForm = (email: string, password: string): ValidationRe
     const emailError = validateEmail(email);
     if (emailError) errors.email = emailError;
 
-    // Only check if password is empty, no complexity validation for login
-    if (!password) {
-        errors.password = 'Password is required';
-    }
+    const passwordError = validatePassword(password);
+    if (passwordError) errors.password = passwordError;
 
     return {
         valid: Object.keys(errors).length === 0,

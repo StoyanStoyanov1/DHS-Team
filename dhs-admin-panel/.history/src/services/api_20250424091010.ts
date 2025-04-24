@@ -1,6 +1,5 @@
 // src/services/api.ts
 import axios, { AxiosError, AxiosInstance, InternalAxiosRequestConfig, AxiosResponse } from 'axios';
-import { useRouter } from 'next/navigation';
 
 const baseURL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
@@ -12,6 +11,7 @@ const api: AxiosInstance = axios.create({
         'Accept': 'application/json',
     },
     withCredentials: true,
+    timeout: 10000, // 10 seconds timeout
 });
 
 // Request interceptor for API calls
@@ -34,15 +34,17 @@ api.interceptors.response.use(
         return response;
     },
     async (error: AxiosError) => {
+        if (error.code === 'ECONNABORTED') {
+            return Promise.reject(new Error('Request timeout. Please check your internet connection.'));
+        }
+
+        if (!error.response) {
+            return Promise.reject(new Error('Network error. Please check your internet connection and try again.'));
+        }
+
         const originalRequest = error.config as InternalAxiosRequestConfig & { _retry?: boolean };
-        const url = originalRequest.url || '';
 
-        // Don't try to refresh for auth endpoints to prevent infinite loops
-        const isAuthEndpoint = url.includes('/api/auth/sign-in') || 
-                              url.includes('/api/auth/sign-up') || 
-                              url.includes('/api/auth/refresh');
-
-        if (error.response?.status === 401 && !originalRequest._retry && !isAuthEndpoint) {
+        if (error.response.status === 401 && !originalRequest._retry) {
             try {
                 originalRequest._retry = true;
 
@@ -52,12 +54,11 @@ api.interceptors.response.use(
 
                 if (originalRequest.headers && newToken) {
                     originalRequest.headers.Authorization = `Bearer ${newToken}`;
-
                     return api(originalRequest);
                 }
             } catch (refreshError) {
                 localStorage.removeItem('access_token');
-                // Don't redirect here, let the component handle it
+                window.location.href = '/auth/login';
                 return Promise.reject(refreshError);
             }
         }

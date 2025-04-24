@@ -9,7 +9,9 @@ export interface LoginCredentials {
     password: string;
 }
 
-export interface RegisterCredentials extends LoginCredentials {
+export interface RegisterCredentials {
+    email: string;
+    password: string;
     password_confirm: string;
 }
 
@@ -61,8 +63,7 @@ class AuthService {
             return this.getDecodedToken() as TokenPayload;
         } catch (error) {
             this.handleAuthError(error as AxiosError);
-            // Return the error response instead of throwing
-            return Promise.reject(error);
+            throw error;
         }
     }
 
@@ -221,14 +222,16 @@ class AuthService {
     /**
      * Handle authentication errors
      */
-    private handleAuthError(error: AxiosError): void {
-        if (error.response?.status === 401) {
+    private handleAuthError(error: AxiosError | any): void {
+        if (error?.response?.status === 401) {
             // Unauthorized - clear token
             this.clearToken();
         }
 
         // Other error handling could be added here
-        console.error('Authentication error:', error.response?.data || error.message);
+        if (error) {
+            console.error('Authentication error:', error.response?.data || error.message || 'Unknown error occurred');
+        }
     }
 }
 

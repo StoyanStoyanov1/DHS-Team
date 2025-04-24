@@ -23,6 +23,15 @@ export const validateEmail = (email: string): string | null => {
     return null;
 };
 
+// Simple password validation for login
+export const validateLoginPassword = (password: string): string | null => {
+    if (!password) {
+        return 'Password is required';
+    }
+    return null;
+};
+
+// Strong password validation for registration
 export const validatePassword = (password: string): string | null => {
     if (!password) {
         return 'Password is required';
@@ -53,10 +62,9 @@ export const validateLoginForm = (email: string, password: string): ValidationRe
     const emailError = validateEmail(email);
     if (emailError) errors.email = emailError;
 
-    // Only check if password is empty, no complexity validation for login
-    if (!password) {
-        errors.password = 'Password is required';
-    }
+    // Use the simple password validation for login
+    const passwordError = validateLoginPassword(password);
+    if (passwordError) errors.password = passwordError;
 
     return {
         valid: Object.keys(errors).length === 0,

@@ -10,7 +10,7 @@ import Alert from '@/src/components/Alert';
 
 export default function LoginPage() {
     const router = useRouter();
-    const { login, error, loading, validationErrors, clearErrors, user } = useAuth();
+    const { login, error, success, loading, validationErrors, clearErrors, clearSuccess, user } = useAuth();
 
     const [formData, setFormData] = useState({
         email: '',
@@ -59,14 +59,8 @@ export default function LoginPage() {
             return;
         }
 
-        try {
-            // Proceed with login
-            await login({ email, password });
-        } catch (err) {
-            // Error is already handled by useAuth hook
-            // We don't need to do anything here as the error will be displayed by the Alert component
-            console.error('Login error:', err);
-        }
+        // Proceed with login
+        await login({ email, password });
     };
 
     // Check for server-side validation errors
@@ -104,6 +98,14 @@ export default function LoginPage() {
                         type="error"
                         message={error}
                         onClose={clearErrors}
+                    />
+                )}
+
+                {success && (
+                    <Alert
+                        type="success"
+                        message={success}
+                        onClose={clearSuccess}
                     />
                 )}
 

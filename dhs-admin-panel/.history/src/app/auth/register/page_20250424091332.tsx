@@ -2,23 +2,51 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Eye, EyeOff, LogIn } from 'lucide-react';
+import { Eye, EyeOff, UserPlus } from 'lucide-react';
 import Link from 'next/link';
 import { useAuth } from '@/src/hooks/useAuth';
-import { validateLoginForm } from '@/src/utils/validation';
+import { validateRegistrationForm } from '@/src/utils/validation';
 import Alert from '@/src/components/Alert';
 
-export default function LoginPage() {
+export default function RegisterPage() {
     const router = useRouter();
-    const { login, error, loading, validationErrors, clearErrors, user } = useAuth();
+    const { register, error, loading, validationErrors, clearErrors, user } = useAuth();
 
     const [formData, setFormData] = useState({
         email: '',
         password: '',
-        rememberMe: false
+        confirmPassword: '',
+        terms: false
     });
     const [showPassword, setShowPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const [formErrors, setFormErrors] = useState<{[key: string]: string}>({});
+    const [currentInput, setCurrentInput] = useState<string | null>(null);
+
+    // Handle keyboard navigation
+    const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+        if (e.key === 'ArrowDown' || e.key === 'Enter') {
+            e.preventDefault();
+            const inputs = ['email', 'password', 'confirmPassword', 'terms'];
+            const currentIndex = inputs.indexOf(currentInput || '');
+            const nextIndex = (currentIndex + 1) % inputs.length;
+            const nextInput = document.getElementById(inputs[nextIndex]);
+            if (nextInput) {
+                nextInput.focus();
+                setCurrentInput(inputs[nextIndex]);
+            }
+        } else if (e.key === 'ArrowUp') {
+            e.preventDefault();
+            const inputs = ['email', 'password', 'confirmPassword', 'terms'];
+            const currentIndex = inputs.indexOf(currentInput || '');
+            const prevIndex = (currentIndex - 1 + inputs.length) % inputs.length;
+            const prevInput = document.getElementById(inputs[prevIndex]);
+            if (prevInput) {
+                prevInput.focus();
+                setCurrentInput(inputs[prevIndex]);
+            }
+        }
+    };
 
     // If user is already logged in, redirect to dashboard
     useEffect(() => {
@@ -51,36 +79,17 @@ export default function LoginPage() {
         clearErrors();
 
         // Client-side validation
-        const { email, password } = formData;
-        const validation = validateLoginForm(email, password);
+        const { email, password, confirmPassword } = formData;
+        const validation = validateRegistrationForm(email, password, confirmPassword);
 
         if (!validation.valid) {
             setFormErrors(validation.errors);
             return;
         }
 
-        try {
-            // Proceed with login
-            await login({ email, password });
-        } catch (err) {
-            // Error is already handled by useAuth hook
-            // We don't need to do anything here as the error will be displayed by the Alert component
-            console.error('Login error:', err);
-        }
+        // Proceed with registration
+        await register({ email, password, password_confirm: confirmPassword });
     };
-
-    // Check for server-side validation errors
-    useEffect(() => {
-        if (validationErrors) {
-            const errors: {[key: string]: string} = {};
-
-            Object.entries(validationErrors).forEach(([field, messages]) => {
-                errors[field] = Array.isArray(messages) ? messages[0] : messages;
-            });
-
-            setFormErrors(errors);
-        }
-    }, [validationErrors]);
 
     return (
         <div className="auth-page-container min-h-screen flex items-center justify-center bg-gray-50 p-4">
@@ -92,10 +101,10 @@ export default function LoginPage() {
                         </div>
                     </div>
                     <h2 className="mt-6 text-3xl font-bold text-gray-900">
-                        Welcome back!
+                        Create your account
                     </h2>
                     <p className="mt-2 text-sm text-gray-600">
-                        Sign in to your account to continue
+                        Sign up to get started with our platform
                     </p>
                 </div>
 
@@ -120,6 +129,8 @@ export default function LoginPage() {
                                 required
                                 value={formData.email}
                                 onChange={handleInputChange}
+                                onKeyDown={handleKeyDown}
+                                onFocus={() => setCurrentInput('email')}
                                 className={`appearance-none relative block w-full px-3 py-2 border ${
                                     formErrors.email ? 'border-red-300 focus:ring-red-500' : 'border-gray-300 focus:ring-blue-500'
                                 } placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:border-transparent transition-all sm:text-sm`}
@@ -142,10 +153,12 @@ export default function LoginPage() {
                                     required
                                     value={formData.password}
                                     onChange={handleInputChange}
+                                    onKeyDown={handleKeyDown}
+                                    onFocus={() => setCurrentInput('password')}
                                     className={`appearance-none relative block w-full px-3 py-2 border ${
                                         formErrors.password ? 'border-red-300 focus:ring-red-500' : 'border-gray-300 focus:ring-blue-500'
                                     } placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:border-transparent transition-all sm:text-sm`}
-                                    placeholder="Enter your password"
+                                    placeholder="Create a password"
                                 />
                                 <button
                                     type="button"
@@ -160,26 +173,53 @@ export default function LoginPage() {
                             )}
                         </div>
 
-                        <div className="flex items-center justify-between">
-                            <div className="flex items-center">
+                        <div>
+                            <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-1">
+                                Confirm Password
+                            </label>
+                            <div className="relative">
                                 <input
-                                    id="remember-me"
-                                    name="rememberMe"
-                                    type="checkbox"
-                                    checked={formData.rememberMe}
+                                    id="confirmPassword"
+                                    name="confirmPassword"
+                                    type={showConfirmPassword ? "text" : "password"}
+                                    required
+                                    value={formData.confirmPassword}
                                     onChange={handleInputChange}
-                                    className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                                    onKeyDown={handleKeyDown}
+                                    onFocus={() => setCurrentInput('confirmPassword')}
+                                    className={`appearance-none relative block w-full px-3 py-2 border ${
+                                        formErrors.confirmPassword ? 'border-red-300 focus:ring-red-500' : 'border-gray-300 focus:ring-blue-500'
+                                    } placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:border-transparent transition-all sm:text-sm`}
+                                    placeholder="Confirm your password"
                                 />
-                                <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-700">
-                                    Remember me
-                                </label>
+                                <button
+                                    type="button"
+                                    className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500 cursor-pointer"
+                                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                                >
+                                    {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                                </button>
                             </div>
+                            {formErrors.confirmPassword && (
+                                <p className="mt-1 text-sm text-red-600">{formErrors.confirmPassword}</p>
+                            )}
+                        </div>
 
-                            <div className="text-sm">
-                                <Link href="/auth/forgot-password" className="font-medium text-blue-600 hover:text-blue-500 transition-colors">
-                                    Forgot password?
-                                </Link>
-                            </div>
+                        <div className="flex items-center">
+                            <input
+                                id="terms"
+                                name="terms"
+                                type="checkbox"
+                                required
+                                checked={formData.terms}
+                                onChange={handleInputChange}
+                                onKeyDown={handleKeyDown}
+                                onFocus={() => setCurrentInput('terms')}
+                                className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                            />
+                            <label htmlFor="terms" className="ml-2 block text-sm text-gray-700">
+                                I agree to the terms and conditions
+                            </label>
                         </div>
                     </div>
 
@@ -191,17 +231,17 @@ export default function LoginPage() {
                         }`}
                     >
                         <span className="absolute left-0 inset-y-0 flex items-center pl-3">
-                            <LogIn size={16} className="text-blue-300" />
+                            <UserPlus size={16} className="text-blue-300" />
                         </span>
-                        {loading ? 'Signing in...' : 'Sign in'}
+                        {loading ? 'Creating account...' : 'Create account'}
                     </button>
                 </form>
 
                 <div className="mt-6 text-center">
                     <p className="text-sm text-gray-600">
-                        Don't have an account? {' '}
-                        <Link href="/auth/register" className="font-medium text-blue-600 hover:text-blue-500 transition-colors">
-                            Sign up instead
+                        Already have an account? {' '}
+                        <Link href="/auth/login" className="font-medium text-blue-600 hover:text-blue-500 transition-colors">
+                            Sign in instead
                         </Link>
                     </p>
                 </div>
