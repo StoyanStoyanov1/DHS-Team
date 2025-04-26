@@ -230,13 +230,29 @@ class AuthService {
      * Handle authentication errors
      */
     private handleAuthError(error: AxiosError): void {
-        if (error.response?.status === 401) {
-            // Unauthorized - clear token
-            this.clearToken();
-        }
+        if (error.response) {
+            const { status, data } = error.response;
 
-        // Other error handling could be added here
-        console.error('Authentication error:', error.response?.data || error.message);
+            if (status === 401) {
+                // Unauthorized - clear token
+                this.clearToken();
+            }
+
+            // Check for existing email error or other specific server errors
+            if (data && typeof data === 'object') {
+                // Capture the raw server error message
+                const errorData = data as any;
+                if (errorData.message) {
+                    // Attach the original server message to the error
+                    (error as any).serverMessage = errorData.message;
+                }
+            }
+
+            // Log the error for debugging
+            console.error('Authentication error:', data);
+        } else {
+            console.error('Network or unknown error:', error.message);
+        }
     }
 }
 

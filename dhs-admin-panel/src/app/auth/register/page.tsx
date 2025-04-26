@@ -81,6 +81,15 @@ export default function RegisterPage() {
             return;
         }
 
+        // Check for password matching
+        if (formData.password !== formData.confirmPassword) {
+            setFormErrors({
+                ...formErrors,
+                confirmPassword: 'Passwords do not match'
+            });
+            return;
+        }
+
         // Proceed with registration
         await register({
             email: formData.email,
@@ -102,6 +111,16 @@ export default function RegisterPage() {
         }
     }, [validationErrors]);
 
+    // Update error handling to display server error messages
+    useEffect(() => {
+        if (error) {
+            setFormErrors((prevErrors) => ({
+                ...prevErrors,
+                general: error
+            }));
+        }
+    }, [error]);
+
     return (
         <div className="auth-page-container min-h-screen flex items-center justify-center bg-gray-50 p-4">
             <div className="max-w-md w-full space-y-8 p-8 bg-white rounded-xl shadow-md">
@@ -119,11 +138,11 @@ export default function RegisterPage() {
                     </p>
                 </div>
 
-                {error && (
+                {formErrors.general && (
                     <Alert
                         type="error"
-                        message={error}
-                        onClose={clearErrors}
+                        message={formErrors.general}
+                        onClose={() => setFormErrors((prevErrors) => ({ ...prevErrors, general: '' }))}
                     />
                 )}
 

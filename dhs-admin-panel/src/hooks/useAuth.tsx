@@ -90,25 +90,43 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         }
     };
 
-    // Handle authentication errors
+    // Update error handling to always display the exact server error message
     const handleAuthError = (err: any) => {
+        console.log('Auth error:', err); // Debug log
+        
         if (err.response) {
             // The request was made and the server responded with a status code
             const { data, status } = err.response;
-
+            
+            // Check for the "Account with this email already exists" error in the response data
+            if (data && data.detail && typeof data.detail === 'string' && 
+                data.detail.includes('Account with this email already exists')) {
+                setError('Account with this email already exists');
+                return;
+            }
+            
             if (status === 422 && data.errors) {
                 // Validation errors
                 setValidationErrors(data.errors);
-            } else if (status === 401) {
-                // Unauthorized - show user-friendly message
-                setError('Invalid email or password. Please try again.');
-            } else if (status === 400 && data.message) {
-                // Bad request with message
+            } else if (data.message) {
+                // Use the server-provided error message directly
                 setError(data.message);
+            } else if (err.serverMessage) {
+                // Use the serverMessage property added by our service
+                setError(err.serverMessage);
+            } else if (data.detail && typeof data.detail === 'string') {
+                // Use detail field if available (common in FastAPI/Django responses)
+                setError(data.detail);
             } else {
-                // Other error with server response
-                setError(data.message || 'An error occurred during authentication');
+                // Fallback to a generic error message
+                setError('An error occurred during authentication');
             }
+        } else if (err.serverMessage) {
+            // Use the serverMessage property added by our service
+            setError(err.serverMessage);
+        } else if (err.message && err.message !== 'Network Error') {
+            // Use the error message if it's not a generic network error
+            setError(err.message);
         } else if (err.request) {
             // The request was made but no response was received
             setError('No response from server. Please check your connection and try again.');
