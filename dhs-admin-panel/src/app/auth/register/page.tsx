@@ -7,6 +7,11 @@ import Link from 'next/link';
 import { useAuth } from '@/src/hooks/useAuth';
 import { validateRegistrationForm } from '@/src/utils/validation';
 import Alert from '@/src/components/Alert';
+import { ValidationErrors } from '@/src/services/auth.service';
+
+interface FormErrors {
+    [key: string]: string;
+}
 
 export default function RegisterPage() {
     const router = useRouter();
@@ -20,7 +25,7 @@ export default function RegisterPage() {
     });
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-    const [formErrors, setFormErrors] = useState<{[key: string]: string}>({});
+    const [formErrors, setFormErrors] = useState<FormErrors>({});
 
     // If user is already logged in, redirect to dashboard
     useEffect(() => {
@@ -81,10 +86,10 @@ export default function RegisterPage() {
     // Check for server-side validation errors
     useEffect(() => {
         if (validationErrors) {
-            const errors: {[key: string]: string} = {};
+            const errors: FormErrors = {};
 
             Object.entries(validationErrors).forEach(([field, messages]) => {
-                errors[field] = Array.isArray(messages) ? messages[0] : messages;
+                errors[field] = Array.isArray(messages) ? messages[0] : messages as string;
             });
 
             setFormErrors(errors);
