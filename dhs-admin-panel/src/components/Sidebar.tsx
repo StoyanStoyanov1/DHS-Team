@@ -1,5 +1,11 @@
 'use client';
 
+/**
+ * Sidebar component for navigation.
+ * Provides links to different sections of the application.
+ * @param props - The properties for the Sidebar component.
+ * @returns A styled sidebar navigation menu.
+ */
 import React, { useState, useEffect } from 'react';
 import {
     Grid,

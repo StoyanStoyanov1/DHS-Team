@@ -1,4 +1,7 @@
-// src/middleware.ts
+/**
+ * Middleware for handling requests and responses in the application.
+ * Can be used for tasks like authentication, logging, or request modification.
+ */
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 

@@ -1,3 +1,9 @@
+/**
+ * Registration page component.
+ * Allows new users to create an account by providing their details.
+ * Includes client-side validation and error handling.
+ */
+
 'use client';
 
 import React, { useState, useEffect } from 'react';

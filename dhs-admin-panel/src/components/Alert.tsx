@@ -10,6 +10,11 @@ interface AlertProps {
     onClose?: () => void;
 }
 
+/**
+ * Alert component for displaying messages to the user.
+ * @param props - The properties for the Alert component (e.g., type, message).
+ * @returns A styled alert box.
+ */
 const Alert: React.FC<AlertProps> = ({ type, message, onClose }) => {
     const typeToClassName = {
         success: 'bg-green-50 text-green-700 border-green-200',

@@ -1,3 +1,9 @@
+/**
+ * Header component for the application.
+ * Displays the app's title, navigation links, and user-related actions.
+ * @param props - The properties for the Header component.
+ * @returns A styled header bar.
+ */
 'use client';
 
 import React, { useState, useRef, useEffect } from 'react';

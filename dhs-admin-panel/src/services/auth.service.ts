@@ -49,7 +49,9 @@ class AuthService {
     }
 
     /**
-     * Authenticate user and store JWT token
+     * Log in a user.
+     * @param credentials - The user's login credentials (e.g., email and password).
+     * @returns A promise resolving to the authentication response.
      */
     async login(credentials: LoginCredentials): Promise<TokenPayload> {
         try {
@@ -67,7 +69,9 @@ class AuthService {
     }
 
     /**
-     * Register a new user
+     * Register a new user.
+     * @param userDetails - The details of the user to register.
+     * @returns A promise resolving to the registration response.
      */
     async register(userData: RegisterCredentials): Promise<TokenPayload> {
         try {
@@ -84,7 +88,8 @@ class AuthService {
     }
 
     /**
-     * Log out the current user
+     * Log out the current user.
+     * @returns A promise resolving when the user is logged out.
      */
     async logout(): Promise<void> {
         try {
@@ -101,7 +106,8 @@ class AuthService {
     }
 
     /**
-     * Refresh the access token
+     * Refresh the access token.
+     * @returns A promise resolving when the token is refreshed.
      */
     async refreshToken(): Promise<void> {
         try {
@@ -117,7 +123,8 @@ class AuthService {
     }
 
     /**
-     * Check if user is authenticated
+     * Check if the user is authenticated.
+     * @returns A boolean indicating whether the user is authenticated.
      */
     isAuthenticated(): boolean {
         const token = this.getToken();
@@ -138,7 +145,8 @@ class AuthService {
     }
 
     /**
-     * Get current user information from token
+     * Get the current user's information from the token.
+     * @returns The decoded token payload or null if not authenticated.
      */
     getCurrentUser(): TokenPayload | null {
         try {

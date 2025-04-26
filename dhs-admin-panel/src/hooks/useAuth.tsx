@@ -138,6 +138,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
 
+/**
+ * Custom hook for managing user authentication state and actions.
+ * Provides methods for login, logout, and checking authentication status.
+ */
+
+/**
+ * useAuth hook.
+ * @returns An object containing authentication state and methods.
+ */
 export const useAuth = (): AuthContextType => {
     const context = useContext(AuthContext);
     if (context === undefined) {

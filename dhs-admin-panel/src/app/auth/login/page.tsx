@@ -1,3 +1,9 @@
+/**
+ * Login page component.
+ * Provides a form for users to log in to their accounts.
+ * Includes client-side validation and error handling.
+ */
+
 'use client';
 
 import React, { useState, useEffect } from 'react';
