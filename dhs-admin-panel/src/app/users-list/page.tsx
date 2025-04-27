@@ -128,7 +128,6 @@ export default function UsersListPage() {
           setItemsPerPage={setItemsPerPage}
           currentPage={currentPage}
           setCurrentPage={setCurrentPage}
-          fixedRowsCount={itemsPerPage} // Използваме itemsPerPage като брой на фиксирани редове
         />
       </div>
     </Layout>

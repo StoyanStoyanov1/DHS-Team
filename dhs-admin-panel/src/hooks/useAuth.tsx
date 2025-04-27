@@ -1,6 +1,6 @@
 "use client"
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import authService, {
     LoginCredentials,
     RegisterCredentials,
@@ -27,19 +27,32 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const [error, setError] = useState<string | null>(null);
     const [validationErrors, setValidationErrors] = useState<ValidationErrors | null>(null);
     const router = useRouter();
+    const searchParams = useSearchParams();
 
-    // Check if user is already logged in on initial load
     useEffect(() => {
-        const initAuth = () => {
-            const currentUser = authService.getCurrentUser();
-            setUser(currentUser);
-            setLoading(false);
+        const initAuth = async () => {
+            setLoading(true);
+            try {
+                const currentUser = authService.getCurrentUser();
+                setUser(currentUser);
+                
+                if (currentUser) {
+                    const redirectParam = searchParams.get('redirect');
+                    if (redirectParam) {
+                        const decodedRedirect = decodeURIComponent(redirectParam);
+                        router.push(decodedRedirect);
+                    }
+                }
+            } catch (error) {
+                console.error("Auth initialization error:", error);
+            } finally {
+                setLoading(false);
+            }
         };
 
         initAuth();
-    }, []);
+    }, [router, searchParams]);
 
-    // Login function
     const login = async (credentials: LoginCredentials, redirectPath: string = '/') => {
         setLoading(true);
         setError(null);
@@ -49,17 +62,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             const user = await authService.login(credentials);
             if (user) {
                 setUser(user);
-                router.push(redirectPath); // Redirect to specified path on successful login
+                router.push(redirectPath);
             }
         } catch (err: any) {
             handleAuthError(err);
-            // Don't redirect on error, just show the error message
         } finally {
             setLoading(false);
         }
     };
 
-    // Register function
     const register = async (userData: RegisterCredentials, redirectPath: string = '/') => {
         setLoading(true);
         setError(null);
@@ -68,7 +79,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         try {
             const user = await authService.register(userData);
             setUser(user);
-            router.push(redirectPath); // Redirect to specified path after registration
+            router.push(redirectPath);
         } catch (err: any) {
             handleAuthError(err);
         } finally {
@@ -76,7 +87,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         }
     };
 
-    // Logout function
     const logout = async () => {
         setLoading(true);
         try {
@@ -90,15 +100,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         }
     };
 
-    // Update error handling to always display the exact server error message
     const handleAuthError = (err: any) => {
-        console.log('Auth error:', err); // Debug log
+        console.log('Auth error:', err);
         
         if (err.response) {
-            // The request was made and the server responded with a status code
             const { data, status } = err.response;
             
-            // Check for the "Account with this email already exists" error in the response data
             if (data && data.detail && typeof data.detail === 'string' && 
                 data.detail.includes('Account with this email already exists')) {
                 setError('Account with this email already exists');
@@ -106,37 +113,27 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             }
             
             if (status === 422 && data.errors) {
-                // Validation errors
                 setValidationErrors(data.errors);
             } else if (data.message) {
-                // Use the server-provided error message directly
                 setError(data.message);
             } else if (err.serverMessage) {
-                // Use the serverMessage property added by our service
                 setError(err.serverMessage);
             } else if (data.detail && typeof data.detail === 'string') {
-                // Use detail field if available (common in FastAPI/Django responses)
                 setError(data.detail);
             } else {
-                // Fallback to a generic error message
                 setError('An error occurred during authentication');
             }
         } else if (err.serverMessage) {
-            // Use the serverMessage property added by our service
             setError(err.serverMessage);
         } else if (err.message && err.message !== 'Network Error') {
-            // Use the error message if it's not a generic network error
             setError(err.message);
         } else if (err.request) {
-            // The request was made but no response was received
             setError('No response from server. Please check your connection and try again.');
         } else {
-            // Something happened in setting up the request
             setError('An error occurred. Please try again.');
         }
     };
 
-    // Clear all errors
     const clearErrors = () => {
         setError(null);
         setValidationErrors(null);
@@ -156,15 +153,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
 
-/**
- * Custom hook for managing user authentication state and actions.
- * Provides methods for login, logout, and checking authentication status.
- */
-
-/**
- * useAuth hook.
- * @returns An object containing authentication state and methods.
- */
 export const useAuth = (): AuthContextType => {
     const context = useContext(AuthContext);
     if (context === undefined) {

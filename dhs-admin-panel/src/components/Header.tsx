@@ -1,29 +1,26 @@
-/**
- * Header component for the application.
- * Displays the app's title, navigation links, and user-related actions.
- * @param props - The properties for the Header component.
- * @returns A styled header bar.
- */
 'use client';
 
 import React, { useState, useRef, useEffect } from 'react';
 import { SunMoon, LayoutGrid, Bell, Settings, LogOut, User } from 'lucide-react';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import SearchBar from './SearchBar';
 import { useAuth } from '@/src/hooks/useAuth';
 
 const Header: React.FC = () => {
     const { user, logout } = useAuth();
     const router = useRouter();
+    const pathname = usePathname();
     const [dropdownOpen, setDropdownOpen] = useState(false);
     const dropdownRef = useRef<HTMLDivElement>(null);
 
     // Check if user is logged in
     useEffect(() => {
         if (!user) {
-            router.push('/auth/login');
+            // Сохраняем текущий путь при перенаправлении
+            const redirectPath = encodeURIComponent(pathname || '/');
+            router.push(`/auth/login?redirect=${redirectPath}`);
         }
-    }, [user, router]);
+    }, [user, router, pathname]);
 
     // Close dropdown when clicking outside
     useEffect(() => {
@@ -41,8 +38,11 @@ const Header: React.FC = () => {
 
     // Handle logout
     const handleLogout = async () => {
-        await logout();
-        router.push('/auth/login');
+        await logout(() => {
+            // Запазваме текущия път при изход
+            const redirectPath = encodeURIComponent(pathname || '/');
+            router.push(`/auth/login?redirect=${redirectPath}`);
+        });
     };
 
     // Get user initials for avatar

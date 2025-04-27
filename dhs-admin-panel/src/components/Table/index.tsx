@@ -20,7 +20,6 @@ export default function Table<T>({
   setItemsPerPage: externalSetItemsPerPage,
   currentPage: externalCurrentPage,
   setCurrentPage: externalSetCurrentPage,
-  fixedRowsCount = 10, // Default to 10 rows if not specified
 }: ITableProps<T>) {
   // Create an instance of the TableService
   const tableService = useMemo(() => new TableService<T>(), []);
@@ -46,21 +45,6 @@ export default function Table<T>({
     pagination ? tableService.getPaginatedData(data, currentPage, itemsPerPage) : data,
     [tableService, pagination, data, currentPage, itemsPerPage]
   );
-  
-  // Generate rows array with exactly fixedRowsCount elements
-  const tableRows = useMemo(() => {
-    // Create array with fixedRowsCount elements
-    const rows = Array(fixedRowsCount).fill(null);
-    
-    // Fill with real data where available
-    paginatedData.forEach((item, index) => {
-      if (index < fixedRowsCount) {
-        rows[index] = item;
-      }
-    });
-    
-    return rows;
-  }, [paginatedData, fixedRowsCount]);
 
   // Handler for changing items per page
   const handleItemsPerPageChange = (newItemsPerPage: number) => {
@@ -99,8 +83,8 @@ export default function Table<T>({
                   </td>
                 </tr>
                 
-                {/* Fill remaining rows */}
-                {Array.from({ length: fixedRowsCount - 1 }, (_, index) => (
+                {/* Fill remaining rows to match itemsPerPage */}
+                {Array.from({ length: itemsPerPage - 1 }, (_, index) => (
                   <tr key={`empty-row-${index}`} className="border-b border-gray-200">
                     {columns.map((column) => (
                       <td 
@@ -114,24 +98,44 @@ export default function Table<T>({
                 ))}
               </>
             ) : (
-              // We have data - show the tableRows
-              tableRows.map((item, rowIndex) => (
-                <tr 
-                  key={item ? keyExtractor(item) : `empty-row-${rowIndex}`}
-                  className={`h-14 border-b border-gray-200 ${
-                    item ? (rowClassName && typeof rowClassName === 'function' ? rowClassName(item) : rowClassName) : ''
-                  }`}
-                >
-                  {columns.map((column) => (
-                    <td 
-                      key={`row-${rowIndex}-${column.key}`}
-                      className={`px-6 py-4 whitespace-nowrap ${column.className || ''}`}
-                    >
-                      {item ? (column.render ? column.render(item) : (item as any)[column.key]) : <span>&nbsp;</span>}
-                    </td>
-                  ))}
-                </tr>
-              ))
+              // Render actual data rows
+              <>
+                {paginatedData.map((item, index) => (
+                  <tr 
+                    key={keyExtractor(item)}
+                    className={`h-14 border-b border-gray-200 ${
+                      rowClassName && typeof rowClassName === 'function' 
+                        ? rowClassName(item) 
+                        : rowClassName
+                    }`}
+                  >
+                    {columns.map((column) => (
+                      <td 
+                        key={`${keyExtractor(item)}-${column.key}`}
+                        className={`px-6 py-4 whitespace-nowrap ${column.className || ''}`}
+                      >
+                        {column.render ? column.render(item) : (item as any)[column.key]}
+                      </td>
+                    ))}
+                  </tr>
+                ))}
+                
+                {/* Add empty rows if paginatedData has fewer rows than itemsPerPage */}
+                {paginatedData.length < itemsPerPage && 
+                  Array.from({ length: itemsPerPage - paginatedData.length }, (_, index) => (
+                    <tr key={`filler-row-${index}`} className="border-b border-gray-200">
+                      {columns.map((column) => (
+                        <td 
+                          key={`filler-${index}-${column.key}`} 
+                          className="px-6 py-4 h-14 border-b border-gray-200"
+                        >
+                          &nbsp;
+                        </td>
+                      ))}
+                    </tr>
+                  ))
+                }
+              </>
             )}
           </tbody>
         </table>

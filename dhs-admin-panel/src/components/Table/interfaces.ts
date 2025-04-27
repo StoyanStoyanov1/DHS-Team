@@ -41,7 +41,6 @@ export interface ITableProps<T> {
   setItemsPerPage?: (itemsPerPage: number) => void; // Callback for changing items per page
   currentPage?: number;
   setCurrentPage?: (page: number) => void;
-  fixedRowsCount?: number; // Add fixed rows count property
 }
 
 /**

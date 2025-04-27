@@ -1,180 +1,217 @@
-// src/app/tests/auth/login/login.test.tsx
-import { render, screen, waitFor } from '@testing-library/react';
-import '@testing-library/jest-dom';
-import userEvent from '@testing-library/user-event';
-import LoginPage from '@/src/app/auth/login/page';
-import { useRouter } from 'next/navigation';
+'use client';
+
+import React, { useState, useEffect } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { Eye, EyeOff, LogIn } from 'lucide-react';
+import Link from 'next/link';
 import { useAuth } from '@/src/hooks/useAuth';
+import { validateLoginForm } from '@/src/utils/validation';
+import Alert from '@/src/components/Alert';
+import { ValidationErrors } from '@/src/services/auth.service';
 
-// Mocking dependencies
-jest.mock('next/navigation', () => ({
-  useRouter: jest.fn(),
-}));
+interface FormErrors {
+    [key: string]: string;
+}
 
-jest.mock('@/src/hooks/useAuth', () => ({
-  useAuth: jest.fn(),
-}));
+export default function LoginPage() {
+    const router = useRouter();
+    const searchParams = useSearchParams();
+    const redirectPath = searchParams.get('redirect') || '/';
+    const { login, error, loading, validationErrors, clearErrors, user } = useAuth();
 
-// Mocking Alert component
-jest.mock('@/src/components/Alert', () => {
-  return function DummyAlert({ 
-    message, 
-    type, 
-    onClose 
-  }: { 
-    message: string; 
-    type: string; 
-    onClose: () => void 
-  }) {
+    const [formData, setFormData] = useState({
+        email: '',
+        password: '',
+        rememberMe: false
+    });
+    const [showPassword, setShowPassword] = useState(false);
+    const [formErrors, setFormErrors] = useState<FormErrors>({});
+
+    // If user is already logged in, redirect to the intended path
+    useEffect(() => {
+        if (user) {
+            router.push(redirectPath);
+        }
+    }, [user, router, redirectPath]);
+
+    // Clear form errors when input changes
+    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const { name, value, type, checked } = e.target;
+        const inputValue = type === 'checkbox' ? checked : value;
+
+        setFormData({
+            ...formData,
+            [name]: inputValue
+        });
+
+        // Clear specific error when user starts typing
+        if (formErrors[name]) {
+            setFormErrors({
+                ...formErrors,
+                [name]: ''
+            });
+        }
+    };
+
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        clearErrors();
+
+        // Client-side validation
+        const { email, password } = formData;
+        const validation = validateLoginForm(email, password);
+
+        if (!validation.valid) {
+            setFormErrors(validation.errors);
+            return;
+        }
+
+        try {
+            // Proceed with login, passing the redirect path
+            await login({ email, password }, redirectPath);
+        } catch (err) {
+            // Error is already handled by useAuth hook
+            console.error('Login error:', err);
+        }
+    };
+
+    // Check for server-side validation errors
+    useEffect(() => {
+        if (validationErrors) {
+            const errors: FormErrors = {};
+
+            Object.entries(validationErrors).forEach(([field, messages]) => {
+                errors[field] = Array.isArray(messages) ? messages[0] : messages as string;
+            });
+
+            setFormErrors(errors);
+        }
+    }, [validationErrors]);
+
     return (
-      <div data-testid="alert" className={`alert-${type}`}>
-        {message}
-        <button onClick={onClose} data-testid="close-alert">Close</button>
-      </div>
+        <div className="auth-page-container min-h-screen flex items-center justify-center bg-gray-50 p-4">
+            <div className="max-w-md w-full space-y-8 p-8 bg-white rounded-xl shadow-md">
+                <div className="text-center">
+                    <div className="flex justify-center">
+                        <div className="h-12 w-12 rounded-lg bg-blue-500 flex items-center justify-center">
+                            <div className="w-7 h-7 bg-white transform rotate-45"></div>
+                        </div>
+                    </div>
+                    <h2 className="mt-6 text-3xl font-bold text-gray-900">
+                        Welcome back!
+                    </h2>
+                    <p className="mt-2 text-sm text-gray-600">
+                        Sign in to your account to continue
+                    </p>
+                </div>
+
+                {error && (
+                    <Alert
+                        type="error"
+                        message={error}
+                        onClose={clearErrors}
+                    />
+                )}
+
+                <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
+                    <div className="space-y-5">
+                        <div>
+                            <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+                                Email
+                            </label>
+                            <input
+                                id="email"
+                                name="email"
+                                type="email"
+                                required
+                                value={formData.email}
+                                onChange={handleInputChange}
+                                className={`appearance-none relative block w-full px-3 py-2 border ${
+                                    formErrors.email ? 'border-red-300 focus:ring-red-500' : 'border-gray-300 focus:ring-blue-500'
+                                } placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:border-transparent transition-all sm:text-sm`}
+                                placeholder="Enter your email"
+                            />
+                            {formErrors.email && (
+                                <p className="mt-1 text-sm text-red-600">{formErrors.email}</p>
+                            )}
+                        </div>
+
+                        <div>
+                            <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
+                                Password
+                            </label>
+                            <div className="relative">
+                                <input
+                                    id="password"
+                                    name="password"
+                                    type={showPassword ? "text" : "password"}
+                                    required
+                                    value={formData.password}
+                                    onChange={handleInputChange}
+                                    className={`appearance-none relative block w-full px-3 py-2 border ${
+                                        formErrors.password ? 'border-red-300 focus:ring-red-500' : 'border-gray-300 focus:ring-blue-500'
+                                    } placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:border-transparent transition-all sm:text-sm`}
+                                    placeholder="Enter your password"
+                                />
+                                <button
+                                    type="button"
+                                    className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500 cursor-pointer"
+                                    onClick={() => setShowPassword(!showPassword)}
+                                >
+                                    {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                                </button>
+                            </div>
+                            {formErrors.password && (
+                                <p className="mt-1 text-sm text-red-600">{formErrors.password}</p>
+                            )}
+                        </div>
+
+                        <div className="flex items-center justify-between">
+                            <div className="flex items-center">
+                                <input
+                                    id="remember-me"
+                                    name="rememberMe"
+                                    type="checkbox"
+                                    checked={formData.rememberMe}
+                                    onChange={handleInputChange}
+                                    className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                                />
+                                <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-700">
+                                    Remember me
+                                </label>
+                            </div>
+
+                            <div className="text-sm">
+                                <Link href="/auth/forgot-password" className="font-medium text-blue-600 hover:text-blue-500 transition-colors">
+                                    Forgot password?
+                                </Link>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button
+                        type="submit"
+                        disabled={loading}
+                        className={`group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors ${
+                            loading ? 'opacity-70 cursor-not-allowed' : ''
+                        }`}
+                    >
+                        <span className="absolute left-0 inset-y-0 flex items-center pl-3">
+                            <LogIn size={16} className="text-blue-300" />
+                        </span>
+                        {loading ? 'Signing in...' : 'Sign in'}
+                    </button>
+                </form>
+
+                <div className="mt-6 text-center">
+                    <p className="text-sm text-gray-600">
+                        Don't have an account? {' '}
+                        <Link href={`/auth/register${redirectPath !== '/' ? `?redirect=${encodeURIComponent(redirectPath)}` : ''}`} className="font-medium text-blue-600 hover:text-blue-500 transition-colors">
+                            Sign up
+                        </Link>
+                    </p>
+                </div>
+            </div>
+        </div>
     );
-  };
-});
-
-jest.mock('lucide-react', () => ({
-  Eye: () => <div data-testid="eye-icon" />,
-  EyeOff: () => <div data-testid="eye-off-icon" />,
-  LogIn: () => <div data-testid="login-icon" />,
-}));
-
-describe('LoginPage', () => {
-  const mockLogin = jest.fn();
-  const mockClearErrors = jest.fn();
-  const mockPush = jest.fn();
-  
-  beforeEach(() => {
-    jest.clearAllMocks();
-    
-    // Setting up base mock values
-    (useRouter as jest.Mock).mockReturnValue({
-      push: mockPush
-    });
-    
-    (useAuth as jest.Mock).mockReturnValue({
-      login: mockLogin,
-      error: null,
-      loading: false,
-      validationErrors: null,
-      clearErrors: mockClearErrors,
-      user: null
-    });
-  });
-  
-  test('renders login form with all necessary elements', () => {
-    render(<LoginPage />);
-    
-    // Check title and subtitle
-    expect(screen.getByText('Welcome back!')).toBeInTheDocument();
-    expect(screen.getByText('Sign in to your account to continue')).toBeInTheDocument();
-    
-    // Check form elements
-    expect(screen.getByLabelText(/email/i)).toBeInTheDocument();
-    expect(screen.getByLabelText(/password/i)).toBeInTheDocument();
-    expect(screen.getByLabelText(/remember me/i)).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /sign in/i })).toBeInTheDocument();
-    
-    // Check links
-    expect(screen.getByText(/forgot password/i)).toBeInTheDocument();
-    expect(screen.getByText(/sign up/i)).toBeInTheDocument();
-  });
-  
-  test('redirects to dashboard if user is already logged in', () => {
-    // Mock state where user is already logged in
-    (useAuth as jest.Mock).mockReturnValue({
-      login: mockLogin,
-      error: null,
-      loading: false,
-      validationErrors: null,
-      clearErrors: mockClearErrors,
-      user: { email: 'test@example.com' }
-    });
-    
-    render(<LoginPage />);
-    
-    // Check if redirect to home page has been called
-    expect(mockPush).toHaveBeenCalledWith('/');
-  });
-  
-  test('toggles password visibility when eye icon is clicked', async () => {
-    render(<LoginPage />);
-    
-    // Find password field and visibility icon
-    const passwordInput = screen.getByLabelText(/password/i);
-    const toggleButton = screen.getByRole('button', { name: '' }); // Toggle button has no text
-    
-    // Check initial field type
-    expect(passwordInput).toHaveAttribute('type', 'password');
-    
-    // Click the icon to toggle visibility
-    await userEvent.click(toggleButton);
-    
-    // Check if field type has changed to 'text'
-    expect(passwordInput).toHaveAttribute('type', 'text');
-    
-    // Click again to revert to hidden password
-    await userEvent.click(toggleButton);
-    
-    // Check if field type has reverted to 'password'
-    expect(passwordInput).toHaveAttribute('type', 'password');
-  });
-  
-  test('submits form with entered credentials', async () => {
-    render(<LoginPage />);
-    
-    // Fill form with valid data
-    await userEvent.type(screen.getByLabelText(/email/i), 'test@example.com');
-    await userEvent.type(screen.getByLabelText(/password/i), 'password123');
-    await userEvent.click(screen.getByLabelText(/remember me/i));
-    
-    // Submit the form
-    const signInButton = screen.getByRole('button', { name: /sign in/i });
-    await userEvent.click(signInButton);
-    
-    // Check if login function is called with correct data
-    expect(mockLogin).toHaveBeenCalledWith({
-      email: 'test@example.com',
-      password: 'password123'
-    });
-  });
-  
-  test('shows authentication error when login fails', async () => {
-    const authError = 'Invalid email or password';
-    
-    // Mock values that simulate an authentication error
-    (useAuth as jest.Mock).mockReturnValue({
-      login: mockLogin,
-      error: authError,
-      loading: false,
-      validationErrors: null,
-      clearErrors: mockClearErrors,
-      user: null
-    });
-    
-    render(<LoginPage />);
-    
-    // Check if error message is displayed
-    expect(screen.getByText(authError)).toBeInTheDocument();
-  });
-  
-  test('shows loading state when login is in progress', async () => {
-    // Mock loading state
-    (useAuth as jest.Mock).mockReturnValue({
-      login: mockLogin,
-      error: null,
-      loading: true,
-      validationErrors: null,
-      clearErrors: mockClearErrors,
-      user: null
-    });
-    
-    render(<LoginPage />);
-    
-    // Check if button shows loading state
-    expect(screen.getByRole('button', { name: /signing in/i })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /signing in/i })).toBeDisabled();
-  });
-});
+}

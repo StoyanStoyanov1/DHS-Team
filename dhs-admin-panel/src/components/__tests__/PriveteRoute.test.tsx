@@ -2,7 +2,7 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import PrivateRoute from '../PriveteRoute';
 
-// Мокваме next/navigation
+// Mock next/navigation
 jest.mock('next/navigation', () => ({
   useRouter: () => ({
     push: jest.fn()
@@ -10,7 +10,7 @@ jest.mock('next/navigation', () => ({
   usePathname: () => '/dashboard'
 }));
 
-// Мокваме useAuth hook
+// Mock useAuth hook
 jest.mock('../../hooks/useAuth', () => ({
   useAuth: jest.fn()
 }));
@@ -24,7 +24,7 @@ describe('PrivateRoute Component', () => {
   });
 
   test('renders loading spinner when authentication is in progress', () => {
-    // Симулираме зареждане на аутентикацията
+    // Simulate authentication loading
     useAuthMock.mockReturnValue({
       user: null,
       loading: true
@@ -36,17 +36,17 @@ describe('PrivateRoute Component', () => {
       </PrivateRoute>
     );
 
-    // Проверяваме дали има индикатор за зареждане по CSS класовете
+    // Check if there's a loading indicator by CSS classes
     const spinner = screen.getByClass('animate-spin');
     expect(spinner).toBeInTheDocument();
     expect(spinner).toHaveClass('border-blue-500');
 
-    // Съдържанието не трябва да се показва
+    // Content should not be displayed
     expect(screen.queryByTestId('protected-content')).not.toBeInTheDocument();
   });
 
   test('shows loading spinner when user is not authenticated', () => {
-    // Симулираме незаредена, но неаутентикирана сесия
+    // Simulate not loaded but unauthenticated session
     useAuthMock.mockReturnValue({
       user: null,
       loading: false
@@ -58,17 +58,17 @@ describe('PrivateRoute Component', () => {
       </PrivateRoute>
     );
 
-    // Проверяваме дали индикаторът за зареждане все още се показва въпреки че loading=false
-    // Това е защото компонентът показва индикатор и когато user=null
+    // Check if loading indicator is still shown despite loading=false
+    // This is because the component shows an indicator when user=null
     const spinner = screen.getByClass('animate-spin');
     expect(spinner).toBeInTheDocument();
 
-    // Проверяваме дали съдържанието не се показва
+    // Check if content is not displayed
     expect(screen.queryByTestId('protected-content')).not.toBeInTheDocument();
   });
 
   test('renders children when user is authenticated', () => {
-    // Симулираме аутентикиран потребител
+    // Simulate authenticated user
     useAuthMock.mockReturnValue({
       user: { id: '1', name: 'Test User', email: 'test@example.com' },
       loading: false
@@ -80,18 +80,18 @@ describe('PrivateRoute Component', () => {
       </PrivateRoute>
     );
 
-    // Проверяваме дали съдържанието се показва
+    // Check if content is displayed
     expect(screen.getByTestId('protected-content')).toBeInTheDocument();
 
-    // Проверяваме дали няма индикатор за зареждане
+    // Check if there's no loading indicator
     expect(screen.queryByClass('animate-spin')).not.toBeInTheDocument();
 
-    // Проверяваме дали не е извикано пренасочване
+    // Check if no redirect was called
     expect(routerPushMock).not.toHaveBeenCalled();
   });
 });
 
-// Добавяме помощни функции за тестове
+// Add helper functions for tests
 const getByClass = (container: HTMLElement, className: string): HTMLElement => {
   const elements = container.getElementsByClassName(className);
   if (elements.length === 0) {
@@ -105,7 +105,7 @@ const queryByClass = (container: HTMLElement, className: string): HTMLElement | 
   return elements.length > 0 ? (elements[0] as HTMLElement) : null;
 };
 
-// Разширяваме screen обекта
+// Extend screen object
 screen.getByClass = function(className: string): HTMLElement {
   return getByClass(document.body, className);
 };

@@ -8,8 +8,9 @@ interface PrivateRouteProps {
     children: ReactNode;
 }
 
-// Списък с маршрути, които не изискват автентикация
-const publicRoutes = ['/users-list'];
+// List of routes that don't require authentication
+// Add other routes here if needed
+const publicRoutes = ['/users-list', '/public-dashboard', '/about', '/contact'];
 
 /**
  * A client-side component that redirects to the login page if the user is not authenticated

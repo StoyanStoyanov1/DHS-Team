@@ -1,10 +1,11 @@
 'use client';
 
-import { useState, ReactNode } from 'react';
-import { usePathname } from 'next/navigation';
+import { useState, ReactNode, useEffect } from 'react';
+import { usePathname, useRouter } from 'next/navigation';
 import Header from './Header';
 import Sidebar from './Sidebar';
 import Breadcrumb from './Breadcrumb';
+import { useAuth } from '@/src/hooks/useAuth';
 
 interface DashboardLayoutProps {
     children: ReactNode;
@@ -14,13 +15,46 @@ const Layout: React.FC<DashboardLayoutProps> = ({ children }) => {
     const [activeSection, setActiveSection] = useState<string>('dashboards');
     const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(true); // Default to collapsed
     const pathname = usePathname();
+    const { user, loading } = useAuth();
+    const router = useRouter();
 
     const isAuthPage = pathname?.startsWith('/auth');
 
+    // Check if the user is authenticated
+    useEffect(() => {
+        // Skip authentication check on login/registration pages
+        if (isAuthPage) {
+            return;
+        }
+
+        // If not loading and no user, redirect to login
+        if (!loading && !user) {
+            const redirectPath = encodeURIComponent(pathname || '/');
+            router.push(`/auth/login?redirect=${redirectPath}`);
+        }
+    }, [user, loading, router, pathname, isAuthPage]);
+
+    // For login/registration pages, just show the content
     if (isAuthPage) {
         return <>{children}</>;
     }
 
+    // If still loading authentication, show spinner
+    if (loading) {
+        return (
+            <div className="min-h-screen flex items-center justify-center">
+                <div className="w-16 h-16 border-t-4 border-blue-500 border-solid rounded-full animate-spin"></div>
+            </div>
+        );
+    }
+
+    // If user is not authenticated, don't show anything
+    // (useEffect will handle the redirect)
+    if (!user) {
+        return null;
+    }
+
+    // If user is authenticated, show the dashboard layout
     return (
         <div className="flex h-screen bg-gray-50 overflow-hidden">
             <Sidebar
