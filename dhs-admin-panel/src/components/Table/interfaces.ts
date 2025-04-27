@@ -24,6 +24,7 @@ export interface ITablePagination {
   totalItems: number;
   onPageChange: (page: number) => void;
   onItemsPerPageChange?: (itemsPerPage: number) => void; // Callback for changing items per page
+  rowsPerPageOptions?: number[]; // Добавяме опция за конфигуриране на опциите за редове на страница
 }
 
 /**
@@ -36,11 +37,14 @@ export interface ITableProps<T> {
   emptyMessage?: string;
   className?: string;
   rowClassName?: string | ((item: T) => string);
-  pagination?: boolean;
+  pagination?: boolean; // Този prop запазваме за обратна съвместимост, но реално винаги показваме пагинацията
   itemsPerPage?: number;
   setItemsPerPage?: (itemsPerPage: number) => void; // Callback for changing items per page
   currentPage?: number;
   setCurrentPage?: (page: number) => void;
+  rowsPerPageOptions?: number[]; // Опция за конфигуриране на опциите за редове на страница
+  fixedTableSize?: boolean; // Указва дали таблицата да има фиксиран размер
+  tableHeight?: number; // Определя височината на таблицата, когато е фиксирана
 }
 
 /**

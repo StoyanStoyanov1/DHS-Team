@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { ITableProps } from './interfaces';
 import { TableService } from './TableService';
 import TablePagination from './TablePagination';
@@ -15,11 +15,14 @@ export default function Table<T>({
   emptyMessage = "No data available",
   className = "",
   rowClassName = "",
-  pagination = true,
+  pagination = true, // Запазваме за обратна съвместимост, но винаги показваме пагинация
   itemsPerPage: externalItemsPerPage = 10,
   setItemsPerPage: externalSetItemsPerPage,
-  currentPage: externalCurrentPage,
+  currentPage: externalCurrentPage = 1, // По подразбиране е 1
   setCurrentPage: externalSetCurrentPage,
+  rowsPerPageOptions = [10, 15, 25], // Добавяме опциите за редове на страница
+  fixedTableSize = true, // По подразбиране таблицата е с фиксиран размер
+  tableHeight, // Височина на таблицата, ако е зададена
 }: ITableProps<T>) {
   // Create an instance of the TableService
   const tableService = useMemo(() => new TableService<T>(), []);
@@ -33,6 +36,11 @@ export default function Table<T>({
   const setCurrentPage = externalSetCurrentPage ?? setInternalCurrentPage;
   const itemsPerPage = externalItemsPerPage;
   const setItemsPerPage = externalSetItemsPerPage ?? setInternalItemsPerPage;
+
+  // Reset to page 1 when data changes (e.g., filtering, sorting)
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [data.length, setCurrentPage]);
   
   // Calculate pagination using the service - ensure at least 1 page
   const totalPages = useMemo(() => 
@@ -42,18 +50,48 @@ export default function Table<T>({
   
   // Get paginated data using the service
   const paginatedData = useMemo(() => 
-    pagination ? tableService.getPaginatedData(data, currentPage, itemsPerPage) : data,
-    [tableService, pagination, data, currentPage, itemsPerPage]
+    tableService.getPaginatedData(data, currentPage, itemsPerPage),
+    [tableService, data, currentPage, itemsPerPage]
   );
 
   // Handler for changing items per page
   const handleItemsPerPageChange = (newItemsPerPage: number) => {
     setItemsPerPage(newItemsPerPage);
+    setCurrentPage(1); // Reset to page 1 when changing items per page
   };
+
+  // Пресмятане на стиловете за таблицата
+  const tableContainerStyle = useMemo(() => {
+    if (fixedTableSize && tableHeight) {
+      return { height: `${tableHeight}px` };
+    }
+    
+    // Изчисляване на височината на базата на броя редове
+    if (fixedTableSize) {
+      // Приемаме, че един ред е 53px (14px височина + падинг + бордер)
+      const rowHeight = 53;
+      return { height: `${itemsPerPage * rowHeight}px` };
+    }
+    
+    return {};
+  }, [fixedTableSize, tableHeight, itemsPerPage]);
+
+  // Изчисляваме броя на редове, които трябва да се добавят
+  const calculateEmptyRows = () => {
+    if (!fixedTableSize) {
+      // Ако таблицата не е с фиксиран размер, добавяме само празни редове, за да стигнем до itemsPerPage
+      return Math.max(0, itemsPerPage - paginatedData.length);
+    }
+    
+    // Винаги показваме точно itemsPerPage реда
+    return itemsPerPage - paginatedData.length;
+  };
+
+  const emptyRows = calculateEmptyRows();
 
   return (
     <div className={`bg-white rounded-lg shadow overflow-hidden ${className}`}>
-      <div className="overflow-x-auto">
+      <div className="overflow-x-auto" style={tableContainerStyle}>
         <table className="min-w-full divide-y divide-gray-200 table-fixed">
           <thead className="bg-gray-50">
             <tr>
@@ -85,7 +123,7 @@ export default function Table<T>({
                 
                 {/* Fill remaining rows to match itemsPerPage */}
                 {Array.from({ length: itemsPerPage - 1 }, (_, index) => (
-                  <tr key={`empty-row-${index}`} className="border-b border-gray-200">
+                  <tr key={`empty-row-${index}`} className="h-14 border-b border-gray-200">
                     {columns.map((column) => (
                       <td 
                         key={`empty-${index}-${column.key}`} 
@@ -120,10 +158,10 @@ export default function Table<T>({
                   </tr>
                 ))}
                 
-                {/* Add empty rows if paginatedData has fewer rows than itemsPerPage */}
-                {paginatedData.length < itemsPerPage && 
-                  Array.from({ length: itemsPerPage - paginatedData.length }, (_, index) => (
-                    <tr key={`filler-row-${index}`} className="border-b border-gray-200">
+                {/* Add empty rows if needed to maintain fixed table size */}
+                {emptyRows > 0 && 
+                  Array.from({ length: emptyRows }, (_, index) => (
+                    <tr key={`filler-row-${index}`} className="h-14 border-b border-gray-200">
                       {columns.map((column) => (
                         <td 
                           key={`filler-${index}-${column.key}`} 
@@ -141,7 +179,7 @@ export default function Table<T>({
         </table>
       </div>
       
-      {/* Always show pagination with items per page selector */}
+      {/* Always show pagination regardless of data amount or pagination prop */}
       <TablePagination
         currentPage={currentPage}
         totalPages={totalPages}
@@ -149,6 +187,7 @@ export default function Table<T>({
         totalItems={data.length}
         onPageChange={setCurrentPage}
         onItemsPerPageChange={handleItemsPerPageChange}
+        rowsPerPageOptions={rowsPerPageOptions}
       />
     </div>
   );

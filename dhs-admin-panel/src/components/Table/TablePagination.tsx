@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight, ChevronsDown } from 'lucide-react';
 import { ITablePagination } from './interfaces';
 
 /**
@@ -13,7 +13,8 @@ const TablePagination: React.FC<ITablePagination> = ({
   itemsPerPage, 
   totalItems, 
   onPageChange,
-  onItemsPerPageChange
+  onItemsPerPageChange,
+  rowsPerPageOptions = [10, 15, 25, 50] // Добавяме опция за 50 реда
 }) => {
   // Force totalPages to be at least 1
   const effectiveTotalPages = Math.max(1, totalPages);
@@ -90,54 +91,62 @@ const TablePagination: React.FC<ITablePagination> = ({
   };
 
   return (
-    <div className="px-6 py-3 flex items-center justify-between border-t border-gray-200">
-      {/* Mobile pagination */}
-      <div className="flex-1 flex justify-between sm:hidden">
-        <button 
-          onClick={handlePrevPage}
-          disabled={currentPage === 1}
-          className={`relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 ${currentPage === 1 ? 'bg-gray-100 cursor-not-allowed' : 'bg-white hover:bg-gray-50'}`}
-        >
-          Previous
-        </button>
-        <button 
-          onClick={handleNextPage}
-          disabled={currentPage === effectiveTotalPages}
-          className={`ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 ${currentPage === effectiveTotalPages ? 'bg-gray-100 cursor-not-allowed' : 'bg-white hover:bg-gray-50'}`}
-        >
-          Next
-        </button>
-      </div>
-      
-      {/* Desktop pagination */}
-      <div className="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
-        <div className="flex items-center space-x-4">
+    <div className="px-6 py-3 flex flex-col md:flex-row md:items-center space-y-3 md:space-y-0 justify-between border-t border-gray-200">
+      {/* Rows per page selector - показваме в по-видим стил */}
+      <div className="flex items-center space-x-2">
+        <div className="flex flex-col md:flex-row md:items-center space-y-2 md:space-y-0 md:space-x-4">
+          {onItemsPerPageChange && (
+            <div className="flex items-center space-x-2 border border-gray-300 rounded-md p-2 bg-white">
+              <label htmlFor="itemsPerPage" className="text-sm text-gray-700 font-medium">
+                Rows per page:
+              </label>
+              <div className="relative inline-block">
+                <select 
+                  id="itemsPerPage"
+                  value={itemsPerPage}
+                  onChange={handleItemsPerPageChange}
+                  className="block appearance-none pl-3 pr-8 py-1 bg-white text-base border-none focus:outline-none focus:ring-2 focus:ring-blue-500 sm:text-sm rounded-md"
+                >
+                  {rowsPerPageOptions.map((option) => (
+                    <option key={option} value={option}>{option}</option>
+                  ))}
+                </select>
+                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+                  <ChevronsDown size={16} />
+                </div>
+              </div>
+            </div>
+          )}
+
           <p className="text-sm text-gray-700">
             Showing <span className="font-medium">{startItem}</span> to <span className="font-medium">{endItem}</span> of{' '}
             <span className="font-medium">{totalItems}</span> results
           </p>
-          
-          {/* Items per page selector */}
-          {onItemsPerPageChange && (
-            <div className="flex items-center space-x-2">
-              <label htmlFor="itemsPerPage" className="text-sm text-gray-600">
-                Rows per page:
-              </label>
-              <select 
-                id="itemsPerPage"
-                value={itemsPerPage}
-                onChange={handleItemsPerPageChange}
-                className="block pl-3 pr-10 py-1 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md"
-              >
-                <option value="10">10</option>
-                <option value="15">15</option>
-                <option value="25">25</option>
-              </select>
-            </div>
-          )}
+        </div>
+      </div>
+      
+      {/* Page navigation buttons */}
+      <div className="flex items-center justify-end">
+        {/* Mobile pagination */}
+        <div className="flex md:hidden">
+          <button 
+            onClick={handlePrevPage}
+            disabled={currentPage === 1}
+            className={`relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 ${currentPage === 1 ? 'bg-gray-100 cursor-not-allowed' : 'bg-white hover:bg-gray-50'}`}
+          >
+            Previous
+          </button>
+          <button 
+            onClick={handleNextPage}
+            disabled={currentPage === effectiveTotalPages}
+            className={`ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 ${currentPage === effectiveTotalPages ? 'bg-gray-100 cursor-not-allowed' : 'bg-white hover:bg-gray-50'}`}
+          >
+            Next
+          </button>
         </div>
         
-        <div>
+        {/* Desktop pagination */}
+        <div className="hidden md:block">
           <nav className="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
             {/* Previous page button */}
             <button
