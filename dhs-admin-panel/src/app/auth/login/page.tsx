@@ -7,7 +7,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { Eye, EyeOff, LogIn } from 'lucide-react';
 import Link from 'next/link';
 import { useAuth } from '@/src/hooks/useAuth';
@@ -21,6 +21,8 @@ interface FormErrors {
 
 export default function LoginPage() {
     const router = useRouter();
+    const searchParams = useSearchParams();
+    const redirectPath = searchParams.get('redirect') || '/';
     const { login, error, loading, validationErrors, clearErrors, user } = useAuth();
 
     const [formData, setFormData] = useState({
@@ -31,12 +33,12 @@ export default function LoginPage() {
     const [showPassword, setShowPassword] = useState(false);
     const [formErrors, setFormErrors] = useState<FormErrors>({});
 
-    // If user is already logged in, redirect to dashboard
+    // If user is already logged in, redirect to the intended path
     useEffect(() => {
         if (user) {
-            router.push('/');
+            router.push(redirectPath);
         }
-    }, [user, router]);
+    }, [user, router, redirectPath]);
 
     // Clear form errors when input changes
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -71,11 +73,10 @@ export default function LoginPage() {
         }
 
         try {
-            // Proceed with login
-            await login({ email, password });
+            // Proceed with login, passing the redirect path
+            await login({ email, password }, redirectPath);
         } catch (err) {
             // Error is already handled by useAuth hook
-            // We don't need to do anything here as the error will be displayed by the Alert component
             console.error('Login error:', err);
         }
     };

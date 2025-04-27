@@ -7,7 +7,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { Eye, EyeOff, UserPlus } from 'lucide-react';
 import Link from 'next/link';
 import { useAuth } from '@/src/hooks/useAuth';
@@ -21,6 +21,8 @@ interface FormErrors {
 
 export default function RegisterPage() {
     const router = useRouter();
+    const searchParams = useSearchParams();
+    const redirectPath = searchParams.get('redirect') || '/';
     const { register, error, loading, validationErrors, clearErrors, user } = useAuth();
 
     const [formData, setFormData] = useState({
@@ -33,12 +35,12 @@ export default function RegisterPage() {
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const [formErrors, setFormErrors] = useState<FormErrors>({});
 
-    // If user is already logged in, redirect to dashboard
+    // If user is already logged in, redirect to the intended path
     useEffect(() => {
         if (user) {
-            router.push('/');
+            router.push(redirectPath);
         }
-    }, [user, router]);
+    }, [user, router, redirectPath]);
 
     // Clear form errors when input changes
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -90,12 +92,12 @@ export default function RegisterPage() {
             return;
         }
 
-        // Proceed with registration
+        // Proceed with registration, passing the redirect path
         await register({
             email: formData.email,
             password: formData.password,
             password_confirm: formData.confirmPassword
-        });
+        }, redirectPath);
     };
 
     // Check for server-side validation errors

@@ -211,13 +211,33 @@ const Sidebar: React.FC<SidebarProps> = ({
                             ACCOUNT MANAGEMENT
                         </div>
                     )}
-                    <NavItem
-                        icon={<Users size={18} />}
-                        label="Users"
-                        active={activeSection === 'users'}
-                        onClick={() => setActiveSection('users')}
-                        isCollapsed={!shouldExpand}
-                    />
+                    <div className="relative">
+                        <div
+                            className={`flex items-center px-3 py-2 rounded-md cursor-pointer mb-1 ${activeSection === 'users' ? 'bg-gray-100 text-blue-600' : 'text-gray-600 hover:bg-gray-50'}`}
+                            onClick={() => setActiveSection('users')}
+                        >
+                            <div className="text-gray-500"><Users size={18} /></div>
+                            {shouldExpand && (
+                                <>
+                                    <span className="ml-3 text-sm font-medium">Users</span>
+                                    <div className="ml-auto">
+                                        {activeSection === 'users' ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+                                    </div>
+                                </>
+                            )}
+                        </div>
+                        {shouldExpand && activeSection === 'users' && (
+                            <div className="ml-4 mt-1 space-y-1">
+                                <button
+                                    onClick={() => router.push('/users-list')}
+                                    className={`flex items-center w-full px-3 py-2 text-sm rounded-md ${pathname === '/users-list' ? 'bg-blue-50 text-blue-600' : 'text-gray-600 hover:bg-gray-50'}`}
+                                >
+                                    <FileText size={16} className="mr-2" />
+                                    List
+                                </button>
+                            </div>
+                        )}
+                    </div>
                     <NavItem
                         icon={<Lock size={18} />}
                         label="Roles & Permissions"

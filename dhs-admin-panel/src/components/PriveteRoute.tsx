@@ -8,6 +8,9 @@ interface PrivateRouteProps {
     children: ReactNode;
 }
 
+// Списък с маршрути, които не изискват автентикация
+const publicRoutes = ['/users-list'];
+
 /**
  * A client-side component that redirects to the login page if the user is not authenticated
  * Use this as a wrapper around components or pages that require authentication
@@ -17,17 +20,28 @@ const PrivateRoute: React.FC<PrivateRouteProps> = ({ children }) => {
     const router = useRouter();
     const pathname = usePathname();
 
+    // Improved check for public routes to handle both exact matches and sub-paths
+    const isPublicRoute = pathname ? 
+        publicRoutes.some(route => 
+            pathname === route || pathname.startsWith(`${route}/`)
+        ) : false;
+
     useEffect(() => {
-        // Only redirect after the authentication check is complete
+        // Skip redirect for public routes regardless of authentication status
+        if (isPublicRoute) {
+            return;
+        }
+        
+        // Redirect only if user is not authenticated and we're not on a public route
         if (!loading && !user) {
             // Encode the current path to redirect back after login
             const redirectPath = encodeURIComponent(pathname || '/');
             router.push(`/auth/login?redirect=${redirectPath}`);
         }
-    }, [user, loading, router, pathname]);
+    }, [user, loading, router, pathname, isPublicRoute]);
 
-    // Show nothing while checking authentication or if user is not authenticated
-    if (loading || !user) {
+    // Show spinner only if we're loading authentication and not on a public route
+    if (loading && !isPublicRoute) {
         return (
             <div className="min-h-screen flex items-center justify-center">
                 <div className="w-16 h-16 border-t-4 border-blue-500 border-solid rounded-full animate-spin"></div>
@@ -35,8 +49,17 @@ const PrivateRoute: React.FC<PrivateRouteProps> = ({ children }) => {
         );
     }
 
-    // If authenticated, render the children
-    return <>{children}</>;
+    // Always show content for public routes or authenticated users
+    if (isPublicRoute || user) {
+        return <>{children}</>;
+    }
+
+    // Default loader for non-public routes while authentication is being checked
+    return (
+        <div className="min-h-screen flex items-center justify-center">
+            <div className="w-16 h-16 border-t-4 border-blue-500 border-solid rounded-full animate-spin"></div>
+        </div>
+    );
 }
 
 export default PrivateRoute;

@@ -13,8 +13,8 @@ interface AuthContextType {
     loading: boolean;
     error: string | null;
     validationErrors: ValidationErrors | null;
-    login: (credentials: LoginCredentials) => Promise<void>;
-    register: (userData: RegisterCredentials) => Promise<void>;
+    login: (credentials: LoginCredentials, redirectPath?: string) => Promise<void>;
+    register: (userData: RegisterCredentials, redirectPath?: string) => Promise<void>;
     logout: () => Promise<void>;
     clearErrors: () => void;
 }
@@ -40,7 +40,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }, []);
 
     // Login function
-    const login = async (credentials: LoginCredentials) => {
+    const login = async (credentials: LoginCredentials, redirectPath: string = '/') => {
         setLoading(true);
         setError(null);
         setValidationErrors(null);
@@ -49,7 +49,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             const user = await authService.login(credentials);
             if (user) {
                 setUser(user);
-                router.push('/'); // Redirect only on successful login
+                router.push(redirectPath); // Redirect to specified path on successful login
             }
         } catch (err: any) {
             handleAuthError(err);
@@ -60,7 +60,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     };
 
     // Register function
-    const register = async (userData: RegisterCredentials) => {
+    const register = async (userData: RegisterCredentials, redirectPath: string = '/') => {
         setLoading(true);
         setError(null);
         setValidationErrors(null);
@@ -68,7 +68,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         try {
             const user = await authService.register(userData);
             setUser(user);
-            router.push('/'); // Redirect to dashboard after registration
+            router.push(redirectPath); // Redirect to specified path after registration
         } catch (err: any) {
             handleAuthError(err);
         } finally {
