@@ -1,33 +1,34 @@
 // src/hooks/__tests__/AuthProvider.test.tsx
+import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
-import { AuthProvider } from '../useAuth';
-import authService from '../../services/auth.service';
-import { useRouter } from 'next/navigation';
+import { AuthProvider } from '@/src/hooks/useAuth';
 
-// Mocking the necessary dependencies
-jest.mock('../../services/auth.service', () => ({
-  getCurrentUser: jest.fn(),
-  isAuthenticated: jest.fn()
+// Мокиране на next/navigation
+jest.mock('next/navigation', () => ({
+  ...jest.requireActual('../../__mocks__/next-navigation'),
 }));
 
-jest.mock('next/navigation', () => ({
-  useRouter: jest.fn()
+// Мокиране на auth.service
+jest.mock('@/src/services/auth.service', () => ({
+  login: jest.fn(),
+  register: jest.fn(),
+  logout: jest.fn(),
+  getCurrentUser: jest.fn(),
 }));
 
 describe('AuthProvider', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    (useRouter as jest.Mock).mockReturnValue({
-      push: jest.fn()
-    });
   });
 
+  // Импортираме auth.service директно след мокирането му
+  const authService = require('@/src/services/auth.service');
+
   test('should check for current user on initial render', async () => {
-    // Mock the getCurrentUser to simulate a logged-in user
-    const mockUser = { email: 'test@example.com', roles: ['user'] };
+    // Подготовка: потребителят е автентикиран
+    const mockUser = { id: '1', email: 'test@example.com', name: 'Test User' };
     (authService.getCurrentUser as jest.Mock).mockReturnValue(mockUser);
-    (authService.isAuthenticated as jest.Mock).mockReturnValue(true);
 
     render(
       <AuthProvider>
@@ -35,19 +36,18 @@ describe('AuthProvider', () => {
       </AuthProvider>
     );
 
-    // Verify the child component renders
+    // Проверка дали компонентът се рендерира
     expect(screen.getByTestId('test-child')).toBeInTheDocument();
     
-    // Verify getCurrentUser was called during initialization
+    // Проверка дали getCurrentUser е извикан
     await waitFor(() => {
       expect(authService.getCurrentUser).toHaveBeenCalled();
     });
   });
 
   test('should render children when user is not authenticated', async () => {
-    // Mock the getCurrentUser to simulate no user logged in
+    // Подготовка: потребителят не е автентикиран
     (authService.getCurrentUser as jest.Mock).mockReturnValue(null);
-    (authService.isAuthenticated as jest.Mock).mockReturnValue(false);
 
     render(
       <AuthProvider>
@@ -55,31 +55,33 @@ describe('AuthProvider', () => {
       </AuthProvider>
     );
 
-    // Verify the child component still renders
+    // Проверка дали компонентът се рендерира коректно
     expect(screen.getByTestId('test-child')).toBeInTheDocument();
     
-    // Verify getCurrentUser was called
+    // Проверка дали getCurrentUser е извикан
     await waitFor(() => {
       expect(authService.getCurrentUser).toHaveBeenCalled();
     });
   });
 
   test('should not redirect if user is authenticated', async () => {
-    // Mock the getCurrentUser to simulate a logged-in user
-    const mockUser = { email: 'test@example.com', roles: ['user'] };
+    // Подготовка: потребителят е автентикиран
+    const mockUser = { id: '1', email: 'test@example.com', name: 'Test User' };
     (authService.getCurrentUser as jest.Mock).mockReturnValue(mockUser);
-    (authService.isAuthenticated as jest.Mock).mockReturnValue(true);
-    
-    const mockRouter = { push: jest.fn() };
-    (useRouter as jest.Mock).mockReturnValue(mockRouter);
 
+    // Подготовка на мок за router
+    const mockRouter = jest.requireMock('next/navigation').useRouter();
+    
     render(
       <AuthProvider>
         <div data-testid="test-child">Test Child Component</div>
       </AuthProvider>
     );
 
-    // Verify router.push was not called
+    // Проверка дали компонентът се рендерира коректно
+    expect(screen.getByTestId('test-child')).toBeInTheDocument();
+    
+    // Проверка дали push не е извикан (няма redirect)
     await waitFor(() => {
       expect(mockRouter.push).not.toHaveBeenCalled();
     });

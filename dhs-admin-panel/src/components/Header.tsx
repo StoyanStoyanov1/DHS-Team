@@ -38,11 +38,10 @@ const Header: React.FC = () => {
 
     // Handle logout
     const handleLogout = async () => {
-        await logout(() => {
-            // Запазваме текущия път при изход
-            const redirectPath = encodeURIComponent(pathname || '/');
-            router.push(`/auth/login?redirect=${redirectPath}`);
-        });
+        await logout();
+        // Save the current path for redirection after login
+        const redirectPath = encodeURIComponent(pathname || '/');
+        router.push(`/auth/login?redirect=${redirectPath}`);
     };
 
     // Get user initials for avatar

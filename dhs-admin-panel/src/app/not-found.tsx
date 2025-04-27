@@ -1,8 +1,9 @@
 "use client"
 
+import { Suspense } from 'react';
 import Link from 'next/link';
 
-export default function NotFound() {
+function NotFoundContent() {
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8 text-center">
@@ -27,5 +28,17 @@ export default function NotFound() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function NotFound() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="w-16 h-16 border-t-4 border-blue-500 border-solid rounded-full animate-spin"></div>
+      </div>
+    }>
+      <NotFoundContent />
+    </Suspense>
   );
 }

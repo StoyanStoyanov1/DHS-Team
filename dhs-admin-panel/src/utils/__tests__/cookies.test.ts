@@ -1,24 +1,19 @@
-// src/utils/__tests__/cookies.test.ts
 import { getCookie, setCookie, removeCookie, parseCookies, serializeCookie } from '../cookies';
 
 describe('Cookie Utils - Browser Environment', () => {
-  // Запазваме оригиналния document.cookie
   let originalCookie: PropertyDescriptor | undefined;
 
   beforeAll(() => {
-    // Запазваме оригиналния document.cookie преди да го мокнем
     originalCookie = Object.getOwnPropertyDescriptor(document, 'cookie');
   });
 
   afterAll(() => {
-    // Възстановяваме оригиналния document.cookie след тестовете
     if (originalCookie) {
       Object.defineProperty(document, 'cookie', originalCookie);
     }
   });
 
   beforeEach(() => {
-    // Създаваме мок на document.cookie за всеки тест
     let cookies: string[] = [];
     
     Object.defineProperty(document, 'cookie', {
@@ -87,11 +82,9 @@ describe('Cookie Utils - Browser Environment', () => {
 
   describe('removeCookie', () => {
     test('should remove a cookie', () => {
-      // Първо добавяме, след това премахваме
       document.cookie = 'toRemove=value; path=/';
       removeCookie('toRemove');
       
-      // Проверяваме дали cookie е със стара дата (изтекъл)
       expect(document.cookie).toContain('toRemove=');
       expect(document.cookie).toContain('expires=Thu, 01 Jan 1970 00:00:00 GMT');
     });

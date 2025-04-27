@@ -42,7 +42,6 @@ class AuthService {
     private refreshTimeoutId: NodeJS.Timeout | null = null;
 
     constructor() {
-        // Initialize token refresh mechanism when service is created
         if (isBrowser) {
             this.initTokenRefresh();
         }
@@ -63,7 +62,6 @@ class AuthService {
             return this.getDecodedToken() as TokenPayload;
         } catch (error) {
             this.handleAuthError(error as AxiosError);
-            // Return the error response instead of throwing
             return Promise.reject(error);
         }
     }
@@ -211,13 +209,11 @@ class AuthService {
         const { exp } = token;
         const currentTime = Date.now() / 1000;
 
-        // If token is expired, clear it
         if (exp <= currentTime) {
             this.clearToken();
             return;
         }
 
-        // Schedule refresh for 5 minutes before expiration
         const timeToExpiry = exp - currentTime;
         const refreshTime = Math.max((timeToExpiry - 5 * 60) * 1000, 0);
 
@@ -234,21 +230,16 @@ class AuthService {
             const { status, data } = error.response;
 
             if (status === 401) {
-                // Unauthorized - clear token
                 this.clearToken();
             }
 
-            // Check for existing email error or other specific server errors
             if (data && typeof data === 'object') {
-                // Capture the raw server error message
                 const errorData = data as any;
                 if (errorData.message) {
-                    // Attach the original server message to the error
                     (error as any).serverMessage = errorData.message;
                 }
             }
 
-            // Log the error for debugging
             console.error('Authentication error:', data);
         } else {
             console.error('Network or unknown error:', error.message);
@@ -256,6 +247,5 @@ class AuthService {
     }
 }
 
-// Create a singleton instance
 const authService = new AuthService();
 export default authService;

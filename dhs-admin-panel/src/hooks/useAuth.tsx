@@ -1,5 +1,5 @@
 "use client"
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect, ReactNode, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import authService, {
     LoginCredentials,
@@ -21,7 +21,8 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export const AuthProvider = ({ children }: { children: ReactNode }) => {
+// Inner component that safely uses useSearchParams
+function AuthProviderContent({ children }: { children: ReactNode }) {
     const [user, setUser] = useState<TokenPayload | null>(null);
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
@@ -151,6 +152,19 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     };
 
     return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+}
+
+// Wrapper component that adds Suspense
+export const AuthProvider = ({ children }: { children: ReactNode }) => {
+    return (
+        <Suspense fallback={
+            <div className="min-h-screen flex items-center justify-center bg-gray-50">
+                <div className="w-16 h-16 border-t-4 border-blue-500 border-solid rounded-full animate-spin"></div>
+            </div>
+        }>
+            <AuthProviderContent children={children} />
+        </Suspense>
+    );
 };
 
 export const useAuth = (): AuthContextType => {

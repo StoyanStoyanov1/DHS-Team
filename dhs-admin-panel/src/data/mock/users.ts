@@ -1,4 +1,3 @@
-// Interface definitions
 export interface User {
   id: number;
   name: string;
@@ -8,7 +7,6 @@ export interface User {
   lastLogin: string;
 }
 
-// Mock user data
 export const mockUsers: User[] = [
   {
     id: 1,

@@ -6,7 +6,7 @@
 
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Eye, EyeOff, UserPlus } from 'lucide-react';
 import Link from 'next/link';
@@ -19,7 +19,8 @@ interface FormErrors {
     [key: string]: string;
 }
 
-export default function RegisterPage() {
+// Component that safely uses the search params
+function RegisterPageContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const redirectPath = searchParams.get('redirect') || '/';
@@ -273,5 +274,18 @@ export default function RegisterPage() {
                 </div>
             </div>
         </div>
+    );
+}
+
+// Main component that wraps the content with Suspense
+export default function RegisterPage() {
+    return (
+        <Suspense fallback={
+            <div className="min-h-screen flex items-center justify-center bg-gray-50">
+                <div className="w-16 h-16 border-t-4 border-blue-500 border-solid rounded-full animate-spin"></div>
+            </div>
+        }>
+            <RegisterPageContent />
+        </Suspense>
     );
 }

@@ -2,16 +2,15 @@
 
 import React, { useState } from 'react';
 import Layout from '@/src/components/Layout';
-import Table, { ITableColumn } from '@/src/components/Table';
-import { Edit, Trash2, FileText, MoreVertical, ChevronDown } from 'lucide-react';
+import Table from '@/src/components/Table';
+import { ITableColumn } from '@/src/components/Table/interfaces';
+import { Edit, Trash2, FileText, MoreVertical } from 'lucide-react';
 import { User, mockUsers } from '@/src/data/mock/users';
 
 export default function UsersListPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
-  const [isTableSizeOpen, setIsTableSizeOpen] = useState(false); // State for dropdown visibility
 
-  // Define columns for the user table
   const columns: ITableColumn<User>[] = [
     {
       header: 'User',
@@ -81,17 +80,6 @@ export default function UsersListPage() {
     }
   ];
 
-  // Handle click on dropdown
-  const toggleTableSizeDropdown = () => {
-    setIsTableSizeOpen(!isTableSizeOpen);
-  };
-
-  // Handle selection of row count
-  const handleRowCountSelect = (count: number) => {
-    setItemsPerPage(count);
-    setIsTableSizeOpen(false);
-  };
-
   return (
     <Layout>
       <div className="p-6">
@@ -100,64 +88,7 @@ export default function UsersListPage() {
           <p className="text-gray-600">Manage your users and their permissions</p>
         </div>
 
-        {/* Table Size Controls - Modern Dropdown Design */}
-        <div className="mb-4 relative">
-          <label htmlFor="tableSize" className="block text-sm font-medium text-gray-700 mb-1">
-            Table Size:
-          </label>
-          <div className="relative inline-block text-left w-40">
-            <button
-              type="button"
-              onClick={toggleTableSizeDropdown}
-              className="inline-flex w-full justify-between items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              id="table-size-button"
-              aria-expanded={isTableSizeOpen}
-              aria-haspopup="true"
-            >
-              {itemsPerPage} rows
-              <ChevronDown className="h-4 w-4 ml-2" aria-hidden="true" />
-            </button>
-
-            {/* Dropdown Menu */}
-            {isTableSizeOpen && (
-              <div 
-                className="absolute right-0 z-10 mt-1 w-full origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none"
-                role="menu"
-                aria-orientation="vertical"
-                aria-labelledby="table-size-button"
-                tabIndex={-1}
-              >
-                <div className="py-1">
-                  {[5, 10, 15, 25, 50].map((size) => (
-                    <button
-                      key={size}
-                      onClick={() => handleRowCountSelect(size)}
-                      className={`w-full text-left px-4 py-2 text-sm ${
-                        itemsPerPage === size
-                          ? 'bg-blue-500 text-white'
-                          : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
-                      }`}
-                      role="menuitem"
-                      tabIndex={-1}
-                    >
-                      {size} rows
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* Click outside listener */}
-          {isTableSizeOpen && (
-            <div 
-              className="fixed inset-0 z-0" 
-              onClick={() => setIsTableSizeOpen(false)}
-            />
-          )}
-        </div>
-
-        {/* Users Table */}
+        {/* Users Table с вградени контроли за размер */}
         <Table 
           columns={columns}
           data={mockUsers}
@@ -169,7 +100,8 @@ export default function UsersListPage() {
           currentPage={currentPage}
           setCurrentPage={setCurrentPage}
           rowsPerPageOptions={[5, 10, 15, 25, 50]}
-          fixedTableSize={true} // Включваме фиксиран размер на таблицата
+          fixedTableSize={true}
+          showTableSizeControls={true}
         />
       </div>
     </Layout>

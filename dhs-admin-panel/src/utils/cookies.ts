@@ -1,5 +1,3 @@
-// src/utils/cookies.ts
-
 /**
  * Utility functions for managing cookies in the browser and server-side.
  */

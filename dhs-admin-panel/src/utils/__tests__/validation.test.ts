@@ -1,4 +1,3 @@
-// src/utils/__tests__/validation.test.ts
 import {
   validateEmail,
   validatePassword,

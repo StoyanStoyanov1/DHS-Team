@@ -1,17 +1,14 @@
-/**
- * Interfaces related to the Table component
- */
-
 import { ReactNode } from 'react';
 
-/**
- * Defines the structure of a table column
- */
+export type SortDirection = 'asc' | 'desc' | null;
+
 export interface ITableColumn<T> {
   header: string;
   key: string;
   render?: (item: T) => ReactNode;
   className?: string;
+  sortable?: boolean;
+  sortFn?: (a: T, b: T, direction: SortDirection) => number;
 }
 
 /**
@@ -23,8 +20,8 @@ export interface ITablePagination {
   itemsPerPage: number;
   totalItems: number;
   onPageChange: (page: number) => void;
-  onItemsPerPageChange?: (itemsPerPage: number) => void; // Callback for changing items per page
-  rowsPerPageOptions?: number[]; // Добавяме опция за конфигуриране на опциите за редове на страница
+  onItemsPerPageChange?: (itemsPerPage: number) => void;
+  rowsPerPageOptions?: number[];
 }
 
 /**
@@ -37,14 +34,17 @@ export interface ITableProps<T> {
   emptyMessage?: string;
   className?: string;
   rowClassName?: string | ((item: T) => string);
-  pagination?: boolean; // Този prop запазваме за обратна съвместимост, но реално винаги показваме пагинацията
+  pagination?: boolean;
   itemsPerPage?: number;
-  setItemsPerPage?: (itemsPerPage: number) => void; // Callback for changing items per page
+  setItemsPerPage?: (itemsPerPage: number) => void;
   currentPage?: number;
   setCurrentPage?: (page: number) => void;
-  rowsPerPageOptions?: number[]; // Опция за конфигуриране на опциите за редове на страница
-  fixedTableSize?: boolean; // Указва дали таблицата да има фиксиран размер
-  tableHeight?: number; // Определя височината на таблицата, когато е фиксирана
+  rowsPerPageOptions?: number[];
+  fixedTableSize?: boolean;
+  tableHeight?: number;
+  showTableSizeControls?: boolean;
+  defaultSortKey?: string;
+  defaultSortDirection?: SortDirection;
 }
 
 /**
@@ -53,4 +53,5 @@ export interface ITableProps<T> {
 export interface ITableService<T> {
   getPaginatedData(data: T[], currentPage: number, itemsPerPage: number): T[];
   calculateTotalPages(totalItems: number, itemsPerPage: number): number;
+  sortData(data: T[], sortKey: string, sortDirection: SortDirection, sortFn?: (a: T, b: T, direction: SortDirection) => number): T[];
 }
