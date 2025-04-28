@@ -251,12 +251,23 @@ export default function Table<T>({
 
   // Function to render sort indicator
   const renderSortIndicator = (columnKey: string) => {
-    if (sortKey !== columnKey) return <ChevronDown size={14} className="ml-1 text-gray-400" />;
+    const isColumnSorted = sortKey === columnKey;
     
-    if (sortDirection === 'asc') return <ArrowUp size={14} className="ml-1 text-indigo-600" />;
-    if (sortDirection === 'desc') return <ArrowDown size={14} className="ml-1 text-indigo-600" />;
-    
-    return <ChevronDown size={14} className="ml-1 text-gray-400" />;
+    return (
+      <div className="flex items-center ml-1">
+        {/* Двете стрелки нагоре и надолу в компактен контейнер */}
+        <div className="flex flex-col -space-y-1 justify-center">
+          <ArrowUp 
+            size={12} 
+            className={`${isColumnSorted && sortDirection === 'asc' ? 'text-indigo-600 transition-colors duration-200' : 'text-gray-400'}`} 
+          />
+          <ArrowDown 
+            size={12} 
+            className={`${isColumnSorted && sortDirection === 'desc' ? 'text-indigo-600 transition-colors duration-200' : 'text-gray-400'}`} 
+          />
+        </div>
+      </div>
+    );
   };
 
   return (

@@ -1,7 +1,7 @@
 'use client';
 
-import React, { useState, useRef, useEffect } from 'react';
-import { ChevronLeft, ChevronRight, ChevronsDown, ArrowRight } from 'lucide-react';
+import React, { useState } from 'react';
+import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, ArrowRight } from 'lucide-react';
 import { ITablePagination } from './interfaces';
 
 /**
@@ -25,6 +25,15 @@ const TablePagination: React.FC<ITablePagination> = ({
   const endItem = Math.min(currentPage * itemsPerPage, totalItems);
 
   /**
+   * Handle going to first page
+   */
+  const handleFirstPage = () => {
+    if (currentPage > 1) {
+      onPageChange(1);
+    }
+  };
+
+  /**
    * Handle going to previous page
    */
   const handlePrevPage = () => {
@@ -39,6 +48,15 @@ const TablePagination: React.FC<ITablePagination> = ({
   const handleNextPage = () => {
     if (currentPage < effectiveTotalPages) {
       onPageChange(currentPage + 1);
+    }
+  };
+
+  /**
+   * Handle going to last page
+   */
+  const handleLastPage = () => {
+    if (currentPage < effectiveTotalPages) {
+      onPageChange(effectiveTotalPages);
     }
   };
 
@@ -90,25 +108,23 @@ const TablePagination: React.FC<ITablePagination> = ({
   const getPageNumbers = () => {
     const pageNumbers: (number | string)[] = [];
     
-    pageNumbers.push(1);
-    
-    if (effectiveTotalPages <= 1) {
-      return pageNumbers;
-    }
-    
-    for (let i = Math.max(2, currentPage - 1); i <= Math.min(effectiveTotalPages - 1, currentPage + 1); i++) {
-      if (i === currentPage - 1 && i > 2) {
-        pageNumbers.push('...');
+    if (effectiveTotalPages <= 7) {
+      // Show all pages if total pages are 7 or less
+      for (let i = 1; i <= effectiveTotalPages; i++) {
+        pageNumbers.push(i);
+      }
+    } else {
+      pageNumbers.push(1);
+      
+      // Calculate which page numbers to show based on current page
+      if (currentPage <= 3) {
+        pageNumbers.push(2, 3, 4, '...', effectiveTotalPages - 1);
+      } else if (currentPage >= effectiveTotalPages - 2) {
+        pageNumbers.push('...', effectiveTotalPages - 3, effectiveTotalPages - 2, effectiveTotalPages - 1);
+      } else {
+        pageNumbers.push('...', currentPage - 1, currentPage, currentPage + 1, '...');
       }
       
-      pageNumbers.push(i);
-      
-      if (i === currentPage + 1 && i < effectiveTotalPages - 1) {
-        pageNumbers.push('...');
-      }
-    }
-    
-    if (effectiveTotalPages > 1) {
       pageNumbers.push(effectiveTotalPages);
     }
     
@@ -127,7 +143,7 @@ const TablePagination: React.FC<ITablePagination> = ({
   }
 
   return (
-    <div className="flex items-center justify-between border-t border-gray-200 px-6 py-3">
+    <div className="flex flex-col sm:flex-row items-center justify-between border-t border-gray-200 px-6 py-3 space-y-3 sm:space-y-0">
       <p className="text-sm text-gray-700">
         Showing <span className="font-medium">{startItem}</span> to <span className="font-medium">{endItem}</span> of{' '}
         <span className="font-medium">{totalItems}</span> results
@@ -154,57 +170,109 @@ const TablePagination: React.FC<ITablePagination> = ({
           />
           <button
             type="submit"
-            className="inline-flex items-center px-2 py-1 border border-blue-500 bg-blue-500 text-white rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1"
+            className="inline-flex items-center px-2 py-1 border border-blue-500 bg-blue-500 text-white rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1 transition-colors duration-200"
             aria-label="Go"
           >
             <ArrowRight size={14} />
           </button>
         </form>
         
-        <nav className="inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
+        <nav className="inline-flex rounded-md shadow-sm" aria-label="Pagination">
+          <button
+            onClick={handleFirstPage}
+            disabled={currentPage === 1}
+            className={`relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 text-sm font-medium ${
+              currentPage === 1 
+                ? 'bg-gray-100 text-gray-400 cursor-not-allowed' 
+                : 'bg-white text-gray-500 hover:bg-gray-50 hover:text-blue-600 transition-colors duration-200'
+            }`}
+            aria-label="Go to first page"
+            title="First page"
+          >
+            <span className="sr-only">First</span>
+            <ChevronsLeft className="h-4 w-4" aria-hidden="true" />
+          </button>
+          
           <button
             onClick={handlePrevPage}
             disabled={currentPage === 1}
-            className={`relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 text-sm font-medium ${currentPage === 1 ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-white text-gray-500 hover:bg-gray-50'}`}
+            className={`relative inline-flex items-center px-2 py-2 border-t border-b border-gray-300 text-sm font-medium ${
+              currentPage === 1 
+                ? 'bg-gray-100 text-gray-400 cursor-not-allowed' 
+                : 'bg-white text-gray-500 hover:bg-gray-50 hover:text-blue-600 transition-colors duration-200'
+            }`}
+            aria-label="Previous page"
+            title="Previous page"
           >
             <span className="sr-only">Previous</span>
-            <ChevronLeft className="h-5 w-5" aria-hidden="true" />
+            <ChevronLeft className="h-4 w-4" aria-hidden="true" />
           </button>
           
-          {getPageNumbers().map((pageNumber, index) => {
-            if (pageNumber === '...') {
+          <div className="hidden sm:flex">
+            {getPageNumbers().map((pageNumber, index) => {
+              if (pageNumber === '...') {
+                return (
+                  <span
+                    key={`ellipsis-${index}`}
+                    className="relative inline-flex items-center px-3 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700"
+                  >
+                    ...
+                  </span>
+                );
+              }
+              
               return (
-                <span
-                  key={`ellipsis-${index}`}
-                  className="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700"
+                <button
+                  key={`page-${pageNumber}`}
+                  onClick={() => onPageChange(pageNumber as number)}
+                  className={`relative inline-flex items-center px-3 py-2 border border-gray-300 text-sm font-medium ${
+                    currentPage === pageNumber
+                      ? 'z-10 bg-blue-500 border-blue-500 text-white hover:bg-blue-600'
+                      : 'bg-white text-gray-500 hover:bg-gray-50 hover:text-blue-600'
+                  } transition-colors duration-200`}
+                  aria-label={`Page ${pageNumber}`}
+                  title={`Page ${pageNumber}`}
                 >
-                  ...
-                </span>
+                  {pageNumber}
+                </button>
               );
-            }
-            
-            return (
-              <button
-                key={`page-${pageNumber}`}
-                onClick={() => onPageChange(pageNumber as number)}
-                className={`relative inline-flex items-center px-4 py-2 border text-sm font-medium ${
-                  currentPage === pageNumber
-                    ? 'z-10 bg-blue-50 border-blue-500 text-blue-600'
-                    : 'bg-white border-gray-300 text-gray-500 hover:bg-gray-50'
-                }`}
-              >
-                {pageNumber}
-              </button>
-            );
-          })}
+            })}
+          </div>
+          
+          <div className="sm:hidden inline-flex items-center px-3 py-2 border border-gray-300 bg-white text-sm font-medium">
+            <span className="font-semibold">{currentPage}</span>
+            <span className="mx-1">/</span>
+            <span>{effectiveTotalPages}</span>
+          </div>
           
           <button
             onClick={handleNextPage}
             disabled={currentPage === effectiveTotalPages}
-            className={`relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 text-sm font-medium ${currentPage === effectiveTotalPages ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-white text-gray-500 hover:bg-gray-50'}`}
+            className={`relative inline-flex items-center px-2 py-2 border-t border-b border-gray-300 text-sm font-medium ${
+              currentPage === effectiveTotalPages 
+                ? 'bg-gray-100 text-gray-400 cursor-not-allowed' 
+                : 'bg-white text-gray-500 hover:bg-gray-50 hover:text-blue-600 transition-colors duration-200'
+            }`}
+            aria-label="Next page"
+            title="Next page"
           >
             <span className="sr-only">Next</span>
-            <ChevronRight className="h-5 w-5" aria-hidden="true" />
+            <ChevronRight className="h-4 w-4" aria-hidden="true" />
+          </button>
+          
+          <button
+            onClick={handleLastPage}
+            disabled={currentPage === effectiveTotalPages}
+            className={`relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 text-sm font-medium ${
+              currentPage === effectiveTotalPages 
+                ? 'bg-gray-100 text-gray-400 cursor-not-allowed' 
+                : 'bg-white text-gray-500 hover:bg-gray-50 hover:text-blue-600 transition-colors duration-200'
+            }`}
+            aria-label="Go to last page"
+            title="Last page"
+          >
+            <span className="sr-only">Last</span>
+            <ChevronsRight className="h-4 w-4" aria-hidden="true" />
           </button>
         </nav>
       </div>
