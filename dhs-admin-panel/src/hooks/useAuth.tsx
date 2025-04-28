@@ -16,12 +16,13 @@ const DEBUG_MODE = process.env.NODE_ENV === 'development' ?
 
 // Mock user for debug mode
 const DEBUG_USER: TokenPayload = {
-    id: 'debug-user-id',
+    sub: 'debug-user-id',
     email: 'debug@example.com',
-    name: 'Debug User',
-    role: 'admin',
+    roles: ['admin'],
     iat: Math.floor(Date.now() / 1000),
-    exp: Math.floor(Date.now() / 1000) + 3600 // 1 hour from now
+    exp: Math.floor(Date.now() / 1000) + 3600, // 1 hour from now
+    iss: 'debug-issuer', 
+    jti: 'debug-token-id'
 };
 
 interface AuthContextType {
