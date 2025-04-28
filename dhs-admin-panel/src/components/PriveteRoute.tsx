@@ -17,7 +17,7 @@ const publicRoutes = ['/users-list', '/public-dashboard', '/about', '/contact'];
  * Use this as a wrapper around components or pages that require authentication
  */
 const PrivateRoute: React.FC<PrivateRouteProps> = ({ children }) => {
-    const { user, loading } = useAuth();
+    const { user, loading, isDebugMode } = useAuth();
     const router = useRouter();
     const pathname = usePathname();
 
@@ -33,13 +33,18 @@ const PrivateRoute: React.FC<PrivateRouteProps> = ({ children }) => {
             return;
         }
         
+        // Allow access to all routes in debug mode
+        if (isDebugMode) {
+            return;
+        }
+        
         // Redirect only if user is not authenticated and we're not on a public route
         if (!loading && !user) {
             // Encode the current path to redirect back after login
             const redirectPath = encodeURIComponent(pathname || '/');
             router.push(`/auth/login?redirect=${redirectPath}`);
         }
-    }, [user, loading, router, pathname, isPublicRoute]);
+    }, [user, loading, router, pathname, isPublicRoute, isDebugMode]);
 
     // Show spinner only if we're loading authentication and not on a public route
     if (loading && !isPublicRoute) {
@@ -50,8 +55,8 @@ const PrivateRoute: React.FC<PrivateRouteProps> = ({ children }) => {
         );
     }
 
-    // Always show content for public routes or authenticated users
-    if (isPublicRoute || user) {
+    // Always show content for public routes, debug mode, or authenticated users
+    if (isPublicRoute || isDebugMode || user) {
         return <>{children}</>;
     }
 

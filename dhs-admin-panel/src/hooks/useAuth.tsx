@@ -8,6 +8,22 @@ import authService, {
     ValidationErrors
 } from '../services/auth.service';
 
+// Debug mode configuration
+// Set default to true to enable debug mode by default
+const DEBUG_MODE = process.env.NODE_ENV === 'development' ? 
+    (process.env.NEXT_PUBLIC_DEBUG_AUTH !== 'false') : // Debug mode is ON by default in development
+    (process.env.NEXT_PUBLIC_DEBUG_AUTH === 'true');   // Explicitly enabled in production
+
+// Mock user for debug mode
+const DEBUG_USER: TokenPayload = {
+    id: 'debug-user-id',
+    email: 'debug@example.com',
+    name: 'Debug User',
+    role: 'admin',
+    iat: Math.floor(Date.now() / 1000),
+    exp: Math.floor(Date.now() / 1000) + 3600 // 1 hour from now
+};
+
 interface AuthContextType {
     user: TokenPayload | null;
     loading: boolean;
@@ -17,6 +33,7 @@ interface AuthContextType {
     register: (userData: RegisterCredentials, redirectPath?: string) => Promise<void>;
     logout: () => Promise<void>;
     clearErrors: () => void;
+    isDebugMode: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -27,6 +44,7 @@ function AuthProviderContent({ children }: { children: ReactNode }) {
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
     const [validationErrors, setValidationErrors] = useState<ValidationErrors | null>(null);
+    const [isDebugMode] = useState<boolean>(DEBUG_MODE);
     const router = useRouter();
     const searchParams = useSearchParams();
 
@@ -34,14 +52,28 @@ function AuthProviderContent({ children }: { children: ReactNode }) {
         const initAuth = async () => {
             setLoading(true);
             try {
-                const currentUser = authService.getCurrentUser();
-                setUser(currentUser);
-                
-                if (currentUser) {
-                    const redirectParam = searchParams.get('redirect');
-                    if (redirectParam) {
-                        const decodedRedirect = decodeURIComponent(redirectParam);
-                        router.push(decodedRedirect);
+                // If in debug mode, use mock user
+                if (isDebugMode) {
+                    setUser(DEBUG_USER);
+                    console.info(
+                        '%c🐞 Debug Mode Активиран!', 
+                        'background: #4CAF50; color: white; padding: 4px 8px; border-radius: 4px; font-weight: bold;'
+                    );
+                    console.info(
+                        'Работите в режим без автентикация. Няма да има заявки към сървъра.',
+                        '\nПотребител:', DEBUG_USER
+                    );
+                } else {
+                    // Normal authentication flow
+                    const currentUser = authService.getCurrentUser();
+                    setUser(currentUser);
+                    
+                    if (currentUser) {
+                        const redirectParam = searchParams.get('redirect');
+                        if (redirectParam) {
+                            const decodedRedirect = decodeURIComponent(redirectParam);
+                            router.push(decodedRedirect);
+                        }
                     }
                 }
             } catch (error) {
@@ -52,13 +84,22 @@ function AuthProviderContent({ children }: { children: ReactNode }) {
         };
 
         initAuth();
-    }, [router, searchParams]);
+    }, [router, searchParams, isDebugMode]);
 
     const login = async (credentials: LoginCredentials, redirectPath: string = '/') => {
         setLoading(true);
         setError(null);
         setValidationErrors(null);
 
+        // If in debug mode, fake successful login
+        if (isDebugMode) {
+            setUser(DEBUG_USER);
+            setLoading(false);
+            router.push(redirectPath);
+            return;
+        }
+
+        // Normal login flow
         try {
             const user = await authService.login(credentials);
             if (user) {
@@ -77,6 +118,15 @@ function AuthProviderContent({ children }: { children: ReactNode }) {
         setError(null);
         setValidationErrors(null);
 
+        // If in debug mode, fake successful registration
+        if (isDebugMode) {
+            setUser(DEBUG_USER);
+            setLoading(false);
+            router.push(redirectPath);
+            return;
+        }
+
+        // Normal registration flow
         try {
             const user = await authService.register(userData);
             setUser(user);
@@ -90,6 +140,16 @@ function AuthProviderContent({ children }: { children: ReactNode }) {
 
     const logout = async () => {
         setLoading(true);
+        
+        // If in debug mode, just clear the user
+        if (isDebugMode) {
+            setUser(null);
+            router.push('/auth/login');
+            setLoading(false);
+            return;
+        }
+
+        // Normal logout flow
         try {
             await authService.logout();
             setUser(null);
@@ -148,7 +208,8 @@ function AuthProviderContent({ children }: { children: ReactNode }) {
         login,
         register,
         logout,
-        clearErrors
+        clearErrors,
+        isDebugMode
     };
 
     return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
