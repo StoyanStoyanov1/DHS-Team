@@ -35,13 +35,10 @@ function RegisterPageContent() {
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const [formErrors, setFormErrors] = useState<FormErrors>({});
+    const [alreadyLoggedInMessage, setAlreadyLoggedInMessage] = useState<string | null>(null);
 
-    // If user is already logged in, redirect to the intended path
-    useEffect(() => {
-        if (user) {
-            router.push(redirectPath);
-        }
-    }, [user, router, redirectPath]);
+    // No longer automatically redirect logged-in users
+    // Instead, we'll show them a message if they try to submit the form
 
     // Clear form errors when input changes
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -60,11 +57,22 @@ function RegisterPageContent() {
                 [name]: ''
             });
         }
+        
+        // Clear the logged in message if it exists
+        if (alreadyLoggedInMessage) {
+            setAlreadyLoggedInMessage(null);
+        }
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         clearErrors();
+        
+        // Check if user is already logged in
+        if (user) {
+            setAlreadyLoggedInMessage("You can go to the dashboard or log out first if you want to create another account.");
+            return;
+        }
 
         // Additional validation for terms
         if (!formData.terms) {
@@ -147,6 +155,22 @@ function RegisterPageContent() {
                         message={formErrors.general}
                         onClose={() => setFormErrors((prevErrors) => ({ ...prevErrors, general: '' }))}
                     />
+                )}
+                
+                {alreadyLoggedInMessage && (
+                    <Alert
+                        type="info"
+                        message={alreadyLoggedInMessage}
+                        onClose={() => setAlreadyLoggedInMessage(null)}
+                    />
+                )}
+                
+                {user && (
+                    <div className="bg-blue-50 border border-blue-200 text-blue-800 px-4 py-3 rounded relative mb-4">
+                        <span className="block sm:inline">
+                        You're already registered and logged in.
+                        </span>
+                    </div>
                 )}
 
                 <form className="mt-8 space-y-6" onSubmit={handleSubmit}>

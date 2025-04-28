@@ -16,7 +16,6 @@ const Header: React.FC = () => {
     // Check if user is logged in
     useEffect(() => {
         if (!user) {
-            // Сохраняем текущий путь при перенаправлении
             const redirectPath = encodeURIComponent(pathname || '/');
             router.push(`/auth/login?redirect=${redirectPath}`);
         }
