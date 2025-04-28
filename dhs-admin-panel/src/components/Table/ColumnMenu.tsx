@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useRef, useEffect, KeyboardEvent } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { ITableColumn } from './interfaces';
 import { ChevronDown, Eye, EyeOff, Filter as FilterIcon, Check, X } from 'lucide-react';
 import { FilterGroup, SelectedFilters } from '../Filter/interfaces';
@@ -43,20 +43,6 @@ export default function ColumnMenu<T>({
     };
   }, []);
 
-  // Add keyboard event listener for Escape key
-  useEffect(() => {
-    function handleKeyDown(event: KeyboardEvent) {
-      if (event.key === 'Escape' && isOpen) {
-        setIsOpen(false);
-      }
-    }
-    
-    document.addEventListener('keydown', handleKeyDown as any);
-    return () => {
-      document.removeEventListener('keydown', handleKeyDown as any);
-    };
-  }, [isOpen]);
-
   // Initialize filter value from active filters
   useEffect(() => {
     setFilterValue(activeFilters[column.key] || null);
@@ -82,17 +68,6 @@ export default function ColumnMenu<T>({
     setIsOpen(false);
   };
 
-  // Handle keyboard events on filter inputs
-  const handleKeyDown = (e: KeyboardEvent<HTMLElement>) => {
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      handleFilterApply();
-    } else if (e.key === 'Escape') {
-      e.preventDefault();
-      setIsOpen(false);
-    }
-  };
-
   const renderFilterControls = () => {
     switch (column.filterType) {
       case 'select':
@@ -101,7 +76,6 @@ export default function ColumnMenu<T>({
             className="w-full p-2 border rounded-md text-sm"
             value={filterValue || ''}
             onChange={(e) => setFilterValue(e.target.value)}
-            onKeyDown={handleKeyDown}
           >
             <option value="">All</option>
             {filterOptions.map((option) => (
@@ -114,11 +88,7 @@ export default function ColumnMenu<T>({
         
       case 'multiselect':
         return (
-          <div 
-            className="max-h-40 overflow-y-auto border rounded-md"
-            onKeyDown={handleKeyDown}
-            tabIndex={0} // Makes the div focusable for keyboard events
-          >
+          <div className="max-h-40 overflow-y-auto border rounded-md">
             {filterOptions.map((option) => (
               <label 
                 key={option.id} 
@@ -153,7 +123,6 @@ export default function ColumnMenu<T>({
             className="w-full p-2 border rounded-md text-sm"
             value={filterValue || ''}
             onChange={(e) => setFilterValue(e.target.value)}
-            onKeyDown={handleKeyDown}
           />
         );
         
@@ -169,7 +138,6 @@ export default function ColumnMenu<T>({
                 ...filterValue || {},
                 min: e.target.value ? Number(e.target.value) : null
               })}
-              onKeyDown={handleKeyDown}
             />
             <input
               type="number"
@@ -180,7 +148,6 @@ export default function ColumnMenu<T>({
                 ...filterValue || {},
                 max: e.target.value ? Number(e.target.value) : null
               })}
-              onKeyDown={handleKeyDown}
             />
           </div>
         );
@@ -201,10 +168,7 @@ export default function ColumnMenu<T>({
       </button>
       
       {isOpen && (
-        <div 
-          className="absolute right-0 z-10 mt-1 w-60 p-2 bg-white rounded-md shadow-lg border border-gray-200"
-          tabIndex={-1} // Makes sure the div can receive focus for keyboard events
-        >
+        <div className="absolute right-0 z-10 mt-1 w-60 p-2 bg-white rounded-md shadow-lg border border-gray-200">
           <div className="mb-3 py-1 border-b border-gray-100">
             <h3 className="font-medium text-sm text-gray-800 mb-1">Column: {column.header}</h3>
           </div>

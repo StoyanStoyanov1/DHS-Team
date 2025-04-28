@@ -8,7 +8,7 @@ import TableSizeControls from './TableSizeControls';
 import ColumnMenu from './ColumnMenu';
 import { Filter } from '../Filter';
 import { SelectedFilters } from '../Filter/interfaces';
-import { Filter as FilterIcon, RotateCcw, SlidersHorizontal, X } from 'lucide-react';
+import { Filter as FilterIcon, RotateCcw, SlidersHorizontal, X, Eye } from 'lucide-react';
 
 export default function Table<T>({
   columns: initialColumns,
@@ -204,19 +204,19 @@ export default function Table<T>({
                   onClick={() => setShowColumnFilterSummary(!showColumnFilterSummary)}
                 >
                   <FilterIcon size={14} className="mr-1.5" />
-                  {activeColumnFilterCount} column {activeColumnFilterCount === 1 ? 'filter' : 'filters'} active
+                  {activeColumnFilterCount} {activeColumnFilterCount === 1 ? 'filter' : 'filters'}
                 </button>
                 
                 {showColumnFilterSummary && (
                   <div className="absolute left-0 top-full mt-1 z-10 w-64 bg-white rounded-md shadow-lg border border-gray-200 p-3">
                     <div className="flex justify-between items-center mb-2 pb-1 border-b border-gray-100">
-                      <h3 className="text-sm font-medium text-gray-800">Active Column Filters</h3>
+                      <h3 className="text-sm font-medium text-gray-800">Active Filters</h3>
                       <button 
                         className="text-xs text-gray-500 hover:text-gray-700 flex items-center"
                         onClick={resetColumnFilters}
                       >
                         <RotateCcw size={12} className="mr-1" />
-                        Reset All
+                        Clear All
                       </button>
                     </div>
                     <div className="space-y-2 max-h-48 overflow-y-auto">
@@ -271,6 +271,26 @@ export default function Table<T>({
           )}
         </div>
         
+        {/* Show a discrete dropdown for hidden columns for better mobile/tablet experience */}
+        {columns.some(col => col.hidden) && (
+          <div className="px-6 py-2 bg-indigo-50/40 border-b border-indigo-100 flex flex-wrap items-center">
+            <span className="text-xs font-medium text-gray-700 mr-2">Hidden Columns:</span>
+            <div className="flex flex-wrap gap-2">
+              {columns.filter(col => col.hidden).map(column => (
+                <button 
+                  key={column.key}
+                  className="text-xs px-2 py-1 bg-white border border-indigo-200 text-indigo-600 rounded-md hover:bg-indigo-50 flex items-center"
+                  onClick={() => handleToggleColumnVisibility(column.key)}
+                >
+                  <Eye size={12} className="mr-1" />
+                  {column.header}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+        
+        {/* Rest of the table */}
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-200 table-fixed">
             <thead className="bg-gray-50">
