@@ -1,15 +1,101 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Layout from '@/src/components/Layout';
 import Table from '@/src/components/Table';
 import { ITableColumn } from '@/src/components/Table/interfaces';
-import { Edit, Trash2, FileText, MoreVertical } from 'lucide-react';
+import { FilterGroup, SelectedFilters } from '@/src/components/Filter/interfaces';
+import { Edit, Trash2, FileText, MoreVertical, UserIcon, ShieldCheck, Activity } from 'lucide-react';
 import { User, mockUsers } from '@/src/data/mock/users';
 
 export default function UsersListPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
+  const [filters, setFilters] = useState<SelectedFilters>({});
+  const [filteredUsers, setFilteredUsers] = useState<User[]>(mockUsers);
+
+  // Define filter groups for the users table
+  const filterGroups: FilterGroup[] = [
+    {
+      id: 'search',
+      label: 'Search Users',
+      type: 'search',
+      placeholder: 'Search by name or email',
+      icon: <UserIcon size={16} />,
+    },
+    {
+      id: 'role',
+      label: 'Role',
+      type: 'multiselect',
+      options: [
+        { id: 'admin', label: 'Admin', value: 'Admin' },
+        { id: 'editor', label: 'Editor', value: 'Editor' },
+        { id: 'user', label: 'User', value: 'User' },
+      ],
+      icon: <ShieldCheck size={16} />,
+    },
+    {
+      id: 'status',
+      label: 'Status',
+      type: 'select',
+      options: [
+        { id: 'active', label: 'Active', value: 'Active' },
+        { id: 'inactive', label: 'Inactive', value: 'Inactive' },
+      ],
+      icon: <Activity size={16} />,
+    },
+  ];
+
+  // Generate role filter options dynamically
+  const getRoleFilterOptions = (data: User[]) => {
+    const uniqueRoles = Array.from(new Set(data.map(user => user.role)));
+    return uniqueRoles.map(role => ({
+      id: role.toLowerCase(),
+      label: role,
+      value: role
+    }));
+  };
+
+  // Generate status filter options dynamically
+  const getStatusFilterOptions = (data: User[]) => {
+    const uniqueStatuses = Array.from(new Set(data.map(user => user.status)));
+    return uniqueStatuses.map(status => ({
+      id: status.toLowerCase(),
+      label: status,
+      value: status
+    }));
+  };
+
+  // Apply filters whenever they change
+  useEffect(() => {
+    let result = [...mockUsers];
+    
+    // Apply search filter
+    if (filters.search) {
+      const searchTerm = filters.search.toLowerCase();
+      result = result.filter(
+        user => user.name.toLowerCase().includes(searchTerm) || 
+                user.email.toLowerCase().includes(searchTerm)
+      );
+    }
+    
+    // Apply role filter (multiselect)
+    if (filters.role && Array.isArray(filters.role) && filters.role.length > 0) {
+      result = result.filter(user => filters.role.includes(user.role));
+    }
+    
+    // Apply status filter (select)
+    if (filters.status) {
+      result = result.filter(user => user.status === filters.status);
+    }
+    
+    setFilteredUsers(result);
+  }, [filters]);
+
+  // Handle filter changes
+  const handleFilterChange = (selectedFilters: SelectedFilters) => {
+    setFilters(selectedFilters);
+  };
 
   const columns: ITableColumn<User>[] = [
     {
@@ -27,7 +113,10 @@ export default function UsersListPage() {
             <div className="text-sm text-gray-500">{user.email}</div>
           </div>
         </div>
-      )
+      ),
+      filterable: true,
+      filterType: 'search',
+      hideable: true
     },
     {
       header: 'Role',
@@ -39,7 +128,11 @@ export default function UsersListPage() {
             'bg-green-100 text-green-800'}`}>
           {user.role}
         </span>
-      )
+      ),
+      filterable: true,
+      filterType: 'select',
+      getFilterOptions: getRoleFilterOptions,
+      hideable: true
     },
     {
       header: 'Status',
@@ -49,14 +142,20 @@ export default function UsersListPage() {
           ${user.status === 'Active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
           {user.status}
         </span>
-      )
+      ),
+      filterable: true,
+      filterType: 'select',
+      getFilterOptions: getStatusFilterOptions,
+      hideable: true
     },
     {
       header: 'Last Login',
       key: 'lastLogin',
       render: (user) => (
         <span className="text-sm text-gray-500">{user.lastLogin}</span>
-      )
+      ),
+      filterable: false,
+      hideable: true
     },
     {
       header: 'Actions',
@@ -76,7 +175,9 @@ export default function UsersListPage() {
             <MoreVertical size={18} />
           </button>
         </div>
-      )
+      ),
+      filterable: false,
+      hideable: false
     }
   ];
 
@@ -88,10 +189,10 @@ export default function UsersListPage() {
           <p className="text-gray-600">Manage your users and their permissions</p>
         </div>
 
-        {/* Users Table с вградени контроли за размер */}
+        {/* Users Table with column-specific filters and visibility options */}
         <Table 
           columns={columns}
-          data={mockUsers}
+          data={filteredUsers}
           keyExtractor={(user) => user.id}
           emptyMessage="No users found"
           pagination={true}
@@ -102,6 +203,12 @@ export default function UsersListPage() {
           rowsPerPageOptions={[5, 10, 15, 25, 50]}
           fixedTableSize={true}
           showTableSizeControls={true}
+          // Global filter props (optional)
+          filterGroups={filterGroups}
+          initialFilterValues={{}}
+          onFilterChange={handleFilterChange}
+          showFilter={false} // We'll use column filters instead
+          filterTitle="Filter Users"
         />
       </div>
     </Layout>

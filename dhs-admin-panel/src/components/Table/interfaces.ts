@@ -1,4 +1,5 @@
 import { ReactNode } from 'react';
+import { FilterGroup, SelectedFilters } from '../Filter/interfaces';
 
 export type SortDirection = 'asc' | 'desc' | null;
 
@@ -9,6 +10,19 @@ export interface ITableColumn<T> {
   className?: string;
   sortable?: boolean;
   sortFn?: (a: T, b: T, direction: SortDirection) => number;
+  
+  // Column filtering options
+  filterable?: boolean;
+  filterType?: 'select' | 'multiselect' | 'search' | 'range' | 'checkbox';
+  filterOptions?: { id: string | number; label: string; value: any }[];
+  // For custom range filters
+  filterRange?: { min: number; max: number };
+  // Function to get unique values from the data for dynamic filter options
+  getFilterOptions?: (data: T[]) => { id: string | number; label: string; value: any }[];
+  
+  // Column visibility
+  hideable?: boolean;
+  hidden?: boolean;
 }
 
 /**
@@ -45,6 +59,13 @@ export interface ITableProps<T> {
   showTableSizeControls?: boolean;
   defaultSortKey?: string;
   defaultSortDirection?: SortDirection;
+  
+  // Filter related props
+  filterGroups?: FilterGroup[];
+  initialFilterValues?: SelectedFilters;
+  onFilterChange?: (selectedFilters: SelectedFilters) => void;
+  showFilter?: boolean;
+  filterTitle?: string;
 }
 
 /**
