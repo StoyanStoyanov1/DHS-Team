@@ -455,6 +455,16 @@ const Filter: React.FC<FilterProps> = ({
               placeholder={filter.placeholder || `Search ${filter.label}`}
               value={value || ''}
               onChange={(e) => handleFilterChange(filter.id, e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  // Apply filter immediately when Enter key is pressed
+                  if (requireConfirmation) {
+                    handleApplyFilters();
+                  }
+                  // Close any open dropdowns
+                  closeAllDropdowns();
+                }
+              }}
             />
             {value && (
               <button

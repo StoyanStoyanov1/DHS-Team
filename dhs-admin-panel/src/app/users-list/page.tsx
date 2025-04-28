@@ -3,12 +3,14 @@
 import React, { useState, useEffect } from 'react';
 import Layout from '@/src/components/Layout';
 import Table from '@/src/components/Table';
-import { ITableColumn } from '@/src/components/Table/interfaces';
+import type { ITableColumn } from '@/src/components/Table';
 import { FilterGroup, SelectedFilters } from '@/src/components/Filter/interfaces';
 import { Edit, Trash2, FileText, MoreVertical, UserIcon, ShieldCheck, Activity } from 'lucide-react';
 import { User, mockUsers } from '@/src/data/mock/users';
+import ClientOnly from '@/src/components/ClientOnly';
 
-export default function UsersListPage() {
+// Separate the actual content into a client component
+function UsersListContent() {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [filters, setFilters] = useState<SelectedFilters>({});
@@ -97,6 +99,18 @@ export default function UsersListPage() {
     setFilters(selectedFilters);
   };
 
+  // Custom sort function for the lastLogin field
+  const sortLastLogin = (a: User, b: User, direction: 'asc' | 'desc' | null) => {
+    const dateA = new Date(a.lastLogin);
+    const dateB = new Date(b.lastLogin);
+    
+    if (direction === 'asc') {
+      return dateA.getTime() - dateB.getTime();
+    } else {
+      return dateB.getTime() - dateA.getTime();
+    }
+  };
+
   const columns: ITableColumn<User>[] = [
     {
       header: 'User',
@@ -116,7 +130,8 @@ export default function UsersListPage() {
       ),
       filterable: true,
       filterType: 'search',
-      hideable: true
+      hideable: true,
+      sortable: true
     },
     {
       header: 'Role',
@@ -132,7 +147,8 @@ export default function UsersListPage() {
       filterable: true,
       filterType: 'select',
       getFilterOptions: getRoleFilterOptions,
-      hideable: true
+      hideable: true,
+      sortable: true
     },
     {
       header: 'Status',
@@ -146,7 +162,8 @@ export default function UsersListPage() {
       filterable: true,
       filterType: 'select',
       getFilterOptions: getStatusFilterOptions,
-      hideable: true
+      hideable: true,
+      sortable: true
     },
     {
       header: 'Last Login',
@@ -155,7 +172,9 @@ export default function UsersListPage() {
         <span className="text-sm text-gray-500">{user.lastLogin}</span>
       ),
       filterable: false,
-      hideable: true
+      hideable: true,
+      sortable: true,
+      sortFn: sortLastLogin  // Custom sort function for dates
     },
     {
       header: 'Actions',
@@ -177,7 +196,8 @@ export default function UsersListPage() {
         </div>
       ),
       filterable: false,
-      hideable: false
+      hideable: false,
+      sortable: false  // Actions column doesn't need sorting
     }
   ];
 
@@ -189,7 +209,7 @@ export default function UsersListPage() {
           <p className="text-gray-600">Manage your users and their permissions</p>
         </div>
 
-        {/* Users Table with column-specific filters and visibility options */}
+        {/* Users Table with column-specific filters, visibility options, and sorting */}
         <Table 
           columns={columns}
           data={filteredUsers}
@@ -203,6 +223,8 @@ export default function UsersListPage() {
           rowsPerPageOptions={[5, 10, 15, 25, 50]}
           fixedTableSize={true}
           showTableSizeControls={true}
+          defaultSortKey={undefined}
+          defaultSortDirection={null}
           // Global filter props (optional)
           filterGroups={filterGroups}
           initialFilterValues={{}}
@@ -212,5 +234,14 @@ export default function UsersListPage() {
         />
       </div>
     </Layout>
+  );
+}
+
+// Export a wrapper that ensures client-side only rendering
+export default function UsersListPage() {
+  return (
+    <ClientOnly>
+      <UsersListContent />
+    </ClientOnly>
   );
 }

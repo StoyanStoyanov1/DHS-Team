@@ -1,14 +1,14 @@
 'use client';
 
-import React, { useState, useMemo, useEffect } from 'react';
-import { ITableProps, ITableColumn } from './interfaces';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
+import { ITableProps, ITableColumn, SortDirection } from './interfaces';
 import { TableService } from './TableService';
 import TablePagination from './TablePagination';
 import TableSizeControls from './TableSizeControls';
 import ColumnMenu from './ColumnMenu';
 import { Filter } from '../Filter';
 import { SelectedFilters } from '../Filter/interfaces';
-import { Filter as FilterIcon, RotateCcw, SlidersHorizontal, X, Eye } from 'lucide-react';
+import { Filter as FilterIcon, RotateCcw, X, Eye, ArrowUp, ArrowDown, ChevronDown } from 'lucide-react';
 
 export default function Table<T>({
   columns: initialColumns,
@@ -23,6 +23,8 @@ export default function Table<T>({
   setCurrentPage: externalSetCurrentPage,
   rowsPerPageOptions = [10, 15, 25], 
   showTableSizeControls = true,
+  defaultSortKey,
+  defaultSortDirection,
   // Filter related props
   filterGroups = [],
   initialFilterValues = {},
@@ -38,6 +40,10 @@ export default function Table<T>({
   const [columnFilters, setColumnFilters] = useState<SelectedFilters>({});
   const [columns, setColumns] = useState<ITableColumn<T>[]>(initialColumns);
   const [showColumnFilterSummary, setShowColumnFilterSummary] = useState(false);
+  // Инициализирай sortKey като undefined, независимо от defaultSortKey, за да няма сортиране по подразбиране
+  const [sortKey, setSortKey] = useState<string | undefined>(undefined);
+  // Инициализирай sortDirection като null, независимо от defaultSortDirection, за да няма сортиране по подразбиране
+  const [sortDirection, setSortDirection] = useState<SortDirection>(null);
   
   const currentPage = externalCurrentPage ?? internalCurrentPage;
   const setCurrentPage = externalSetCurrentPage ?? setInternalCurrentPage;
@@ -95,6 +101,56 @@ export default function Table<T>({
     return result;
   }, [data, columnFilters, columns]);
 
+  // Apply sorting to the filtered data
+  const sortedData = useMemo(() => {
+    if (!sortKey) return filteredData;
+    
+    const column = columns.find(col => col.key === sortKey);
+    return tableService.sortData(
+      filteredData, 
+      sortKey, 
+      sortDirection, 
+      column?.sortFn
+    );
+  }, [tableService, filteredData, sortKey, sortDirection, columns]);
+
+  // Function to determine if a column should be sortable based on its type
+  const isSortableColumn = (column: ITableColumn<T>) => {
+    // Don't allow sorting for select/multiselect columns (like Role, Status) 
+    // as these are meant for filtering only
+    if (column.filterType === 'select' || column.filterType === 'multiselect') {
+      return false;
+    }
+    
+    // Otherwise, respect the column's sortable property
+    return column.sortable === true;
+  };
+
+  // Handle sorting when a sortable column header is clicked
+  const handleSort = (columnKey: string) => {
+    const column = columns.find(col => col.key === columnKey);
+    if (!column) return;
+    
+    // Don't sort if the column shouldn't be sortable
+    if (!isSortableColumn(column)) return;
+    
+    // Prevent sorting when filters are active
+    if (Object.keys(columnFilters).length > 0) {
+      return;
+    }
+    
+    setSortKey(columnKey);
+    if (sortKey === columnKey) {
+      // Cycle through sort directions: null -> asc -> desc -> null
+      if (sortDirection === null) setSortDirection('asc');
+      else if (sortDirection === 'asc') setSortDirection('desc');
+      else setSortDirection(null);
+    } else {
+      // Default to ascending for a new sort column
+      setSortDirection('asc');
+    }
+  };
+
   // Handle column filter changes
   const handleColumnFilterChange = (columnKey: string, value: any) => {
     setColumnFilters(prev => {
@@ -132,6 +188,7 @@ export default function Table<T>({
   // Reset all column filters
   const resetColumnFilters = () => {
     setColumnFilters({});
+    setShowColumnFilterSummary(false); // Close the filter dropdown after clearing
   };
 
   // Visible columns (exclude hidden ones)
@@ -144,6 +201,26 @@ export default function Table<T>({
     Object.keys(columnFilters).length, 
     [columnFilters]
   );
+  
+  // Reference for the filter summary dropdown
+  const filterSummaryRef = useRef<HTMLDivElement>(null);
+  
+  // Close filter summary when clicking outside
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (filterSummaryRef.current && !filterSummaryRef.current.contains(event.target as Node)) {
+        setShowColumnFilterSummary(false);
+      }
+    }
+    
+    if (showColumnFilterSummary) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+    
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [showColumnFilterSummary]);
 
   useEffect(() => {
     if (externalItemsPerPage !== undefined) {
@@ -153,16 +230,16 @@ export default function Table<T>({
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [filteredData.length, setCurrentPage]);
+  }, [sortedData.length, setCurrentPage]);
   
   const totalPages = useMemo(() => 
-    Math.max(1, tableService.calculateTotalPages(filteredData.length, itemsPerPage)),
-    [tableService, filteredData.length, itemsPerPage]
+    Math.max(1, tableService.calculateTotalPages(sortedData.length, itemsPerPage)),
+    [tableService, sortedData.length, itemsPerPage]
   );
   
   const paginatedData = useMemo(() => 
-    tableService.getPaginatedData(filteredData, currentPage, itemsPerPage),
-    [tableService, filteredData, currentPage, itemsPerPage]
+    tableService.getPaginatedData(sortedData, currentPage, itemsPerPage),
+    [tableService, sortedData, currentPage, itemsPerPage]
   );
 
   const handleItemsPerPageChange = (newItemsPerPage: number) => {
@@ -171,6 +248,16 @@ export default function Table<T>({
   };
 
   const emptyRows = itemsPerPage - paginatedData.length;
+
+  // Function to render sort indicator
+  const renderSortIndicator = (columnKey: string) => {
+    if (sortKey !== columnKey) return <ChevronDown size={14} className="ml-1 text-gray-400" />;
+    
+    if (sortDirection === 'asc') return <ArrowUp size={14} className="ml-1 text-indigo-600" />;
+    if (sortDirection === 'desc') return <ArrowDown size={14} className="ml-1 text-indigo-600" />;
+    
+    return <ChevronDown size={14} className="ml-1 text-gray-400" />;
+  };
 
   return (
     <div className="space-y-4">
@@ -193,12 +280,12 @@ export default function Table<T>({
         <div className="px-6 py-3 flex items-center justify-between border-b border-gray-200 bg-white">
           <div className="flex items-center space-x-4">
             <h2 className="text-sm font-medium text-gray-700">
-              {filteredData.length} {filteredData.length === 1 ? 'item' : 'items'}
+              {sortedData.length} {sortedData.length === 1 ? 'item' : 'items'}
             </h2>
             
             {/* Column filter summary */}
             {activeColumnFilterCount > 0 && (
-              <div className="relative">
+              <div className="relative" ref={filterSummaryRef}>
                 <button 
                   className="flex items-center text-sm text-indigo-600 hover:text-indigo-800 font-medium"
                   onClick={() => setShowColumnFilterSummary(!showColumnFilterSummary)}
@@ -265,7 +352,7 @@ export default function Table<T>({
               setItemsPerPage={handleItemsPerPageChange}
               options={rowsPerPageOptions.map(size => ({
                 size, 
-                available: size <= Math.max(...rowsPerPageOptions, filteredData.length)
+                available: size <= Math.max(...rowsPerPageOptions, sortedData.length)
               }))}
             />
           )}
@@ -290,28 +377,43 @@ export default function Table<T>({
           </div>
         )}
         
-        {/* Rest of the table */}
+        {/* Table data */}
         <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200 table-fixed">
+          <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
                 {visibleColumns.map((column) => (
                   <th 
-                    key={column.key} 
-                    scope="col" 
-                    className={`px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider ${column.className || ''}`}
+                    key={column.key}
+                    scope="col"
+                    className={`px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-r border-gray-200 ${column.className || ''}`}
                   >
                     <div className="flex items-center justify-between">
-                      <span>{column.header}</span>
-                      {(column.filterable || column.hideable) && (
-                        <ColumnMenu
-                          column={column}
-                          data={data}
-                          onFilterChange={handleColumnFilterChange}
-                          onToggleVisibility={handleToggleColumnVisibility}
-                          activeFilters={columnFilters}
-                        />
-                      )}
+                      <div className="flex items-center">
+                        {isSortableColumn(column) ? (
+                          <button 
+                            className="flex items-center hover:text-gray-700 focus:outline-none" 
+                            onClick={() => handleSort(column.key)}
+                          >
+                            {column.header}
+                            {renderSortIndicator(column.key)}
+                          </button>
+                        ) : (
+                          <span>{column.header}</span>
+                        )}
+                      </div>
+                      
+                      {/* Column Menu */}
+                      <ColumnMenu
+                        column={column}
+                        data={data}
+                        onFilterChange={handleColumnFilterChange}
+                        onToggleVisibility={handleToggleColumnVisibility}
+                        activeFilters={columnFilters}
+                        onSortChange={handleSort}
+                        currentSortKey={sortKey}
+                        currentSortDirection={sortDirection}
+                      />
                     </div>
                   </th>
                 ))}
@@ -319,7 +421,7 @@ export default function Table<T>({
             </thead>
             
             <tbody className="bg-white divide-y divide-gray-200">
-              {filteredData.length === 0 ? (
+              {sortedData.length === 0 ? (
                 <>
                   <tr>
                     <td 
@@ -388,7 +490,7 @@ export default function Table<T>({
           currentPage={currentPage}
           totalPages={totalPages}
           itemsPerPage={itemsPerPage}
-          totalItems={filteredData.length}
+          totalItems={sortedData.length}
           onPageChange={setCurrentPage}
           onItemsPerPageChange={handleItemsPerPageChange}
           rowsPerPageOptions={rowsPerPageOptions}
