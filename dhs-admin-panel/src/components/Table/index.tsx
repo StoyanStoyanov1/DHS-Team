@@ -78,7 +78,53 @@ export default function Table<T>({
           break;
           
         case 'search':
-          if (typeof value === 'string' && value.trim() !== '') {
+          // Check if the value is a complex search configuration object
+          if (typeof value === 'object' && value !== null && value.term !== undefined) {
+            // It's a search configuration with method, field, etc.
+            const { term, field, method } = value;
+            if (!term) break; // Skip empty searches
+            
+            const searchTerm = term.toLowerCase();
+            result = result.filter(item => {
+              // Get the value from the item based on the field path
+              let itemValue;
+              if (field && field !== key) {
+                // Search in a nested field or different field
+                itemValue = String((item as any)[field] || '').toLowerCase();
+              } else {
+                // Search in the default column field
+                itemValue = String((item as any)[key] || '').toLowerCase();
+              }
+              
+              // Apply the appropriate search method
+              switch(method) {
+                case 'contains':
+                  return itemValue.includes(searchTerm);
+                case 'equals':
+                  return itemValue === searchTerm;
+                case 'startsWith':
+                  return itemValue.startsWith(searchTerm);
+                case 'endsWith':
+                  return itemValue.endsWith(searchTerm);
+                case 'notContains':
+                  return !itemValue.includes(searchTerm);
+                case 'isEmpty':
+                  return !itemValue || itemValue.trim() === '';
+                case 'isNotEmpty':
+                  return itemValue && itemValue.trim() !== '';
+                case 'regex':
+                  try {
+                    return new RegExp(searchTerm).test(itemValue);
+                  } catch (e) {
+                    return false;
+                  }
+                default:
+                  return itemValue.includes(searchTerm);
+              }
+            });
+          } 
+          // For backward compatibility: handle simple string searches
+          else if (typeof value === 'string' && value.trim() !== '') {
             const searchTerm = value.toLowerCase();
             result = result.filter(item => {
               const itemValue = String((item as any)[key] || '').toLowerCase();

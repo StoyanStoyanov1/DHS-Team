@@ -131,7 +131,15 @@ function UsersListContent() {
       filterable: true,
       filterType: 'search',
       hideable: true,
-      sortable: true
+      sortable: true,
+      // Add search fields for both name and email
+      searchFields: [
+        { key: 'name', label: 'Name', path: 'name' },
+        { key: 'email', label: 'Email', path: 'email' }
+      ],
+      fieldDataType: 'text',
+      // Add example recent searches
+      recentSearches: ['John', 'admin', 'support']
     },
     {
       header: 'Role',

@@ -2,6 +2,13 @@ import { ReactNode } from 'react';
 import { FilterGroup, SelectedFilters } from '../Filter/interfaces';
 
 export type SortDirection = 'asc' | 'desc' | null;
+export type SearchMethod = 'contains' | 'equals' | 'startsWith' | 'endsWith' | 'notContains' | 'isEmpty' | 'isNotEmpty' | 'regex';
+
+export interface SearchField {
+  key: string;
+  label: string;
+  path?: string; // Път за достъп до вложени данни
+}
 
 export interface ITableColumn<T> {
   header: string;
@@ -23,6 +30,11 @@ export interface ITableColumn<T> {
   // Column visibility
   hideable?: boolean;
   hidden?: boolean;
+
+  // Enhanced search options
+  searchFields?: SearchField[]; // For specifying multiple searchable fields within a column
+  fieldDataType?: 'text' | 'number' | 'date' | 'boolean' | 'array'; // For type-specific search options
+  recentSearches?: string[]; // For showing recent searches
 }
 
 /**

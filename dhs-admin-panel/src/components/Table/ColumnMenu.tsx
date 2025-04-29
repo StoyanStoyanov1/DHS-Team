@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { ITableColumn } from './interfaces';
 import { Eye, EyeOff, Filter as FilterIcon, Check, X, SearchIcon, ListFilter, ArrowDownAZ, ArrowUpAZ } from 'lucide-react';
 import { FilterGroup, SelectedFilters } from '../Filter/interfaces';
+import ColumnSearchFilter from './ColumnSearchFilter';
 
 interface ColumnMenuProps<T> {
   column: ITableColumn<T>;
@@ -26,6 +27,7 @@ export default function ColumnMenu<T>({
 }: ColumnMenuProps<T>) {
   const [filterValue, setFilterValue] = useState<any>(activeFilters[column.key] || null);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [showSearchFilter, setShowSearchFilter] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   
   // Get filter options either from column config or generate dynamically from data
@@ -49,6 +51,7 @@ export default function ColumnMenu<T>({
     function handleClickOutside(event: MouseEvent) {
       if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
         setIsMenuOpen(false);
+        setShowSearchFilter(false);
       }
     }
     
@@ -59,7 +62,15 @@ export default function ColumnMenu<T>({
   }, []);
 
   const toggleMenu = () => {
-    setIsMenuOpen(!isMenuOpen);
+    if (column.filterType === 'search') {
+      // For search columns, show the enhanced search filter
+      setShowSearchFilter(!showSearchFilter);
+      setIsMenuOpen(false);
+    } else {
+      // For other filter types, show the regular menu
+      setIsMenuOpen(!isMenuOpen);
+      setShowSearchFilter(false);
+    }
   };
 
   const handleFilterApply = () => {
@@ -122,6 +133,21 @@ export default function ColumnMenu<T>({
     }
   };
 
+  // Handle search from ColumnSearchFilter
+  const handleAdvancedSearch = (columnKey: string, term: string, field: string, method: string) => {
+    // Store the complete search configuration as an object in the filter value
+    const searchConfig = {
+      term: term || null,
+      field: field || columnKey,
+      method: method || 'contains'
+    };
+    
+    // Pass the entire search configuration to the filter
+    onFilterChange(columnKey, searchConfig);
+    // Don't automatically close the search filter - let the user close it manually
+    // setShowSearchFilter(false);
+  };
+
   const renderFilterControls = () => {
     switch (column.filterType) {
       case 'select':
@@ -165,6 +191,7 @@ export default function ColumnMenu<T>({
         );
         
       case 'search':
+        // We now handle search differently using the ColumnSearchFilter component
         return (
           <div className="flex items-center space-x-1" onClick={(e) => e.stopPropagation()}>
             <input
@@ -250,6 +277,17 @@ export default function ColumnMenu<T>({
     return null;
   }
 
+  // Prepare search fields for the column
+  const getSearchFields = () => {
+    // If column has searchFields defined, use those
+    if (column.searchFields && column.searchFields.length > 0) {
+      return column.searchFields;
+    }
+    
+    // Otherwise create a default search field based on the column
+    return [{ key: column.key, label: column.header, path: column.key }];
+  };
+
   return (
     <div className="relative" ref={menuRef}>
       {/* Action buttons that appear on hover */}
@@ -281,8 +319,29 @@ export default function ColumnMenu<T>({
         )}
       </div>
       
+      {/* Enhanced search filter for search columns */}
+      {showSearchFilter && column.filterType === 'search' && (
+        <div 
+          className="absolute z-50 mt-1 right-0 transform origin-top-right"
+          style={{
+            animation: 'menuAppear 0.2s ease-out forwards'
+          }}
+        >
+          <ColumnSearchFilter
+            columnKey={column.key}
+            columnHeader={column.header}
+            searchFields={getSearchFields()}
+            onSearch={handleAdvancedSearch}
+            initialValue={filterValue || ''}
+            onClose={() => setShowSearchFilter(false)}
+            fieldDataType={column.fieldDataType || 'text'}
+            recentSearches={column.recentSearches || []}
+          />
+        </div>
+      )}
+      
       {/* Menu with animation - shown only when isMenuOpen is true */}
-      {isMenuOpen && (
+      {isMenuOpen && column.filterType !== 'search' && (
         <div 
           className="absolute z-50 mt-1 min-w-[160px] p-3 bg-white rounded-md shadow-lg border border-gray-200 right-0"
           style={{
