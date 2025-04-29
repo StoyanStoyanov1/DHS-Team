@@ -135,9 +135,15 @@ export default function ColumnMenu<T>({
 
   // Handle search from ColumnSearchFilter
   const handleAdvancedSearch = (columnKey: string, term: string, field: string, method: string) => {
+    // Ако term е null или празен низ, премахни филтъра напълно
+    if (term === null || term === '') {
+      onFilterChange(columnKey, null);
+      return;
+    }
+    
     // Store the complete search configuration as an object in the filter value
     const searchConfig = {
-      term: term || null,
+      term: term,
       field: field || columnKey,
       method: method || 'contains'
     };

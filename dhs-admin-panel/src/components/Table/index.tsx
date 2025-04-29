@@ -82,9 +82,14 @@ export default function Table<T>({
           if (typeof value === 'object' && value !== null && value.term !== undefined) {
             // It's a search configuration with method, field, etc.
             const { term, field, method } = value;
-            if (!term) break; // Skip empty searches
             
-            const searchTerm = term.toLowerCase();
+            // Ако term е null, то пропускаме филтрацията - филтърът е бил изчистен
+            if (term === null) break;
+            
+            // Пропускаме филтрацията, ако термина за търсене е празен (с изключение на специалните методи isEmpty/isNotEmpty)
+            if (!term && !['isEmpty', 'isNotEmpty'].includes(method)) break;
+            
+            const searchTerm = String(term).toLowerCase();
             result = result.filter(item => {
               // Get the value from the item based on the field path
               let itemValue;
@@ -180,10 +185,7 @@ export default function Table<T>({
     // Don't sort if the column shouldn't be sortable
     if (!isSortableColumn(column)) return;
     
-    // Prevent sorting when filters are active
-    if (Object.keys(columnFilters).length > 0) {
-      return;
-    }
+    // Премахната е проверката, която блокираше сортирането при наличие на филтри
     
     setSortKey(columnKey);
     if (sortKey === columnKey) {
@@ -229,6 +231,17 @@ export default function Table<T>({
         col.key === columnKey ? { ...col, hidden: !col.hidden } : col
       )
     );
+    
+    // Когато скриваме колона, проверяваме дали има активен филтър за нея и го премахваме
+    const column = columns.find(col => col.key === columnKey);
+    if (column && !column.hidden && columnFilters[columnKey] !== undefined) {
+      // Само ако колоната е била видима и сега се скрива, премахваме филтъра
+      setColumnFilters(prev => {
+        const newFilters = { ...prev };
+        delete newFilters[columnKey];
+        return newFilters;
+      });
+    }
   };
 
   // Reset all column filters

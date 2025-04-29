@@ -97,16 +97,28 @@ export default function ColumnSearchFilter({
   }, [showRecentSearches]);
 
   const handleSearch = () => {
-    // If the search term is empty (except for isEmpty/isNotEmpty methods), clear the filter
-    if (!searchTerm && !['isEmpty', 'isNotEmpty'].includes(searchMethod)) {
-      handleClear();
+    // Ако методът не е isEmpty/isNotEmpty и търсеният низ е празен,
+    // директно премахваме филтъра от активните филтри
+    if (searchTerm === "" && !['isEmpty', 'isNotEmpty'].includes(searchMethod)) {
+      // Изпращаме null стойност, което ще премахне филтъра от активните филтри
+      onSearch(columnKey, null, selectedField, searchMethod as SearchMethod);
+      
+      // Затваряме филтъра след премахване
+      if (onClose) {
+        onClose();
+      }
       return;
     }
     
-    // Apply the search - only now the search is actually applied
-    onSearch(columnKey, searchTerm, selectedField, searchMethod as SearchMethod);
+    // За методи isEmpty и isNotEmpty не е нужна стойност за търсене
+    if (['isEmpty', 'isNotEmpty'].includes(searchMethod)) {
+      onSearch(columnKey, '', selectedField, searchMethod as SearchMethod);
+    } else {
+      // За всички останали методи използваме въведения низ
+      onSearch(columnKey, searchTerm, selectedField, searchMethod as SearchMethod);
+    }
     
-    // Close the search filter popup after applying search
+    // Затваряме филтъра след прилагане на търсенето
     if (onClose) {
       onClose();
     }
@@ -116,7 +128,7 @@ export default function ColumnSearchFilter({
     setSearchTerm('');
     setSearchMethod('contains');
     setCaseSensitive(false);
-    onSearch(columnKey, '', selectedField, 'contains');
+    onSearch(columnKey, null, selectedField, 'contains');
     if (onClose) {
       onClose();
     }
@@ -125,15 +137,20 @@ export default function ColumnSearchFilter({
   // Custom close handler that doesn't apply changes
   const handleClose = () => {
     if (onClose) {
-      // If user closes without searching, restore the previous filter state
-      if (typeof initialValue === 'object' && initialValue !== null) {
+      // Ако потребителят затвори компонента без да търси, НЕ запазваме текущото състояние
+      // Това предотвратява добавянето на празни филтри в списъка с активни филтри
+      
+      // Ако няма предходен филтър (initialValue е празен) и searchTerm е празен,
+      // премахваме филтъра от активните
+      if ((initialValue === '' || initialValue === null) && (searchTerm === '' || searchTerm === null)) {
+        onSearch(columnKey, null, selectedField, 'contains');
+      } 
+      // Ако имаме предишна стойност, запазваме я без промяна
+      else if (typeof initialValue === 'object' && initialValue !== null) {
         const config = initialValue as any;
         if (config.term !== undefined && config.field !== undefined && config.method !== undefined) {
-          onSearch(columnKey, config.term || '', config.field, config.method as SearchMethod);
+          // Не правим нищо - запазваме текущия филтър както си е
         }
-      } else {
-        // If there was no previous filter, clear it
-        onSearch(columnKey, '', selectedField, 'contains');
       }
       
       onClose();
