@@ -180,13 +180,14 @@ export default function Table<T>({
 
   // Function to determine if a column should be sortable based on its type
   const isSortableColumn = (column: ITableColumn<T>) => {
-    // Don't allow sorting for select/multiselect columns (like Role, Status) 
-    // as these are meant for filtering only
-    if (column.filterType === 'select' || column.filterType === 'multiselect') {
+    // Не позволяваме сортиране за select/multiselect/boolean колони
+    if (column.filterType === 'select' || 
+        column.filterType === 'multiselect' || 
+        column.filterType === 'boolean') {
       return false;
     }
     
-    // Otherwise, respect the column's sortable property
+    // В останалите случаи, зачитаме sortable свойството на колоната
     return column.sortable === true;
   };
 

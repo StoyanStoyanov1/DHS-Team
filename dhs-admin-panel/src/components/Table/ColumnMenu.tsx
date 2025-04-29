@@ -174,21 +174,17 @@ export default function ColumnMenu<T>({
         );
         
       case 'boolean':
-        // Използваме новия компонент за булеви филтри с директно предаване на стойността
         return (
           <div onClick={(e) => e.stopPropagation()}>
             <BooleanColumnFilter 
               value={filterValue}
               onChange={(value) => {
-                // Локално обновяване на стойността без да задействаме филтър
                 console.log("Boolean filter changed to:", value);
                 setFilterValue(value);
               }}
               onApply={(value) => {
-                // Директно използваме получената стойност от компонента
                 console.log("Applying boolean filter with direct value:", value);
                 
-                // Прилагаме филтъра директно с получената стойност
                 onFilterChange(column.key, value);
                 setIsMenuOpen(false);
               }}
@@ -201,7 +197,6 @@ export default function ColumnMenu<T>({
         );
         
       case 'custom':
-        // Рендерира потребителски компонент за филтриране, ако е наличен
         return column.customFilterComponent ? (
           <div onClick={(e) => e.stopPropagation()}>
             {column.customFilterComponent(onFilterChange, filterValue)}
