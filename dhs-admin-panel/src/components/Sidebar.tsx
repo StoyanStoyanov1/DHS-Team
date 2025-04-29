@@ -49,6 +49,7 @@ const Sidebar: React.FC<SidebarProps> = ({
     const router = useRouter();
     const pathname = usePathname();
     const [isAuthOpen, setIsAuthOpen] = useState(false);
+    const [isUsersOpen, setIsUsersOpen] = useState(false); // Добавен state за Users менюто
     const [isHovering, setIsHovering] = useState(false);
     const [isPinned, setIsPinned] = useState(false);
 
@@ -56,6 +57,7 @@ const Sidebar: React.FC<SidebarProps> = ({
     const isAuthPath = pathname?.startsWith('/auth');
     const isLoginPath = pathname === '/auth/login';
     const isRegisterPath = pathname === '/auth/register';
+    const isUsersListPath = pathname === '/users-list'; // Проверка за users-list path
 
     // Effect to auto-open auth submenu when on auth pages
     useEffect(() => {
@@ -64,11 +66,25 @@ const Sidebar: React.FC<SidebarProps> = ({
         }
     }, [pathname, isAuthPath]);
 
+    // Effect to auto-open users submenu when on users pages
+    useEffect(() => {
+        if (isUsersListPath) {
+            setIsUsersOpen(true);
+            setActiveSection('users');
+        }
+    }, [pathname, isUsersListPath, setActiveSection]);
+
     const handleAuthClick = () => {
         setIsAuthOpen(!isAuthOpen);
         if (!isAuthPath) {
             setActiveSection('authentication');
         }
+    };
+
+    // Нова функция за превключване на Users менюто
+    const handleUsersClick = () => {
+        setIsUsersOpen(!isUsersOpen);
+        setActiveSection('users');
     };
 
     const handleLoginClick = () => {
@@ -214,19 +230,19 @@ const Sidebar: React.FC<SidebarProps> = ({
                     <div className="relative">
                         <div
                             className={`flex items-center px-3 py-2 rounded-md cursor-pointer mb-1 ${activeSection === 'users' ? 'bg-gray-100 text-blue-600' : 'text-gray-600 hover:bg-gray-50'}`}
-                            onClick={() => setActiveSection('users')}
+                            onClick={handleUsersClick} // Променено от setActiveSection на handleUsersClick
                         >
                             <div className="text-gray-500"><Users size={18} /></div>
                             {shouldExpand && (
                                 <>
                                     <span className="ml-3 text-sm font-medium">Users</span>
                                     <div className="ml-auto">
-                                        {activeSection === 'users' ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+                                        {isUsersOpen ? <ChevronUp size={16} /> : <ChevronDown size={16} />} {/* Променено от activeSection на isUsersOpen */}
                                     </div>
                                 </>
                             )}
                         </div>
-                        {shouldExpand && activeSection === 'users' && (
+                        {shouldExpand && isUsersOpen && ( // Променено от activeSection на isUsersOpen
                             <div className="ml-4 mt-1 space-y-1">
                                 <button
                                     onClick={() => router.push('/users-list')}
