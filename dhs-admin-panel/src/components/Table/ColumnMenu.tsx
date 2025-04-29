@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { ITableColumn } from './interfaces';
-import { MoreVertical, Eye, EyeOff, Filter as FilterIcon, Check, X } from 'lucide-react';
+import { Eye, EyeOff, Filter as FilterIcon, Check, X, SearchIcon, ListFilter, ArrowDownAZ, ArrowUpAZ } from 'lucide-react';
 import { FilterGroup, SelectedFilters } from '../Filter/interfaces';
 
 interface ColumnMenuProps<T> {
@@ -33,13 +33,18 @@ export default function ColumnMenu<T>({
     ? column.getFilterOptions(data)
     : column.filterOptions || [];
 
+  // Check if column has an active filter
+  const hasActiveFilter = activeFilters[column.key] !== undefined;
+  
   // Check if menu should be shown (when there are available options)
   const shouldShowMenu = column.hideable || column.filterable;
-  
-  // Check if any filters are active across all columns
-  const hasActiveFilters = Object.keys(activeFilters).length > 0;
 
-  // Handle clicks outside to close the menu
+  // Initialize filter value from active filters
+  useEffect(() => {
+    setFilterValue(activeFilters[column.key] || null);
+  }, [activeFilters, column.key]);
+
+  // Click outside handler to close any expanded elements
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
@@ -53,29 +58,24 @@ export default function ColumnMenu<T>({
     };
   }, []);
 
-  // Initialize filter value from active filters
-  useEffect(() => {
-    setFilterValue(activeFilters[column.key] || null);
-  }, [activeFilters, column.key]);
-
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
   };
 
   const handleFilterApply = () => {
     onFilterChange(column.key, filterValue);
-    setIsMenuOpen(false); // Close menu after applying filter
+    setIsMenuOpen(false);
   };
 
   const handleFilterClear = () => {
     setFilterValue(null);
     onFilterChange(column.key, null);
-    setIsMenuOpen(false); // Close menu after clearing filter
+    setIsMenuOpen(false);
   };
 
   const handleToggleVisibility = () => {
     onToggleVisibility(column.key);
-    setIsMenuOpen(false); // Close menu after toggling visibility
+    setIsMenuOpen(false);
   };
 
   // Handle select option change with auto-apply
@@ -107,14 +107,30 @@ export default function ColumnMenu<T>({
     }
   };
 
+  // Get appropriate filter icon based on column type
+  const getFilterIcon = () => {
+    switch (column.filterType) {
+      case 'search':
+        return <SearchIcon size={14} />;
+      case 'select':
+      case 'multiselect':
+        return <ListFilter size={14} />;
+      case 'range':
+        return <FilterIcon size={14} />;
+      default:
+        return <FilterIcon size={14} />;
+    }
+  };
+
   const renderFilterControls = () => {
     switch (column.filterType) {
       case 'select':
         return (
           <select
-            className="w-full p-2 border rounded-md text-sm"
+            className="w-full p-1.5 border rounded-md text-sm bg-white transition-all duration-200"
             value={filterValue || ''}
             onChange={handleSelectChange}
+            onClick={(e) => e.stopPropagation()}
           >
             <option value="">All</option>
             {filterOptions.map((option) => (
@@ -127,11 +143,14 @@ export default function ColumnMenu<T>({
         
       case 'multiselect':
         return (
-          <div className="max-h-40 overflow-y-auto border rounded-md">
+          <div 
+            className="max-h-32 overflow-y-auto border rounded-md bg-white shadow-sm transition-all duration-200"
+            onClick={(e) => e.stopPropagation()}
+          >
             {filterOptions.map((option) => (
               <label 
                 key={option.id} 
-                className="flex items-center p-2 hover:bg-indigo-50 text-sm cursor-pointer"
+                className="flex items-center p-1.5 hover:bg-indigo-50 text-sm cursor-pointer"
               >
                 <input
                   type="checkbox"
@@ -147,15 +166,18 @@ export default function ColumnMenu<T>({
         
       case 'search':
         return (
-          <div>
+          <div className="flex items-center space-x-1" onClick={(e) => e.stopPropagation()}>
             <input
               type="text"
               placeholder="Search..."
-              className="w-full p-2 border rounded-md text-sm"
+              className="w-full p-1.5 border rounded-md text-sm bg-white transition-all duration-200"
               value={filterValue || ''}
-              onChange={(e) => setFilterValue(e.target.value)}
+              onChange={(e) => {
+                setFilterValue(e.target.value);
+              }}
+              autoFocus
             />
-            <div className="flex justify-end mt-2 space-x-2">
+            <div className="flex space-x-1 mt-2">
               <button
                 onClick={handleFilterClear}
                 className="px-2 py-1 text-xs border border-gray-200 rounded-md hover:bg-gray-50"
@@ -174,30 +196,34 @@ export default function ColumnMenu<T>({
         
       case 'range':
         return (
-          <>
-            <div className="flex space-x-2">
+          <div onClick={(e) => e.stopPropagation()}>
+            <div className="flex space-x-1">
               <input
                 type="number"
                 placeholder="Min"
-                className="w-1/2 p-2 border rounded-md text-sm"
+                className="w-1/2 p-1.5 border rounded-md text-sm bg-white transition-all duration-200"
                 value={filterValue?.min || ''}
-                onChange={(e) => setFilterValue({
-                  ...filterValue || {},
-                  min: e.target.value ? Number(e.target.value) : null
-                })}
+                onChange={(e) => {
+                  setFilterValue({
+                    ...filterValue || {},
+                    min: e.target.value ? Number(e.target.value) : null
+                  });
+                }}
               />
               <input
                 type="number"
                 placeholder="Max"
-                className="w-1/2 p-2 border rounded-md text-sm"
+                className="w-1/2 p-1.5 border rounded-md text-sm bg-white transition-all duration-200"
                 value={filterValue?.max || ''}
-                onChange={(e) => setFilterValue({
-                  ...filterValue || {},
-                  max: e.target.value ? Number(e.target.value) : null
-                })}
+                onChange={(e) => {
+                  setFilterValue({
+                    ...filterValue || {},
+                    max: e.target.value ? Number(e.target.value) : null
+                  });
+                }}
               />
             </div>
-            <div className="flex justify-end mt-2 space-x-2">
+            <div className="flex space-x-1 mt-2">
               <button
                 onClick={handleFilterClear}
                 className="px-2 py-1 text-xs border border-gray-200 rounded-md hover:bg-gray-50"
@@ -211,78 +237,63 @@ export default function ColumnMenu<T>({
                 Apply
               </button>
             </div>
-          </>
+          </div>
         );
         
       default:
-        return <p className="text-xs text-gray-500 italic">No filter available</p>;
+        return null;
     }
   };
 
-  // Only render the menu button if there are options available
+  // Only render the menu if there are options available
   if (!shouldShowMenu) {
     return null;
   }
 
   return (
     <div className="relative" ref={menuRef}>
-      {/* Button with three dots that toggles the menu */}
-      <button 
-        onClick={toggleMenu}
-        className="text-gray-400 hover:text-gray-600 focus:outline-none"
-        aria-label="Column Menu"
-      >
-        <MoreVertical size={14} />
-      </button>
+      {/* Action buttons that appear on hover */}
+      <div className={`flex items-center column-menu-actions ${hasActiveFilter ? 'active' : ''}`}>
+        {/* Filter button - Show active status with color */}
+        {column.filterable && (
+          <button 
+            onClick={toggleMenu}
+            className={`p-1 rounded-md mr-1 focus:outline-none transition-colors duration-150 ${
+              hasActiveFilter ? 'text-indigo-600 bg-indigo-50' : 'text-gray-400 hover:text-gray-600 hover:bg-gray-100'
+            }`}
+            aria-label={`Filter ${column.header}`}
+            title={`Filter ${column.header}`}
+          >
+            {getFilterIcon()}
+          </button>
+        )}
+        
+        {/* Column visibility toggle */}
+        {column.hideable && (
+          <button 
+            onClick={handleToggleVisibility}
+            className="p-1 rounded-md text-gray-400 hover:text-gray-600 hover:bg-gray-100 focus:outline-none transition-colors duration-150"
+            aria-label={column.hidden ? "Show Column" : "Hide Column"}
+            title={column.hidden ? "Show Column" : "Hide Column"}
+          >
+            {column.hidden ? <Eye size={14} /> : <EyeOff size={14} />}
+          </button>
+        )}
+      </div>
       
       {/* Menu with animation - shown only when isMenuOpen is true */}
       {isMenuOpen && (
         <div 
-          className="fixed z-50 mt-1 w-60 p-2 bg-white rounded-md shadow-lg border border-gray-200"
+          className="absolute z-50 mt-1 min-w-[160px] p-3 bg-white rounded-md shadow-lg border border-gray-200 right-0"
           style={{
             animation: 'menuAppear 0.2s ease-out forwards',
-            transformOrigin: 'top right',
-            top: menuRef.current ? menuRef.current.getBoundingClientRect().bottom + window.scrollY : 0,
-            left: menuRef.current ? menuRef.current.getBoundingClientRect().right - 240 : 0,
-            boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)'
+            transformOrigin: 'top right'
           }}
         >
-          <div className="mb-3 py-1 border-b border-gray-100">
-            <h3 className="font-medium text-sm text-gray-800 mb-1">Column: {column.header}</h3>
+          <div className="mb-2 pb-1 border-b border-gray-100">
+            <h3 className="font-medium text-sm text-gray-800">{column.header}</h3>
           </div>
-          
-          {column.hideable && (
-            <div className="py-1 mb-2 border-b border-gray-100">
-              <button
-                onClick={handleToggleVisibility}
-                className="flex items-center w-full px-2 py-1 text-sm text-left hover:bg-gray-50 rounded-md"
-              >
-                {column.hidden ? (
-                  <>
-                    <Eye size={15} className="mr-2 text-indigo-600" />
-                    <span>Show Column</span>
-                  </>
-                ) : (
-                  <>
-                    <EyeOff size={15} className="mr-2 text-gray-600" />
-                    <span>Hide Column</span>
-                  </>
-                )}
-              </button>
-            </div>
-          )}
-          
-          {column.filterable && (
-            <div className="py-1">
-              <div className="mb-2">
-                <div className="flex items-center mb-1">
-                  <FilterIcon size={14} className="mr-1.5 text-indigo-600" />
-                  <span className="text-sm font-medium">Filter</span>
-                </div>
-                {renderFilterControls()}
-              </div>
-            </div>
-          )}
+          {renderFilterControls()}
         </div>
       )}
     </div>

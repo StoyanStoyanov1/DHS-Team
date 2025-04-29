@@ -397,7 +397,7 @@ export default function Table<T>({
                   <th 
                     key={column.key}
                     scope="col"
-                    className={`px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-r border-gray-200 ${column.className || ''}`}
+                    className={`px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-r border-gray-200 table-column-header transition-colors duration-200 ${column.className || ''}`}
                   >
                     <div className="flex items-center justify-between">
                       <div className="flex items-center">
