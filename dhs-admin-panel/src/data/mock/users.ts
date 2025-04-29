@@ -5,6 +5,7 @@ export interface User {
   role: string;
   status: string;
   lastLogin: string;
+  isActive: boolean;  // Добавяме ново поле isActive тип boolean
 }
 
 export const mockUsers: User[] = [
@@ -15,6 +16,7 @@ export const mockUsers: User[] = [
     role: 'Admin',
     status: 'Active',
     lastLogin: '2023-04-23',
+    isActive: true,
   },
   {
     id: 2,
@@ -23,6 +25,7 @@ export const mockUsers: User[] = [
     role: 'Editor',
     status: 'Active',
     lastLogin: '2023-04-22',
+    isActive: true,
   },
   {
     id: 3,
@@ -31,6 +34,7 @@ export const mockUsers: User[] = [
     role: 'User',
     status: 'Active',
     lastLogin: '2023-04-21',
+    isActive: true,
   },
   {
     id: 4,
@@ -39,6 +43,7 @@ export const mockUsers: User[] = [
     role: 'Editor',
     status: 'Inactive',
     lastLogin: '2023-03-15',
+    isActive: false,
   },
   {
     id: 5,
@@ -47,6 +52,7 @@ export const mockUsers: User[] = [
     role: 'Admin',
     status: 'Active',
     lastLogin: '2023-04-20',
+    isActive: true,
   },
   {
     id: 6,
@@ -55,6 +61,7 @@ export const mockUsers: User[] = [
     role: 'User',
     status: 'Active',
     lastLogin: '2023-04-19',
+    isActive: true,
   },
   {
     id: 7,
@@ -63,6 +70,7 @@ export const mockUsers: User[] = [
     role: 'User',
     status: 'Inactive',
     lastLogin: '2023-02-28',
+    isActive: false,
   },
   {
     id: 8,
@@ -71,6 +79,7 @@ export const mockUsers: User[] = [
     role: 'Editor',
     status: 'Active',
     lastLogin: '2023-04-18',
+    isActive: true,
   },
   {
     id: 9,
@@ -79,6 +88,7 @@ export const mockUsers: User[] = [
     role: 'User',
     status: 'Active',
     lastLogin: '2023-04-17',
+    isActive: true,
   },
   {
     id: 10,
@@ -87,6 +97,7 @@ export const mockUsers: User[] = [
     role: 'User',
     status: 'Active',
     lastLogin: '2023-04-16',
+    isActive: true,
   },
   {
     id: 11,
@@ -95,6 +106,7 @@ export const mockUsers: User[] = [
     role: 'Editor',
     status: 'Active',
     lastLogin: '2023-04-15',
+    isActive: true,
   },
   {
     id: 12,
@@ -103,6 +115,7 @@ export const mockUsers: User[] = [
     role: 'User',
     status: 'Inactive',
     lastLogin: '2023-03-10',
+    isActive: false,
   },
   {
     id: 13,
@@ -111,6 +124,7 @@ export const mockUsers: User[] = [
     role: 'Admin',
     status: 'Active',
     lastLogin: '2023-04-14',
+    isActive: true,
   },
   {
     id: 14,
@@ -119,6 +133,7 @@ export const mockUsers: User[] = [
     role: 'User',
     status: 'Active',
     lastLogin: '2023-04-13',
+    isActive: true,
   },
   {
     id: 15,
@@ -127,6 +142,7 @@ export const mockUsers: User[] = [
     role: 'Editor',
     status: 'Active',
     lastLogin: '2023-04-12',
+    isActive: true,
   },
   {
     id: 16,
@@ -135,6 +151,7 @@ export const mockUsers: User[] = [
     role: 'User',
     status: 'Active',
     lastLogin: '2023-04-11',
+    isActive: true,
   },
   {
     id: 17,
@@ -143,6 +160,7 @@ export const mockUsers: User[] = [
     role: 'User',
     status: 'Inactive',
     lastLogin: '2023-03-05',
+    isActive: false,
   },
   {
     id: 18,
@@ -151,6 +169,7 @@ export const mockUsers: User[] = [
     role: 'Editor',
     status: 'Active',
     lastLogin: '2023-04-10',
+    isActive: true,
   },
   {
     id: 19,
@@ -159,6 +178,7 @@ export const mockUsers: User[] = [
     role: 'User',
     status: 'Active',
     lastLogin: '2023-04-09',
+    isActive: true,
   },
   {
     id: 20,
@@ -167,6 +187,7 @@ export const mockUsers: User[] = [
     role: 'Admin',
     status: 'Active',
     lastLogin: '2023-04-08',
+    isActive: true,
   },
   {
     id: 21,
@@ -175,6 +196,7 @@ export const mockUsers: User[] = [
     role: 'User',
     status: 'Active',
     lastLogin: '2023-04-07',
+    isActive: true,
   },
   {
     id: 22,
@@ -183,6 +205,7 @@ export const mockUsers: User[] = [
     role: 'Editor',
     status: 'Active',
     lastLogin: '2023-04-06',
+    isActive: true,
   },
   {
     id: 23,
@@ -191,6 +214,7 @@ export const mockUsers: User[] = [
     role: 'User',
     status: 'Inactive',
     lastLogin: '2023-02-15',
+    isActive: false,
   },
   {
     id: 24,
@@ -199,6 +223,7 @@ export const mockUsers: User[] = [
     role: 'User',
     status: 'Active',
     lastLogin: '2023-04-05',
+    isActive: true,
   },
   {
     id: 25,
@@ -207,5 +232,6 @@ export const mockUsers: User[] = [
     role: 'Admin',
     status: 'Active',
     lastLogin: '2023-04-04',
+    isActive: true,
   }
 ];

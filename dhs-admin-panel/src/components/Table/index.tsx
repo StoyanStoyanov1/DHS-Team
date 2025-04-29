@@ -71,6 +71,21 @@ export default function Table<T>({
           result = result.filter(item => (item as any)[key] === value);
           break;
           
+        case 'boolean':
+          // Специална обработка за булеви стойности
+          if (value !== null) {
+            // Важно: Превръщаме стойността в булев тип независимо от формата
+            const boolValue = value === true || value === 'true';
+            console.log(`Filtering boolean column: ${key}, filter value:`, boolValue, typeof boolValue);
+            
+            result = result.filter(item => {
+              const itemValue = Boolean((item as any)[key]);
+              console.log(`Item ${key}:`, itemValue, typeof itemValue);
+              return itemValue === boolValue;
+            });
+          }
+          break;
+          
         case 'multiselect':
           if (Array.isArray(value) && value.length > 0) {
             result = result.filter(item => value.includes((item as any)[key]));
@@ -83,10 +98,8 @@ export default function Table<T>({
             // It's a search configuration with method, field, etc.
             const { term, field, method } = value;
             
-            // Ако term е null, то пропускаме филтрацията - филтърът е бил изчистен
             if (term === null) break;
             
-            // Пропускаме филтрацията, ако термина за търсене е празен (с изключение на специалните методи isEmpty/isNotEmpty)
             if (!term && !['isEmpty', 'isNotEmpty'].includes(method)) break;
             
             const searchTerm = String(term).toLowerCase();

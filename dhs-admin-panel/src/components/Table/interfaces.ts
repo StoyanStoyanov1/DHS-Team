@@ -20,12 +20,19 @@ export interface ITableColumn<T> {
   
   // Column filtering options
   filterable?: boolean;
-  filterType?: 'select' | 'multiselect' | 'search' | 'range' | 'checkbox';
+  filterType?: 'select' | 'multiselect' | 'search' | 'range' | 'checkbox' | 'custom' | 'boolean';
   filterOptions?: { id: string | number; label: string; value: any }[];
   // For custom range filters
   filterRange?: { min: number; max: number };
   // Function to get unique values from the data for dynamic filter options
   getFilterOptions?: (data: T[]) => { id: string | number; label: string; value: any }[];
+  // Custom filter component
+  customFilterComponent?: (onFilterChange: (key: string, value: any) => void, currentValue: any) => ReactNode;
+  
+  // Boolean filter specific props
+  labelTrue?: string;
+  labelFalse?: string;
+  labelAll?: string;
   
   // Column visibility
   hideable?: boolean;

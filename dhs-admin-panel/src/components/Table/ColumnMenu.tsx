@@ -3,6 +3,7 @@ import { ITableColumn } from './interfaces';
 import { Eye, EyeOff, Filter as FilterIcon, Check, X, SearchIcon, ListFilter, ArrowDownAZ, ArrowUpAZ } from 'lucide-react';
 import { FilterGroup, SelectedFilters } from '../Filter/interfaces';
 import ColumnSearchFilter from './ColumnSearchFilter';
+import BooleanColumnFilter from './BooleanColumnFilter';
 
 interface ColumnMenuProps<T> {
   column: ITableColumn<T>;
@@ -135,7 +136,6 @@ export default function ColumnMenu<T>({
 
   // Handle search from ColumnSearchFilter
   const handleAdvancedSearch = (columnKey: string, term: string, field: string, method: string) => {
-    // Ако term е null или празен низ, премахни филтъра напълно
     if (term === null || term === '') {
       onFilterChange(columnKey, null);
       return;
@@ -172,6 +172,41 @@ export default function ColumnMenu<T>({
             ))}
           </select>
         );
+        
+      case 'boolean':
+        // Използваме новия компонент за булеви филтри с директно предаване на стойността
+        return (
+          <div onClick={(e) => e.stopPropagation()}>
+            <BooleanColumnFilter 
+              value={filterValue}
+              onChange={(value) => {
+                // Локално обновяване на стойността без да задействаме филтър
+                console.log("Boolean filter changed to:", value);
+                setFilterValue(value);
+              }}
+              onApply={(value) => {
+                // Директно използваме получената стойност от компонента
+                console.log("Applying boolean filter with direct value:", value);
+                
+                // Прилагаме филтъра директно с получената стойност
+                onFilterChange(column.key, value);
+                setIsMenuOpen(false);
+              }}
+              onClose={() => setIsMenuOpen(false)}
+              labelTrue={column.labelTrue || 'True'}
+              labelFalse={column.labelFalse || 'False'}
+              labelAll={column.labelAll || 'All'}
+            />
+          </div>
+        );
+        
+      case 'custom':
+        // Рендерира потребителски компонент за филтриране, ако е наличен
+        return column.customFilterComponent ? (
+          <div onClick={(e) => e.stopPropagation()}>
+            {column.customFilterComponent(onFilterChange, filterValue)}
+          </div>
+        ) : null;
         
       case 'multiselect':
         return (

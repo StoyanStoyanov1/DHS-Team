@@ -37,12 +37,12 @@ function UsersListContent() {
       icon: <ShieldCheck size={16} />,
     },
     {
-      id: 'status',
+      id: 'isActive',
       label: 'Status',
       type: 'select',
       options: [
-        { id: 'active', label: 'Active', value: 'Active' },
-        { id: 'inactive', label: 'Inactive', value: 'Inactive' },
+        { id: 'active', label: 'Active', value: true },
+        { id: 'inactive', label: 'Inactive', value: false },
       ],
       icon: <Activity size={16} />,
     },
@@ -86,9 +86,9 @@ function UsersListContent() {
       result = result.filter(user => filters.role.includes(user.role));
     }
     
-    // Apply status filter (select)
-    if (filters.status) {
-      result = result.filter(user => user.status === filters.status);
+    // Apply status filter (select) - използваме isActive вместо status
+    if (filters.isActive !== undefined) {
+      result = result.filter(user => user.isActive === filters.isActive);
     }
     
     setFilteredUsers(result);
@@ -160,16 +160,18 @@ function UsersListContent() {
     },
     {
       header: 'Status',
-      key: 'status',
+      key: 'isActive',
       render: (user) => (
         <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
-          ${user.status === 'Active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
-          {user.status}
+          ${user.isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+          {user.isActive ? 'Active' : 'Inactive'}
         </span>
       ),
       filterable: true,
-      filterType: 'select',
-      getFilterOptions: getStatusFilterOptions,
+      filterType: 'boolean',
+      labelTrue: 'Active',
+      labelFalse: 'Inactive',
+      labelAll: 'All Statuses',
       hideable: true,
       sortable: true
     },
