@@ -20,7 +20,7 @@ export interface ITableColumn<T> {
   
   // Column filtering options
   filterable?: boolean;
-  filterType?: 'select' | 'multiselect' | 'search' | 'range' | 'checkbox' | 'custom' | 'boolean';
+  filterType?: 'select' | 'multiselect' | 'search' | 'range' | 'checkbox' | 'custom' | 'boolean' | 'daterange';
   filterOptions?: { id: string | number; label: string; value: any }[];
   // For custom range filters
   filterRange?: { min: number; max: number };

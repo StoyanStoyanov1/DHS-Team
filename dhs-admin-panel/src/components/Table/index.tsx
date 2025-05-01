@@ -91,6 +91,57 @@ export default function Table<T>({
             result = result.filter(item => value.includes((item as any)[key]));
           }
           break;
+
+        case 'daterange':
+          if (value && (value.start || value.end)) {
+            result = result.filter(item => {
+              const itemDateValue = (item as any)[key];
+              
+              // Skip if the value is null or undefined
+              if (itemDateValue === null || itemDateValue === undefined) return true;
+              
+              // Convert to Date object according to the data format
+              let itemDate: Date;
+              
+              if (itemDateValue instanceof Date) {
+                // Already a Date object
+                itemDate = itemDateValue;
+              } else if (typeof itemDateValue === 'number') {
+                // Timestamp (in milliseconds)
+                itemDate = new Date(itemDateValue);
+              } else if (typeof itemDateValue === 'string') {
+                // ISO string or other date string format
+                itemDate = new Date(itemDateValue);
+              } else {
+                // Unable to convert to date, skip this item
+                return true;
+              }
+              
+              // Skip invalid dates
+              if (isNaN(itemDate.getTime())) return true;
+              
+              // Filter by start date (if provided)
+              if (value.start) {
+                const startDate = new Date(value.start);
+                if (startDate > itemDate) {
+                  return false;
+                }
+              }
+              
+              // Filter by end date (if provided)
+              if (value.end) {
+                const endDate = new Date(value.end);
+                // Make the end date inclusive by setting it to the end of the day
+                endDate.setHours(23, 59, 59, 999);
+                if (endDate < itemDate) {
+                  return false;
+                }
+              }
+              
+              return true;
+            });
+          }
+          break;
           
         case 'search':
           // Check if the value is a complex search configuration object
@@ -399,10 +450,33 @@ export default function Table<T>({
                         if (Array.isArray(value)) {
                           displayValue = `${value.length} selected`;
                         } else if (typeof value === 'object' && value !== null) {
-                          // Range filter
-                          const min = value.min !== undefined && value.min !== null ? value.min : '—';
-                          const max = value.max !== undefined && value.max !== null ? value.max : '—';
-                          displayValue = `${min} - ${max}`;
+                          if (value.start || value.end) {
+                            // Date range filter
+                            const formatDate = (date: Date | string | null | undefined) => {
+                              if (!date) return '—';
+                              const dateObj = typeof date === 'string' ? new Date(date) : date;
+                              return dateObj.toLocaleDateString('bg-BG', { 
+                                day: '2-digit', 
+                                month: '2-digit', 
+                                year: 'numeric' 
+                              });
+                            };
+                            
+                            const start = formatDate(value.start);
+                            const end = formatDate(value.end);
+                            displayValue = `${start} - ${end}`;
+                          } else if (value.min !== undefined || value.max !== undefined) {
+                            // Numeric range filter
+                            const min = value.min !== undefined && value.min !== null ? value.min : '—';
+                            const max = value.max !== undefined && value.max !== null ? value.max : '—';
+                            displayValue = `${min} - ${max}`;
+                          } else if (value.term !== undefined) {
+                            // Search filter
+                            displayValue = `"${value.term}"`;
+                          } else {
+                            // Generic object
+                            displayValue = "Custom filter";
+                          }
                         } else {
                           displayValue = String(value);
                         }

@@ -17,7 +17,7 @@ export interface FilterOption {
 export interface FilterGroup {
   id: string;
   label: string;
-  type: 'select' | 'multiselect' | 'checkbox' | 'radio' | 'range' | 'search';
+  type: 'select' | 'multiselect' | 'checkbox' | 'radio' | 'range' | 'search' | 'date';
   options?: FilterOption[];
   placeholder?: string;
   initialValue?: any;

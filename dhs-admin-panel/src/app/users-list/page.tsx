@@ -181,7 +181,8 @@ function UsersListContent() {
       render: (user) => (
         <span className="text-sm text-gray-500">{user.lastLogin}</span>
       ),
-      filterable: false,
+      filterable: true,
+      filterType: 'daterange',
       hideable: true,
       sortable: true,
       sortFn: sortLastLogin  // Custom sort function for dates

@@ -1,9 +1,10 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { ITableColumn } from './interfaces';
-import { Eye, EyeOff, Filter as FilterIcon, Check, X, SearchIcon, ListFilter, ArrowDownAZ, ArrowUpAZ } from 'lucide-react';
+import { Eye, EyeOff, Filter as FilterIcon, Check, X, SearchIcon, ListFilter, ArrowDownAZ, ArrowUpAZ, Calendar } from 'lucide-react';
 import { FilterGroup, SelectedFilters } from '../Filter/interfaces';
 import ColumnSearchFilter from './ColumnSearchFilter';
 import BooleanColumnFilter from './BooleanColumnFilter';
+import DateRangeFilter from '../Filter/DateRangeFilter';
 
 interface ColumnMenuProps<T> {
   column: ITableColumn<T>;
@@ -119,6 +120,15 @@ export default function ColumnMenu<T>({
     }
   };
 
+  // Handle date range filter change
+  const handleDateRangeChange = (value: { start?: Date | null; end?: Date | null } | null) => {
+    setFilterValue(value);
+    onFilterChange(column.key, value);
+    if (!value || (!value.start && !value.end)) {
+      setIsMenuOpen(false);
+    }
+  };
+
   // Get appropriate filter icon based on column type
   const getFilterIcon = () => {
     switch (column.filterType) {
@@ -127,6 +137,8 @@ export default function ColumnMenu<T>({
       case 'select':
       case 'multiselect':
         return <ListFilter size={14} />;
+      case 'daterange':
+        return <Calendar size={14} />;
       case 'range':
         return <FilterIcon size={14} />;
       default:
@@ -223,6 +235,18 @@ export default function ColumnMenu<T>({
                 {option.label}
               </label>
             ))}
+          </div>
+        );
+        
+      case 'daterange':
+        return (
+          <div onClick={(e) => e.stopPropagation()} className="w-full">
+            <DateRangeFilter 
+              value={filterValue}
+              onChange={handleDateRangeChange}
+              placeholder=""
+              defaultOpen={false}
+            />
           </div>
         );
         
@@ -379,7 +403,7 @@ export default function ColumnMenu<T>({
       {/* Menu with animation - shown only when isMenuOpen is true */}
       {isMenuOpen && column.filterType !== 'search' && (
         <div 
-          className="absolute z-50 mt-1 min-w-[160px] p-3 bg-white rounded-md shadow-lg border border-gray-200 right-0"
+          className={`absolute z-50 mt-1 p-3 bg-white rounded-md shadow-lg border border-gray-200 right-0 ${column.filterType === 'daterange' ? 'min-w-[320px]' : 'min-w-[160px]'}`}
           style={{
             animation: 'menuAppear 0.2s ease-out forwards',
             transformOrigin: 'top right'

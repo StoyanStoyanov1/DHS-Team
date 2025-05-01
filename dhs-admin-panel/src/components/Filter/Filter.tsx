@@ -2,7 +2,8 @@
 
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { FilterProps, SelectedFilters, FilterGroup } from './interfaces';
-import { Search, X, ChevronDown, Filter as FilterIcon, RotateCcw, Sliders, Check, PlusCircle } from 'lucide-react';
+import { Search, X, ChevronDown, Filter as FilterIcon, RotateCcw, Sliders, Check, PlusCircle, Calendar } from 'lucide-react';
+import DateRangeFilter from './DateRangeFilter';
 
 /**
  * A modern, abstract, and visually appealing filter component with animations
@@ -77,6 +78,9 @@ const Filter: React.FC<FilterProps> = ({
           case 'search':
             initialFilters[group.id] = '';
             break;
+          case 'daterange':
+            initialFilters[group.id] = null;
+            break;
           default:
             initialFilters[group.id] = null;
         }
@@ -118,6 +122,9 @@ const Filter: React.FC<FilterProps> = ({
               break;
             case 'search':
               newFilterValues[group.id] = '';
+              break;
+            case 'daterange':
+              newFilterValues[group.id] = null;
               break;
             default:
               newFilterValues[group.id] = null;
@@ -182,6 +189,9 @@ const Filter: React.FC<FilterProps> = ({
           case 'search':
             resetFilters[group.id] = '';
             break;
+          case 'daterange':
+            resetFilters[group.id] = null;
+            break;
           default:
             resetFilters[group.id] = null;
         }
@@ -232,6 +242,9 @@ const Filter: React.FC<FilterProps> = ({
         break;
       case 'search':
         defaultValue = '';
+        break;
+      case 'daterange':
+        defaultValue = null;
         break;
       default:
         defaultValue = null;
@@ -513,6 +526,15 @@ const Filter: React.FC<FilterProps> = ({
           </div>
         );
         
+      case 'date':
+        return (
+          <DateRangeFilter 
+            value={value}
+            onChange={(dateRange) => handleFilterChange(filter.id, dateRange)}
+            placeholder={filter.placeholder}
+          />
+        );
+
       default:
         return null;
     }
@@ -550,6 +572,13 @@ const Filter: React.FC<FilterProps> = ({
             const minVal = value.min !== undefined && value.min !== null ? value.min : '—';
             const maxVal = value.max !== undefined && value.max !== null ? value.max : '—';
             valueDisplay = `${minVal} - ${maxVal}`;
+          } else if (filter.type === 'daterange') {
+            const formatDate = (date: Date) => {
+              return date ? date.toLocaleDateString('bg-BG', { day: '2-digit', month: '2-digit', year: 'numeric' }) : '—';
+            };
+            const startVal = value.start ? formatDate(new Date(value.start)) : '—';
+            const endVal = value.end ? formatDate(new Date(value.end)) : '—';
+            valueDisplay = `${startVal} - ${endVal}`;
           }
           
           return (
@@ -718,4 +747,5 @@ const Filter: React.FC<FilterProps> = ({
   );
 };
 
+export { Filter };
 export default Filter;
