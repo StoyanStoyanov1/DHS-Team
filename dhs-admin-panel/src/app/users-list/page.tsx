@@ -13,7 +13,14 @@ import ClientOnly from '@/src/components/ClientOnly';
 function UsersListContent() {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
-  const [filters, setFilters] = useState<SelectedFilters>({});
+  
+  // Get all unique roles for default selection
+  const allRoles = ['Admin', 'Editor', 'Viewer', 'Support', 'Manager', 'Analyst', 'Developer'];
+  
+  // Initialize filters with all roles selected
+  const [filters, setFilters] = useState<SelectedFilters>({
+    role: allRoles
+  });
   const [filteredUsers, setFilteredUsers] = useState<User[]>(mockUsers);
 
   // Define filter groups for the users table
@@ -32,9 +39,14 @@ function UsersListContent() {
       options: [
         { id: 'admin', label: 'Admin', value: 'Admin' },
         { id: 'editor', label: 'Editor', value: 'Editor' },
-        { id: 'user', label: 'User', value: 'User' },
+        { id: 'viewer', label: 'Viewer', value: 'Viewer' },
+        { id: 'support', label: 'Support', value: 'Support' },
+        { id: 'manager', label: 'Manager', value: 'Manager' },
+        { id: 'analyst', label: 'Analyst', value: 'Analyst' },
+        { id: 'developer', label: 'Developer', value: 'Developer' },
       ],
       icon: <ShieldCheck size={16} />,
+      initialValue: allRoles,
     },
     {
       id: 'isActive',
@@ -82,11 +94,14 @@ function UsersListContent() {
     }
     
     // Apply role filter (multiselect)
-    if (filters.role && Array.isArray(filters.role) && filters.role.length > 0) {
-      result = result.filter(user => filters.role.includes(user.role));
+    if (filters.role && Array.isArray(filters.role)) {
+      if (filters.role.length > 0) {
+        result = result.filter(user => filters.role.includes(user.role));
+      }
+      // If no roles are selected, we don't filter (show all)
     }
     
-    // Apply status filter (select) - използваме isActive вместо status
+    // Apply status filter (select)
     if (filters.isActive !== undefined) {
       result = result.filter(user => user.isActive === filters.isActive);
     }
@@ -153,8 +168,10 @@ function UsersListContent() {
         </span>
       ),
       filterable: true,
-      filterType: 'select',
+      filterType: 'multiselect',
       getFilterOptions: getRoleFilterOptions,
+      labelAll: 'All Roles',
+      defaultSelectAll: true,
       hideable: true,
       sortable: true
     },

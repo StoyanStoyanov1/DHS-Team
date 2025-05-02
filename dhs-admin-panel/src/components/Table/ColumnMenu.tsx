@@ -5,6 +5,7 @@ import { FilterGroup, SelectedFilters } from '../Filter/interfaces';
 import ColumnSearchFilter from './ColumnSearchFilter';
 import BooleanColumnFilter from './BooleanColumnFilter';
 import DateRangeFilter from '../Filter/DateRangeFilter';
+import MultiSelectFilter from '../Filter/MultiSelectFilter';
 
 interface ColumnMenuProps<T> {
   column: ITableColumn<T>;
@@ -217,24 +218,30 @@ export default function ColumnMenu<T>({
         
       case 'multiselect':
         return (
-          <div 
-            className="max-h-32 overflow-y-auto border rounded-md bg-white shadow-sm transition-all duration-200"
-            onClick={(e) => e.stopPropagation()}
-          >
-            {filterOptions.map((option) => (
-              <label 
-                key={option.id} 
-                className="flex items-center p-1.5 hover:bg-indigo-50 text-sm cursor-pointer"
-              >
-                <input
-                  type="checkbox"
-                  className="rounded text-indigo-600 mr-2"
-                  checked={Array.isArray(filterValue) && filterValue.includes(option.value)}
-                  onChange={(e) => handleCheckboxChange(option.value, e.target.checked)}
-                />
-                {option.label}
-              </label>
-            ))}
+          <div onClick={(e) => e.stopPropagation()}>
+            <MultiSelectFilter
+              options={filterOptions}
+              value={Array.isArray(filterValue) ? filterValue : []}
+              onChange={(value) => {
+                setFilterValue(value);
+              }}
+              onApply={(value) => {
+                // Handle "all selected" case (null value returned from MultiSelectFilter)
+                if (value === null) {
+                  // Clear the filter when all items are selected
+                  onFilterChange(column.key, null);
+                } else if (Array.isArray(value) && value.length > 0) {
+                  // Apply filter with selected values
+                  onFilterChange(column.key, value);
+                } else {
+                  // Fallback to prevent applying an empty filter
+                  onFilterChange(column.key, null);
+                }
+                setIsMenuOpen(false);
+              }}
+              onClose={() => setIsMenuOpen(false)}
+              defaultSelectAll={column.defaultSelectAll !== false}
+            />
           </div>
         );
         

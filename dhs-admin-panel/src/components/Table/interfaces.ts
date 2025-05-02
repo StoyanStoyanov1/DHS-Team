@@ -34,6 +34,9 @@ export interface ITableColumn<T> {
   labelFalse?: string;
   labelAll?: string;
   
+  // Multiselect filter specific props
+  defaultSelectAll?: boolean;
+  
   // Column visibility
   hideable?: boolean;
   hidden?: boolean;
