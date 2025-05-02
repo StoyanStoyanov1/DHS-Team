@@ -4,7 +4,7 @@ import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { ITableProps, ITableColumn, SortDirection } from './interfaces';
 import { TableService } from './TableService';
 import TablePagination from './TablePagination';
-import TableSizeControls from './TableSizeControls';
+import PageSizeControl from './PageSizeControl';
 import ColumnMenu from './ColumnMenu';
 import { Filter } from '../Filter';
 import { SelectedFilters } from '../Filter/interfaces';
@@ -39,8 +39,8 @@ export default function Table<T>({
   const [columnFilters, setColumnFilters] = useState<SelectedFilters>({});
   const [columns, setColumns] = useState<ITableColumn<T>[]>(initialColumns);
   const [showColumnFilterSummary, setShowColumnFilterSummary] = useState(false);
-  const [sortKey, setSortKey] = useState<string | undefined>(undefined);
-  const [sortDirection, setSortDirection] = useState<SortDirection>(null);
+  const [sortKey, setSortKey] = useState<string | undefined>(defaultSortKey);
+  const [sortDirection, setSortDirection] = useState<SortDirection>(defaultSortDirection || null);
   
   const currentPage = externalCurrentPage ?? internalCurrentPage;
   const setCurrentPage = externalSetCurrentPage ?? setInternalCurrentPage;
@@ -446,13 +446,14 @@ export default function Table<T>({
           </div>
           
           {showTableSizeControls && (
-            <TableSizeControls
+            <PageSizeControl
               itemsPerPage={itemsPerPage}
               setItemsPerPage={handleItemsPerPageChange}
               options={rowsPerPageOptions.map(size => ({
                 size, 
                 available: size <= Math.max(...rowsPerPageOptions, sortedData.length)
               }))}
+              label="Rows per page:"
             />
           )}
         </div>
@@ -590,6 +591,7 @@ export default function Table<T>({
           onPageChange={setCurrentPage}
           onItemsPerPageChange={handleItemsPerPageChange}
           rowsPerPageOptions={rowsPerPageOptions}
+          showPageSizeControl={false} // We're showing it above
         />
       </div>
     </div>

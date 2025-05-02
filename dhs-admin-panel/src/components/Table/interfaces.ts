@@ -59,6 +59,7 @@ export interface ITablePagination {
   onPageChange: (page: number) => void;
   onItemsPerPageChange?: (itemsPerPage: number) => void;
   rowsPerPageOptions?: number[];
+  showPageSizeControl?: boolean; // Control visibility of the page size dropdown
 }
 
 export interface ITableProps<T> {
