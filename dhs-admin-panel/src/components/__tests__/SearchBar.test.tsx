@@ -6,40 +6,74 @@ describe('SearchBar Component', () => {
   test('renders correctly', () => {
     render(<SearchBar />);
     
-    // Проверяваме дали полето за търсене съществува
+    // Check if search field exists
     const searchInput = screen.getByPlaceholderText('Search (CTRL + K)');
     expect(searchInput).toBeInTheDocument();
     
-    // Проверяваме дали иконката за търсене присъства
+    // Check if search icon is present
     const searchIcon = document.querySelector('svg');
     expect(searchIcon).toBeInTheDocument();
     
-    // Проверяваме дали текстът за клавишна комбинация е видим
+    // Check if shortcut text is visible
     const shortcutText = screen.getByText('⌘K');
     expect(shortcutText).toBeInTheDocument();
   });
 
   test('input change works correctly', () => {
-    render(<SearchBar />);
+    // Mock search function
+    const mockSearch = jest.fn();
+    render(<SearchBar onSearch={mockSearch} />);
     
-    // Намираме input полето
+    // Find input field
     const searchInput = screen.getByPlaceholderText('Search (CTRL + K)') as HTMLInputElement;
     
-    // Симулираме въвеждане на текст
+    // Simulate text input
     fireEvent.change(searchInput, { target: { value: 'test query' } });
     
-    // Проверяваме дали стойността на полето е обновена
+    // Check if input value is updated
     expect(searchInput.value).toBe('test query');
+    
+    // Check if onSearch callback was called
+    expect(mockSearch).toHaveBeenCalledWith('test query');
+  });
+  
+  test('clears input on Escape key', () => {
+    // Mock search function
+    const mockSearch = jest.fn();
+    render(<SearchBar onSearch={mockSearch} initialValue="initial query" />);
+    
+    const searchInput = screen.getByPlaceholderText('Search (CTRL + K)') as HTMLInputElement;
+    
+    // Verify initial value
+    expect(searchInput.value).toBe('initial query');
+    
+    // Press Escape key
+    fireEvent.keyDown(searchInput, { key: 'Escape' });
+    
+    // Verify input was cleared
+    expect(searchInput.value).toBe('');
+    
+    // Verify onSearch was called with empty string
+    expect(mockSearch).toHaveBeenCalledWith('');
+  });
+  
+  test('applies custom placeholder', () => {
+    render(<SearchBar placeholder="Custom placeholder" />);
+    
+    const searchInput = screen.getByPlaceholderText('Custom placeholder');
+    expect(searchInput).toBeInTheDocument();
   });
 
   test('has proper accessibility attributes', () => {
     render(<SearchBar />);
     
-    // Проверяваме дали полето има правилните атрибути за достъпност
+    // Check if input has proper accessibility attributes
     const searchInput = screen.getByPlaceholderText('Search (CTRL + K)');
     expect(searchInput).toHaveAttribute('type', 'text');
+    expect(searchInput).toHaveAttribute('aria-label', 'Search');
+    expect(searchInput).toHaveAttribute('data-search-input', 'true');
     
-    // Проверяваме дали контейнерът има правилните класове
+    // Check if container has proper classes
     const container = searchInput.parentElement;
     expect(container).toHaveClass('relative');
   });

@@ -1,17 +1,76 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useCallback } from 'react';
 import { Search } from 'lucide-react';
 
-const SearchBar: React.FC = () => {
+interface SearchBarProps {
+    onSearch?: (term: string) => void;
+    placeholder?: string;
+    className?: string;
+    initialValue?: string;
+    autoFocus?: boolean;
+}
+
+const SearchBar: React.FC<SearchBarProps> = ({
+    onSearch,
+    placeholder = "Search (CTRL + K)",
+    className = "",
+    initialValue = "",
+    autoFocus = false
+}) => {
+    const [searchTerm, setSearchTerm] = useState(initialValue);
+    
+    // Handle input change
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const value = e.target.value;
+        setSearchTerm(value);
+        if (onSearch) {
+            onSearch(value);
+        }
+    };
+    
+    // Handle keyboard shortcuts
+    const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLInputElement>) => {
+        // Clear search on Escape
+        if (e.key === 'Escape') {
+            setSearchTerm('');
+            if (onSearch) {
+                onSearch('');
+            }
+            e.preventDefault();
+        }
+    }, [onSearch]);
+
+    // Global keyboard shortcut handler
+    React.useEffect(() => {
+        const handleGlobalKeyDown = (e: KeyboardEvent) => {
+            // Focus search box on CTRL+K or CMD+K
+            if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+                e.preventDefault();
+                document.querySelector<HTMLInputElement>('input[type="text"][data-search-input="true"]')?.focus();
+            }
+        };
+
+        document.addEventListener('keydown', handleGlobalKeyDown);
+        return () => {
+            document.removeEventListener('keydown', handleGlobalKeyDown);
+        };
+    }, []);
+
     return (
-        <div className="relative flex-1 max-w-md">
+        <div className={`relative flex-1 max-w-md ${className}`}>
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                 <Search size={18} className="text-gray-400" />
             </div>
             <input
                 type="text"
-                placeholder="Search (CTRL + K)"
+                data-search-input="true"
+                placeholder={placeholder}
+                value={searchTerm}
+                onChange={handleChange}
+                onKeyDown={handleKeyDown}
+                autoFocus={autoFocus}
+                aria-label="Search"
                 className="w-full pl-10 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
             />
             <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">

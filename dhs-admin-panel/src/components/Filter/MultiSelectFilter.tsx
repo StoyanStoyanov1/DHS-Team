@@ -26,14 +26,19 @@ const MultiSelectFilter: React.FC<MultiSelectFilterProps> = ({
     return [...options].sort((a, b) => a.label.localeCompare(b.label));
   }, [options]);
   
-  // Initialize selected values - if defaultSelectAll is true and no values are selected,
-  // select all options by default
+  // Initialize selected values based on the following priority:
+  // 1. If active filter values exist (value array has items), use them
+  // 2. If defaultSelectAll is true and no active filter, select all options
+  // 3. Otherwise, start with empty selection
   const [selectedValues, setSelectedValues] = useState<any[]>(() => {
     if (Array.isArray(value) && value.length > 0) {
+      // Active filter exists, use those values
       return [...value];
     } else if (defaultSelectAll) {
+      // No active filter but defaultSelectAll is true
       return sortedOptions.map(option => option.value);
     }
+    // Default to empty selection
     return [];
   });
   
@@ -52,7 +57,10 @@ const MultiSelectFilter: React.FC<MultiSelectFilterProps> = ({
   // Update local state when external value changes
   useEffect(() => {
     if (Array.isArray(value)) {
-      setSelectedValues([...value]);
+      // Only update if there are active filter values
+      if (value.length > 0) {
+        setSelectedValues([...value]);
+      }
     }
   }, [value]);
   

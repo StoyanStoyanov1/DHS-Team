@@ -192,12 +192,9 @@ export default function ColumnMenu<T>({
             <BooleanColumnFilter 
               value={filterValue}
               onChange={(value) => {
-                console.log("Boolean filter changed to:", value);
                 setFilterValue(value);
               }}
               onApply={(value) => {
-                console.log("Applying boolean filter with direct value:", value);
-                
                 onFilterChange(column.key, value);
                 setIsMenuOpen(false);
               }}
@@ -240,6 +237,7 @@ export default function ColumnMenu<T>({
                 setIsMenuOpen(false);
               }}
               onClose={() => setIsMenuOpen(false)}
+              // Pass defaultSelectAll from column config, defaulting to true if not specified
               defaultSelectAll={column.defaultSelectAll !== false}
             />
           </div>
@@ -326,7 +324,7 @@ export default function ColumnMenu<T>({
               </button>
               <button
                 onClick={handleFilterApply}
-                className="px-2 py-1 text-xs bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
+                className="px-3 py-1 text-xs bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
               >
                 Apply
               </button>

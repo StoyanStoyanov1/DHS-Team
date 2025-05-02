@@ -7,7 +7,7 @@ export type SearchMethod = 'contains' | 'equals' | 'startsWith' | 'endsWith' | '
 export interface SearchField {
   key: string;
   label: string;
-  path?: string; // Път за достъп до вложени данни
+  path?: string;
 }
 
 export interface ITableColumn<T> {
@@ -18,15 +18,19 @@ export interface ITableColumn<T> {
   sortable?: boolean;
   sortFn?: (a: T, b: T, direction: SortDirection) => number;
   
+  // Filter related props
+  filterGroups?: FilterGroup[];
+  initialFilterValues?: SelectedFilters;
+  onFilterChange?: (selectedFilters: SelectedFilters) => void;
+  showFilter?: boolean;
+  filterTitle?: string;
+  
   // Column filtering options
   filterable?: boolean;
   filterType?: 'select' | 'multiselect' | 'search' | 'range' | 'checkbox' | 'custom' | 'boolean' | 'daterange';
   filterOptions?: { id: string | number; label: string; value: any }[];
-  // For custom range filters
   filterRange?: { min: number; max: number };
-  // Function to get unique values from the data for dynamic filter options
   getFilterOptions?: (data: T[]) => { id: string | number; label: string; value: any }[];
-  // Custom filter component
   customFilterComponent?: (onFilterChange: (key: string, value: any) => void, currentValue: any) => ReactNode;
   
   // Boolean filter specific props
@@ -42,9 +46,18 @@ export interface ITableColumn<T> {
   hidden?: boolean;
 
   // Enhanced search options
-  searchFields?: SearchField[]; // For specifying multiple searchable fields within a column
-  fieldDataType?: 'text' | 'number' | 'date' | 'boolean' | 'array'; // For type-specific search options
-  recentSearches?: string[]; // For showing recent searches
+  searchFields?: SearchField[];
+  fieldDataType?: 'text' | 'number' | 'date' | 'boolean' | 'array';
+  recentSearches?: string[];
+}
+
+/**
+ * Defines table service operations
+ */
+export interface ITableService<T> {
+  getPaginatedData(data: T[], currentPage: number, itemsPerPage: number): T[];
+  calculateTotalPages(totalItems: number, itemsPerPage: number): number;
+  sortData(data: T[], sortKey: string, sortDirection: SortDirection, sortFn?: (a: T, b: T, direction: SortDirection) => number): T[];
 }
 
 /**
@@ -88,13 +101,4 @@ export interface ITableProps<T> {
   onFilterChange?: (selectedFilters: SelectedFilters) => void;
   showFilter?: boolean;
   filterTitle?: string;
-}
-
-/**
- * Defines table service operations
- */
-export interface ITableService<T> {
-  getPaginatedData(data: T[], currentPage: number, itemsPerPage: number): T[];
-  calculateTotalPages(totalItems: number, itemsPerPage: number): number;
-  sortData(data: T[], sortKey: string, sortDirection: SortDirection, sortFn?: (a: T, b: T, direction: SortDirection) => number): T[];
 }

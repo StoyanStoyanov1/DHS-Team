@@ -9,7 +9,6 @@ import authService, {
 } from '../services/auth.service';
 
 // Debug mode configuration
-// Set default to true to enable debug mode by default
 const DEBUG_MODE = process.env.NODE_ENV === 'development' ? 
     (process.env.NEXT_PUBLIC_DEBUG_AUTH !== 'false') : // Debug mode is ON by default in development
     (process.env.NEXT_PUBLIC_DEBUG_AUTH === 'true');   // Explicitly enabled in production
@@ -56,14 +55,7 @@ function AuthProviderContent({ children }: { children: ReactNode }) {
                 // If in debug mode, use mock user
                 if (isDebugMode) {
                     setUser(DEBUG_USER);
-                    console.info(
-                        '%c🐞 Debug Mode Активиран!', 
-                        'background: #4CAF50; color: white; padding: 4px 8px; border-radius: 4px; font-weight: bold;'
-                    );
-                    console.info(
-                        'Работите в режим без автентикация. Няма да има заявки към сървъра.',
-                        '\nПотребител:', DEBUG_USER
-                    );
+                    console.info('Debug Mode Activated!');
                 } else {
                     // Normal authentication flow
                     const currentUser = authService.getCurrentUser();
@@ -163,8 +155,6 @@ function AuthProviderContent({ children }: { children: ReactNode }) {
     };
 
     const handleAuthError = (err: any) => {
-        console.log('Auth error:', err);
-        
         if (err.response) {
             const { data, status } = err.response;
             

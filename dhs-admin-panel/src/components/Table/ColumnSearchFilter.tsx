@@ -97,28 +97,43 @@ export default function ColumnSearchFilter({
   }, [showRecentSearches]);
 
   const handleSearch = () => {
-    // Ако методът не е isEmpty/isNotEmpty и търсеният низ е празен,
-    // директно премахваме филтъра от активните филтри
+    // If method is not isEmpty/isNotEmpty and search string is empty,
+    // directly remove filter from active filters
     if (searchTerm === "" && !['isEmpty', 'isNotEmpty'].includes(searchMethod)) {
-      // Изпращаме null стойност, което ще премахне филтъра от активните филтри
+      // Send null value, which will remove the filter from active filters
       onSearch(columnKey, null, selectedField, searchMethod as SearchMethod);
       
-      // Затваряме филтъра след премахване
+      // Close filter after removal
       if (onClose) {
         onClose();
       }
       return;
     }
     
-    // За методи isEmpty и isNotEmpty не е нужна стойност за търсене
+    // For isEmpty and isNotEmpty methods, no search value is needed
     if (['isEmpty', 'isNotEmpty'].includes(searchMethod)) {
       onSearch(columnKey, '', selectedField, searchMethod as SearchMethod);
     } else {
-      // За всички останали методи използваме въведения низ
+      // For all other methods, use the entered string
       onSearch(columnKey, searchTerm, selectedField, searchMethod as SearchMethod);
     }
     
-    // Затваряме филтъра след прилагане на търсенето
+    // This prevents adding empty filters to the list of active filters
+    
+    // If there was no previous filter (initialValue is empty) and searchTerm is empty,
+    // remove the filter from active filters
+    if ((initialValue === '' || initialValue === null) && (searchTerm === '' || searchTerm === null)) {
+      onSearch(columnKey, null, selectedField, 'contains');
+    } 
+    // If we have a previous value, keep it without changes
+    else if (typeof initialValue === 'object' && initialValue !== null) {
+      const config = initialValue as any;
+      if (config.term !== undefined && config.field !== undefined && config.method !== undefined) {
+        // Do nothing - keep the current filter as is
+      }
+    }
+    
+    // Close filter after applying the search
     if (onClose) {
       onClose();
     }
@@ -137,20 +152,10 @@ export default function ColumnSearchFilter({
   // Custom close handler that doesn't apply changes
   const handleClose = () => {
     if (onClose) {
-      // Ако потребителят затвори компонента без да търси, НЕ запазваме текущото състояние
-      // Това предотвратява добавянето на празни филтри в списъка с активни филтри
-      
-      // Ако няма предходен филтър (initialValue е празен) и searchTerm е празен,
-      // премахваме филтъра от активните
-      if ((initialValue === '' || initialValue === null) && (searchTerm === '' || searchTerm === null)) {
-        onSearch(columnKey, null, selectedField, 'contains');
-      } 
-      // Ако имаме предишна стойност, запазваме я без промяна
-      else if (typeof initialValue === 'object' && initialValue !== null) {
-        const config = initialValue as any;
-        if (config.term !== undefined && config.field !== undefined && config.method !== undefined) {
-          // Не правим нищо - запазваме текущия филтър както си е
-        }
+      // If user closes the component without searching, do NOT save current state
+      const config = initialValue as any;
+      if (config.term !== undefined && config.field !== undefined && config.method !== undefined) {
+        // Do nothing - keep the current filter as is
       }
       
       onClose();
@@ -252,7 +257,7 @@ export default function ColumnSearchFilter({
   // Parse initial value - check if it's a search config object or a simple string
   useEffect(() => {
     // Always update values when initialValue changes significantly
-    // regardless of focus state (removed the focus check)
+    // regardless of focus state
     if (typeof initialValue === 'object' && initialValue !== null) {
       // It's a search config object
       const config = initialValue as any;

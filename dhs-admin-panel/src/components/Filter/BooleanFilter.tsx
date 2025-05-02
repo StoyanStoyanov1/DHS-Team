@@ -3,7 +3,7 @@ import React from 'react';
 import { Check, X, ListFilter } from 'lucide-react';
 
 interface BooleanFilterProps {
-  value: string | boolean | null; // Current selected value: true, false, или null (за всички)
+  value: string | boolean | null; // Current selected value: true, false, or null (for all)
   onChange: (value: string | boolean | null) => void; // Callback when the value changes
   className?: string;
   labelTrue?: string;
@@ -47,7 +47,7 @@ const BooleanFilter: React.FC<BooleanFilterProps> = ({
         
         <div className="space-y-2">
           <div className="flex flex-col space-y-2">
-            {/* All option - круг със сива рамка */}
+            {/* All option - circle with gray border */}
             <button
               onClick={() => handleValueChange(null)}
               className={`flex items-center px-3 py-2 rounded-md text-sm transition-all
@@ -70,7 +70,7 @@ const BooleanFilter: React.FC<BooleanFilterProps> = ({
               )}
             </button>
             
-            {/* True option - зелено кръгче */}
+            {/* True option - green circle */}
             <button
               onClick={() => handleValueChange(true)}
               className={`flex items-center px-3 py-2 rounded-md text-sm transition-all
@@ -93,7 +93,7 @@ const BooleanFilter: React.FC<BooleanFilterProps> = ({
               )}
             </button>
             
-            {/* False option - червено кръгче */}
+            {/* False option - red circle */}
             <button
               onClick={() => handleValueChange(false)}
               className={`flex items-center px-3 py-2 rounded-md text-sm transition-all

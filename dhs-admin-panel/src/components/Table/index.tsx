@@ -8,7 +8,7 @@ import TableSizeControls from './TableSizeControls';
 import ColumnMenu from './ColumnMenu';
 import { Filter } from '../Filter';
 import { SelectedFilters } from '../Filter/interfaces';
-import { Filter as FilterIcon, RotateCcw, X, Eye, ArrowUp, ArrowDown, ChevronDown } from 'lucide-react';
+import { Filter as FilterIcon, RotateCcw, X, Eye, ArrowUp, ArrowDown } from 'lucide-react';
 
 export default function Table<T>({
   columns: initialColumns,
@@ -40,9 +40,9 @@ export default function Table<T>({
   const [columnFilters, setColumnFilters] = useState<SelectedFilters>({});
   const [columns, setColumns] = useState<ITableColumn<T>[]>(initialColumns);
   const [showColumnFilterSummary, setShowColumnFilterSummary] = useState(false);
-  // Инициализирай sortKey като undefined, независимо от defaultSortKey, за да няма сортиране по подразбиране
+  // Initialize sortKey as undefined regardless of defaultSortKey to have no default sorting
   const [sortKey, setSortKey] = useState<string | undefined>(undefined);
-  // Инициализирай sortDirection като null, независимо от defaultSortDirection, за да няма сортиране по подразбиране
+  // Initialize sortDirection as null regardless of defaultSortDirection to have no default sorting
   const [sortDirection, setSortDirection] = useState<SortDirection>(null);
   
   const currentPage = externalCurrentPage ?? internalCurrentPage;
@@ -72,15 +72,12 @@ export default function Table<T>({
           break;
           
         case 'boolean':
-          // Специална обработка за булеви стойности
+          // Special processing for boolean values
           if (value !== null) {
-            // Важно: Превръщаме стойността в булев тип независимо от формата
+            // Important: Convert the value to a boolean type regardless of format
             const boolValue = value === true || value === 'true';
-            console.log(`Filtering boolean column: ${key}, filter value:`, boolValue, typeof boolValue);
-            
             result = result.filter(item => {
               const itemValue = Boolean((item as any)[key]);
-              console.log(`Item ${key}:`, itemValue, typeof itemValue);
               return itemValue === boolValue;
             });
           }
@@ -231,14 +228,14 @@ export default function Table<T>({
 
   // Function to determine if a column should be sortable based on its type
   const isSortableColumn = (column: ITableColumn<T>) => {
-    // Не позволяваме сортиране за select/multiselect/boolean колони
+    // Don't allow sorting for select/multiselect/boolean columns
     if (column.filterType === 'select' || 
         column.filterType === 'multiselect' || 
         column.filterType === 'boolean') {
       return false;
     }
     
-    // В останалите случаи, зачитаме sortable свойството на колоната
+    // In other cases, respect the sortable property of the column
     return column.sortable === true;
   };
 
@@ -249,8 +246,6 @@ export default function Table<T>({
     
     // Don't sort if the column shouldn't be sortable
     if (!isSortableColumn(column)) return;
-    
-    // Премахната е проверката, която блокираше сортирането при наличие на филтри
     
     setSortKey(columnKey);
     if (sortKey === columnKey) {
@@ -297,10 +292,10 @@ export default function Table<T>({
       )
     );
     
-    // Когато скриваме колона, проверяваме дали има активен филтър за нея и го премахваме
+    // When hiding a column, check if it has an active filter and remove it
     const column = columns.find(col => col.key === columnKey);
     if (column && !column.hidden && columnFilters[columnKey] !== undefined) {
-      // Само ако колоната е била видима и сега се скрива, премахваме филтъра
+      // Only if the column was visible and is now being hidden, remove the filter
       setColumnFilters(prev => {
         const newFilters = { ...prev };
         delete newFilters[columnKey];
@@ -379,7 +374,7 @@ export default function Table<T>({
     
     return (
       <div className="flex items-center ml-1">
-        {/* Двете стрелки нагоре и надолу в компактен контейнер */}
+        {/* Two arrows up and down in a compact container */}
         <div className="flex flex-col -space-y-1 justify-center">
           <ArrowUp 
             size={12} 
@@ -394,9 +389,9 @@ export default function Table<T>({
     );
   };
 
+  // Rest of the component remains unchanged
   return (
     <div className="space-y-4">
-      {/* Render Filter component if showFilter is true and filterGroups are provided */}
       {showFilter && filterGroups.length > 0 && (
         <Filter
           filterGroups={filterGroups}
@@ -411,14 +406,12 @@ export default function Table<T>({
       )}
       
       <div className={`bg-white rounded-lg shadow ${className}`}>
-        {/* Table controls section */}
         <div className="px-6 py-3 flex items-center justify-between border-b border-gray-200 bg-white">
           <div className="flex items-center space-x-4">
             <h2 className="text-sm font-medium text-gray-700">
               {sortedData.length} {sortedData.length === 1 ? 'item' : 'items'}
             </h2>
             
-            {/* Column filter summary */}
             {activeColumnFilterCount > 0 && (
               <div className="relative" ref={filterSummaryRef}>
                 <button 
@@ -503,7 +496,6 @@ export default function Table<T>({
             )}
           </div>
           
-          {/* Table size controls */}
           {showTableSizeControls && (
             <TableSizeControls
               itemsPerPage={itemsPerPage}
@@ -516,7 +508,6 @@ export default function Table<T>({
           )}
         </div>
         
-        {/* Show a discrete dropdown for hidden columns for better mobile/tablet experience */}
         {columns.some(col => col.hidden) && (
           <div className="px-6 py-2 bg-indigo-50/40 border-b border-indigo-100 flex flex-wrap items-center">
             <span className="text-xs font-medium text-gray-700 mr-2">Hidden Columns:</span>
@@ -535,7 +526,6 @@ export default function Table<T>({
           </div>
         )}
         
-        {/* Table data */}
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
@@ -561,7 +551,6 @@ export default function Table<T>({
                         )}
                       </div>
                       
-                      {/* Column Menu */}
                       <ColumnMenu
                         column={column}
                         data={data}
@@ -604,7 +593,7 @@ export default function Table<T>({
                 </>
               ) : (
                 <>
-                  {paginatedData.map((item, index) => (
+                  {paginatedData.map((item) => (
                     <tr 
                       key={keyExtractor(item)}
                       className={`h-14 border-b border-gray-200 ${

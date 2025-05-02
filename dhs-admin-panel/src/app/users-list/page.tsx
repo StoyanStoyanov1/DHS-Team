@@ -171,7 +171,7 @@ function UsersListContent() {
       filterType: 'multiselect',
       getFilterOptions: getRoleFilterOptions,
       labelAll: 'All Roles',
-      defaultSelectAll: true,
+      defaultSelectAll: true, // Explicitly set to select all by default
       hideable: true,
       sortable: true
     },
