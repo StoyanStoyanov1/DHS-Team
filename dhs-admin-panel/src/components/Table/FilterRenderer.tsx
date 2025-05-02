@@ -5,19 +5,42 @@ import BooleanColumnFilter from './BooleanColumnFilter';
 import DateRangeFilter from '../Filter/DateRangeFilter';
 import MultiSelectFilter from '../Filter/MultiSelectFilter';
 
+/**
+ * Props for the FilterRenderer component.
+ * @template T - The type of data in the table.
+ */
 interface FilterRendererProps<T> {
+  /** The column configuration for which the filter is being rendered */
   column: ITableColumn<T>;
+  /** The data array from the table, used for generating filter options */
   data: T[];
+  /** The current filter value for the column */
   filterValue: any;
+  /** Callback function to update the filter value */
   onFilterValueChange: (value: any) => void;
+  /** Callback function to apply the filter with the current value */
   onFilterApply: (value: any) => void;
+  /** Callback function to clear the filter */
   onFilterClear: () => void;
+  /** Callback function to close the filter dropdown/modal */
   onClose: () => void;
 }
 
 /**
- * A shared component for rendering filters based on column type.
- * This component is used both by ColumnMenu and TableContextMenu to avoid code duplication.
+ * A shared component for rendering different types of column filters based on column configuration.
+ * 
+ * This component dynamically renders the appropriate filter UI based on the column's filterType property.
+ * Supported filter types include:
+ * - select: Dropdown selection filter
+ * - boolean: True/False/All filter
+ * - multiselect: Multiple selection filter
+ * - daterange: Date range picker filter
+ * - search: Text search with advanced options
+ * - range: Numeric range filter
+ * 
+ * This component is used by both ColumnMenu and TableContextMenu to avoid code duplication.
+ * 
+ * @template T - The type of data in the table.
  */
 export default function FilterRenderer<T>({
   column,
@@ -42,13 +65,13 @@ export default function FilterRenderer<T>({
       onFilterValueChange(null);
       return;
     }
-    
+
     const searchConfig = {
       term: term,
       field: field || columnKey,
       method: method || 'contains'
     };
-    
+
     onFilterValueChange(searchConfig);
     onFilterApply(searchConfig);
   };
@@ -69,7 +92,7 @@ export default function FilterRenderer<T>({
               </option>
             ))}
           </select>
-          
+
           <div className="flex justify-end gap-2 mt-3">
             <button
               onClick={onFilterClear}
@@ -131,7 +154,7 @@ export default function FilterRenderer<T>({
             placeholder=""
             defaultOpen={true}
           />
-          
+
           <div className="flex justify-end gap-2 mt-3">
             <button
               onClick={onFilterClear}
@@ -194,7 +217,7 @@ export default function FilterRenderer<T>({
               }}
             />
           </div>
-          
+
           <div className="flex justify-end gap-2 mt-3">
             <button
               onClick={onFilterClear}
