@@ -6,6 +6,7 @@ import { TableService } from './TableService';
 import TablePagination from './TablePagination';
 import PageSizeControl from './PageSizeControl';
 import ColumnMenu from './ColumnMenu';
+import TableContextMenu from './TableContextMenu';
 import { Filter } from '../Filter';
 import { SelectedFilters } from '../Filter/interfaces';
 import { Filter as FilterIcon, RotateCcw, X, Eye, ArrowUp, ArrowDown } from 'lucide-react';
@@ -32,7 +33,7 @@ export default function Table<T>({
   filterTitle = "Table Filters",
 }: ITableProps<T>) {
   const tableService = useMemo(() => new TableService<T>(), []);
-  
+
   const [internalCurrentPage, setInternalCurrentPage] = useState(1);
   const [internalItemsPerPage, setInternalItemsPerPage] = useState(externalItemsPerPage);
   const [filters, setFilters] = useState<SelectedFilters>(initialFilterValues);
@@ -41,7 +42,9 @@ export default function Table<T>({
   const [showColumnFilterSummary, setShowColumnFilterSummary] = useState(false);
   const [sortKey, setSortKey] = useState<string | undefined>(defaultSortKey);
   const [sortDirection, setSortDirection] = useState<SortDirection>(defaultSortDirection || null);
-  
+  // Add state for context menu
+  const [contextMenuPosition, setContextMenuPosition] = useState<{ x: number; y: number } | null>(null);
+
   const currentPage = externalCurrentPage ?? internalCurrentPage;
   const setCurrentPage = externalSetCurrentPage ?? setInternalCurrentPage;
   const itemsPerPage = externalItemsPerPage ?? internalItemsPerPage;
@@ -53,18 +56,18 @@ export default function Table<T>({
 
   const filteredData = useMemo(() => {
     let result = [...data];
-    
+
     Object.entries(columnFilters).forEach(([key, value]) => {
       if (value === null || value === '') return;
-      
+
       const column = columns.find(col => col.key === key);
       if (!column) return;
-      
+
       switch (column.filterType) {
         case 'select':
           result = result.filter(item => (item as any)[key] === value);
           break;
-          
+
         case 'boolean':
           if (value !== null) {
             const boolValue = value === true || value === 'true';
@@ -74,7 +77,7 @@ export default function Table<T>({
             });
           }
           break;
-          
+
         case 'multiselect':
           if (Array.isArray(value) && value.length > 0) {
             result = result.filter(item => value.includes((item as any)[key]));
@@ -85,11 +88,11 @@ export default function Table<T>({
           if (value && (value.start || value.end)) {
             result = result.filter(item => {
               const itemDateValue = (item as any)[key];
-              
+
               if (itemDateValue === null || itemDateValue === undefined) return true;
-              
+
               let itemDate: Date;
-              
+
               if (itemDateValue instanceof Date) {
                 itemDate = itemDateValue;
               } else if (typeof itemDateValue === 'number') {
@@ -99,16 +102,16 @@ export default function Table<T>({
               } else {
                 return true;
               }
-              
+
               if (isNaN(itemDate.getTime())) return true;
-              
+
               if (value.start) {
                 const startDate = new Date(value.start);
                 if (startDate > itemDate) {
                   return false;
                 }
               }
-              
+
               if (value.end) {
                 const endDate = new Date(value.end);
                 endDate.setHours(23, 59, 59, 999);
@@ -116,20 +119,20 @@ export default function Table<T>({
                   return false;
                 }
               }
-              
+
               return true;
             });
           }
           break;
-          
+
         case 'search':
           if (typeof value === 'object' && value !== null && value.term !== undefined) {
             const { term, field, method } = value;
-            
+
             if (term === null) break;
-            
+
             if (!term && !['isEmpty', 'isNotEmpty'].includes(method)) break;
-            
+
             const searchTerm = String(term).toLowerCase();
             result = result.filter(item => {
               let itemValue;
@@ -138,7 +141,7 @@ export default function Table<T>({
               } else {
                 itemValue = String((item as any)[key] || '').toLowerCase();
               }
-              
+
               switch(method) {
                 case 'contains':
                   return itemValue.includes(searchTerm);
@@ -173,7 +176,7 @@ export default function Table<T>({
             });
           }
           break;
-          
+
         case 'range':
           if (value.min !== undefined && value.min !== null) {
             result = result.filter(item => (item as any)[key] >= value.min);
@@ -184,13 +187,13 @@ export default function Table<T>({
           break;
       }
     });
-    
+
     return result;
   }, [data, columnFilters, columns]);
 
   const sortedData = useMemo(() => {
     if (!sortKey) return filteredData;
-    
+
     const column = columns.find(col => col.key === sortKey);
     return tableService.sortData(
       filteredData, 
@@ -206,16 +209,16 @@ export default function Table<T>({
         column.filterType === 'boolean') {
       return false;
     }
-    
+
     return column.sortable === true;
   };
 
   const handleSort = (columnKey: string) => {
     const column = columns.find(col => col.key === columnKey);
     if (!column) return;
-    
+
     if (!isSortableColumn(column)) return;
-    
+
     setSortKey(columnKey);
     if (sortKey === columnKey) {
       if (sortDirection === null) setSortDirection('asc');
@@ -242,7 +245,7 @@ export default function Table<T>({
   const handleFilterChange = (selectedFilters: SelectedFilters) => {
     setFilters(selectedFilters);
     setCurrentPage(1);
-    
+
     if (onFilterChange) {
       onFilterChange(selectedFilters);
     }
@@ -254,7 +257,7 @@ export default function Table<T>({
         col.key === columnKey ? { ...col, hidden: !col.hidden } : col
       )
     );
-    
+
     const column = columns.find(col => col.key === columnKey);
     if (column && !column.hidden && columnFilters[columnKey] !== undefined) {
       setColumnFilters(prev => {
@@ -278,20 +281,47 @@ export default function Table<T>({
     Object.keys(columnFilters).length, 
     [columnFilters]
   );
-  
+
   const filterSummaryRef = useRef<HTMLDivElement>(null);
-  
+
+  // Handle right click on table to show context menu
+  const handleTableRightClick = (e: React.MouseEvent) => {
+    // Prevent default browser context menu
+    e.preventDefault();
+
+    // Check if the click target is a table cell or header
+    // If it is, the cell's own context menu handler will take care of it
+    const target = e.target as HTMLElement;
+    const isTableCell = target.tagName === 'TD' || 
+                        target.closest('td') !== null || 
+                        target.tagName === 'TH' || 
+                        target.closest('th') !== null;
+
+    // Only show the generic context menu if we're not clicking on a cell or header
+    // and we have filterable columns
+    if (!isTableCell && columns.some(col => col.filterable)) {
+      setContextMenuPosition({ x: e.clientX, y: e.clientY });
+      // Clear any previously set column
+      (window as any).__currentColumnForContextMenu = null;
+    }
+  };
+
+  // Close context menu
+  const handleCloseContextMenu = () => {
+    setContextMenuPosition(null);
+  };
+
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (filterSummaryRef.current && !filterSummaryRef.current.contains(event.target as Node)) {
         setShowColumnFilterSummary(false);
       }
     }
-    
+
     if (showColumnFilterSummary) {
       document.addEventListener('mousedown', handleClickOutside);
     }
-    
+
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
@@ -306,12 +336,12 @@ export default function Table<T>({
   useEffect(() => {
     setCurrentPage(1);
   }, [sortedData.length, setCurrentPage]);
-  
+
   const totalPages = useMemo(() => 
     Math.max(1, tableService.calculateTotalPages(sortedData.length, itemsPerPage)),
     [tableService, sortedData.length, itemsPerPage]
   );
-  
+
   const paginatedData = useMemo(() => 
     tableService.getPaginatedData(sortedData, currentPage, itemsPerPage),
     [tableService, sortedData, currentPage, itemsPerPage]
@@ -326,7 +356,7 @@ export default function Table<T>({
 
   const renderSortIndicator = (columnKey: string) => {
     const isColumnSorted = sortKey === columnKey;
-    
+
     return (
       <div className="flex items-center ml-1">
         <div className="flex flex-col -space-y-1 justify-center">
@@ -343,6 +373,22 @@ export default function Table<T>({
     );
   };
 
+  // Add CSS for animation
+  useEffect(() => {
+    // Create style element for menu animation if it doesn't exist
+    if (!document.getElementById('table-context-menu-styles')) {
+      const styleElement = document.createElement('style');
+      styleElement.id = 'table-context-menu-styles';
+      styleElement.textContent = `
+        @keyframes menuAppear {
+          from { opacity: 0; transform: scale(0.95); }
+          to { opacity: 1; transform: scale(1); }
+        }
+      `;
+      document.head.appendChild(styleElement);
+    }
+  }, []);
+
   return (
     <div className="space-y-4">
       {showFilter && filterGroups.length > 0 && (
@@ -357,14 +403,14 @@ export default function Table<T>({
           compact={false}
         />
       )}
-      
+
       <div className={`bg-white rounded-lg shadow ${className}`}>
         <div className="px-6 py-3 flex items-center justify-between border-b border-gray-200 bg-white">
           <div className="flex items-center space-x-4">
             <h2 className="text-sm font-medium text-gray-700">
               {sortedData.length} {sortedData.length === 1 ? 'item' : 'items'}
             </h2>
-            
+
             {activeColumnFilterCount > 0 && (
               <div className="relative" ref={filterSummaryRef}>
                 <button 
@@ -374,7 +420,7 @@ export default function Table<T>({
                   <FilterIcon size={14} className="mr-1.5" />
                   {activeColumnFilterCount} {activeColumnFilterCount === 1 ? 'filter' : 'filters'}
                 </button>
-                
+
                 {showColumnFilterSummary && (
                   <div className="absolute left-0 top-full mt-1 z-10 w-64 bg-white rounded-md shadow-lg border border-gray-200 p-3">
                     <div className="flex justify-between items-center mb-2 pb-1 border-b border-gray-100">
@@ -391,7 +437,7 @@ export default function Table<T>({
                       {Object.entries(columnFilters).map(([key, value]) => {
                         const column = columns.find(col => col.key === key);
                         if (!column) return null;
-                        
+
                         let displayValue: string;
                         if (Array.isArray(value)) {
                           displayValue = `${value.length} selected`;
@@ -406,7 +452,7 @@ export default function Table<T>({
                                 year: 'numeric' 
                               });
                             };
-                            
+
                             const start = formatDate(value.start);
                             const end = formatDate(value.end);
                             displayValue = `${start} - ${end}`;
@@ -422,7 +468,7 @@ export default function Table<T>({
                         } else {
                           displayValue = String(value);
                         }
-                        
+
                         return (
                           <div key={key} className="flex justify-between items-center text-xs">
                             <span className="font-medium text-gray-700">{column.header}:</span>
@@ -444,7 +490,7 @@ export default function Table<T>({
               </div>
             )}
           </div>
-          
+
           {showTableSizeControls && (
             <PageSizeControl
               itemsPerPage={itemsPerPage}
@@ -457,7 +503,7 @@ export default function Table<T>({
             />
           )}
         </div>
-        
+
         {columns.some(col => col.hidden) && (
           <div className="px-6 py-2 bg-indigo-50/40 border-b border-indigo-100 flex flex-wrap items-center">
             <span className="text-xs font-medium text-gray-700 mr-2">Hidden Columns:</span>
@@ -475,8 +521,11 @@ export default function Table<T>({
             </div>
           </div>
         )}
-        
-        <div className="overflow-x-auto">
+
+        <div 
+          className="overflow-x-auto"
+          onContextMenu={handleTableRightClick}
+        >
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
@@ -485,6 +534,13 @@ export default function Table<T>({
                     key={column.key}
                     scope="col"
                     className={`px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-r border-gray-200 table-column-header transition-colors duration-200 ${column.className || ''}`}
+                    onContextMenu={(e) => {
+                      e.preventDefault();
+                      const rect = e.currentTarget.getBoundingClientRect();
+                      setContextMenuPosition({ x: e.clientX, y: rect.bottom });
+                      // Store the current column for the context menu
+                      (window as any).__currentColumnForContextMenu = column;
+                    }}
                   >
                     <div className="flex items-center justify-between">
                       <div className="flex items-center">
@@ -500,7 +556,7 @@ export default function Table<T>({
                           <span>{column.header}</span>
                         )}
                       </div>
-                      
+
                       <ColumnMenu
                         column={column}
                         data={data}
@@ -516,7 +572,7 @@ export default function Table<T>({
                 ))}
               </tr>
             </thead>
-            
+
             <tbody className="bg-white divide-y divide-gray-200">
               {sortedData.length === 0 ? (
                 <>
@@ -556,13 +612,19 @@ export default function Table<T>({
                         <td 
                           key={`${keyExtractor(item)}-${column.key}`}
                           className={`px-6 py-4 whitespace-nowrap ${column.className || ''}`}
+                          onContextMenu={(e) => {
+                            e.preventDefault();
+                            setContextMenuPosition({ x: e.clientX, y: e.clientY });
+                            // Store the current column for the context menu
+                            (window as any).__currentColumnForContextMenu = column;
+                          }}
                         >
                           {column.render ? column.render(item) : (item as any)[column.key]}
                         </td>
                       ))}
                     </tr>
                   ))}
-                  
+
                   {emptyRows > 0 && 
                     Array.from({ length: emptyRows }, (_, index) => (
                       <tr key={`filler-row-${index}`} className="h-14 border-b border-gray-200">
@@ -582,7 +644,7 @@ export default function Table<T>({
             </tbody>
           </table>
         </div>
-        
+
         <TablePagination
           currentPage={currentPage}
           totalPages={totalPages}
@@ -594,6 +656,22 @@ export default function Table<T>({
           showPageSizeControl={false} // We're showing it above
         />
       </div>
+
+      {/* Add the table context menu */}
+      <TableContextMenu
+        columns={columns}
+        data={data}
+        onFilterChange={handleColumnFilterChange}
+        activeFilters={columnFilters}
+        position={contextMenuPosition}
+        onClose={handleCloseContextMenu}
+        onSortChange={handleSort}
+        currentSortKey={sortKey}
+        currentSortDirection={sortDirection}
+        onToggleVisibility={handleToggleColumnVisibility}
+        onResetColumnFilter={(columnKey) => handleColumnFilterChange(columnKey, null)}
+        onResetAllFilters={resetColumnFilters}
+      />
     </div>
   );
 }
