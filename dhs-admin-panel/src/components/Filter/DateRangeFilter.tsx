@@ -1,14 +1,14 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Calendar, ChevronLeft, ChevronRight, X, ArrowRight, ArrowLeft, ArrowLeftRight } from 'lucide-react';
+import { Calendar, ChevronLeft, ChevronRight, X, ArrowRight, ArrowLeft, ArrowLeftRight, ChevronDown } from 'lucide-react';
 
 interface DateRangeFilterProps {
   value: { start?: Date | null; end?: Date | null } | null;
   onChange: (value: { start?: Date | null; end?: Date | null } | null) => void;
   className?: string;
   placeholder?: string;
-  defaultOpen?: boolean; // New prop to control if calendar is open by default
+  defaultOpen?: boolean; 
 }
 
 type FilterMode = 'range' | 'before' | 'after';
@@ -25,11 +25,14 @@ const DateRangeFilter: React.FC<DateRangeFilterProps> = ({
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [filterMode, setFilterMode] = useState<FilterMode>('range');
   
+  // Month and Year selection dropdowns
+  const [showMonthDropdown, setShowMonthDropdown] = useState<boolean>(false);
+  const [showYearDropdown, setShowYearDropdown] = useState<boolean>(false);
+  
   const [rangeStart, setRangeStart] = useState<Date | null>(null);
   const [rangeEnd, setRangeEnd] = useState<Date | null>(null);
   const [selectingStartDate, setSelectingStartDate] = useState<boolean>(true);
   
-  // Draft state for working values before applying the filter
   const [draftState, setDraftState] = useState<{
     mode: FilterMode,
     singleDate: Date | null,
@@ -42,7 +45,33 @@ const DateRangeFilter: React.FC<DateRangeFilterProps> = ({
     end: null
   });
   
-  // Initialize from props
+  // Month names for dropdown
+  const monthNames = [
+    'January', 'February', 'March', 'April', 'May', 'June',
+    'July', 'August', 'September', 'October', 'November', 'December'
+  ];
+  
+  // Generate available years (10 years before and after current)
+  const getAvailableYears = () => {
+    const years = [];
+    const currentYear = new Date().getFullYear();
+    for (let i = currentYear - 10; i <= currentYear + 10; i++) {
+      years.push(i);
+    }
+    return years;
+  };
+  
+  // Month and year selection functions
+  const handleMonthChange = (monthIndex: number) => {
+    setCurrentMonth(new Date(currentMonth.getFullYear(), monthIndex, 1));
+    setShowMonthDropdown(false);
+  };
+  
+  const handleYearChange = (year: number) => {
+    setCurrentMonth(new Date(year, currentMonth.getMonth(), 1));
+    setShowYearDropdown(false);
+  };
+  
   useEffect(() => {
     if (value) {
       if (value.start && !value.end) {
@@ -81,6 +110,28 @@ const DateRangeFilter: React.FC<DateRangeFilterProps> = ({
     }
   }, [value]);
   
+  // Close dropdowns when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      const isMonthDropdown = target.closest('.month-dropdown');
+      const isYearDropdown = target.closest('.year-dropdown');
+      
+      if (!isMonthDropdown) {
+        setShowMonthDropdown(false);
+      }
+      
+      if (!isYearDropdown) {
+        setShowYearDropdown(false);
+      }
+    };
+    
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+  
   const resetAllSelections = () => {
     setSelectedDate(null);
     setRangeStart(null);
@@ -94,13 +145,11 @@ const DateRangeFilter: React.FC<DateRangeFilterProps> = ({
     });
   };
   
-  // Format date for display
   const formatDate = (date: Date | null | undefined) => {
     if (!date) return '';
     return date.toLocaleDateString('bg-BG', { day: '2-digit', month: '2-digit', year: 'numeric' });
   };
   
-  // Generate dates for calendar
   const getDaysInMonth = (year: number, month: number) => {
     return new Date(year, month + 1, 0).getDate();
   };
@@ -109,17 +158,13 @@ const DateRangeFilter: React.FC<DateRangeFilterProps> = ({
     const days = [];
     const daysInMonth = getDaysInMonth(year, month);
     
-    // Get first day of month
     const firstDay = new Date(year, month, 1).getDay();
-    // Adjust because in JS Sunday is 0, but we want Monday to be 0
     const firstDayAdjusted = firstDay === 0 ? 6 : firstDay - 1;
     
-    // Add empty cells for days before month start
     for (let i = 0; i < firstDayAdjusted; i++) {
       days.push(null);
     }
     
-    // Add days of the month
     for (let i = 1; i <= daysInMonth; i++) {
       days.push(new Date(year, month, i));
     }
@@ -127,7 +172,6 @@ const DateRangeFilter: React.FC<DateRangeFilterProps> = ({
     return days;
   };
   
-  // Check if a date is selected for single date mode
   const isSingleDateSelected = (date: Date | null) => {
     if (!date || !draftState.singleDate) return false;
     
@@ -136,7 +180,6 @@ const DateRangeFilter: React.FC<DateRangeFilterProps> = ({
            date.getFullYear() === draftState.singleDate.getFullYear();
   };
   
-  // Check if a date is selected as start or end in range mode
   const isRangeDateSelected = (date: Date | null) => {
     if (!date) return false;
     
@@ -153,23 +196,19 @@ const DateRangeFilter: React.FC<DateRangeFilterProps> = ({
     return isStart || isEnd;
   };
   
-  // Check if a date is in range between start and end
   const isDateInRange = (date: Date | null) => {
     if (!date || !draftState.start || !draftState.end) return false;
     return date > draftState.start && date < draftState.end;
   };
   
-  // Navigate to previous month
   const goToPrevMonth = () => {
     setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1, 1));
   };
   
-  // Navigate to next month
   const goToNextMonth = () => {
     setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 1));
   };
   
-  // Handle date click based on selected mode
   const handleDateClick = (date: Date | null) => {
     if (!date) return;
     
@@ -182,7 +221,6 @@ const DateRangeFilter: React.FC<DateRangeFilterProps> = ({
         });
         setSelectingStartDate(false);
       } else {
-        // Ensure end date isn't before start date
         if (draftState.start && date < draftState.start) {
           setDraftState({
             ...draftState,
@@ -197,7 +235,6 @@ const DateRangeFilter: React.FC<DateRangeFilterProps> = ({
         }
       }
     } else {
-      // For before/after modes
       setDraftState({
         ...draftState,
         singleDate: date
@@ -205,7 +242,6 @@ const DateRangeFilter: React.FC<DateRangeFilterProps> = ({
     }
   };
   
-  // Apply the filter based on the selected mode
   const applyFilter = () => {
     let filterValue: { start?: Date | null; end?: Date | null } | null = null;
     
@@ -222,7 +258,6 @@ const DateRangeFilter: React.FC<DateRangeFilterProps> = ({
     onChange(filterValue);
     setShowCalendar(false);
     
-    // Synchronize component's state with the applied filter
     if (draftState.mode === 'range') {
       setRangeStart(draftState.start);
       setRangeEnd(draftState.end);
@@ -232,7 +267,6 @@ const DateRangeFilter: React.FC<DateRangeFilterProps> = ({
     setFilterMode(draftState.mode);
   };
   
-  // Clear the filter
   const clearFilter = () => {
     resetAllSelections();
     onChange(null);
@@ -373,7 +407,7 @@ const DateRangeFilter: React.FC<DateRangeFilterProps> = ({
             </div>
           </div>
           
-          {/* Calendar header */}
+          {/* Calendar header with month/year selectors */}
           <div className="mb-3 flex items-center justify-between">
             <button 
               className="p-1 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded"
@@ -382,8 +416,72 @@ const DateRangeFilter: React.FC<DateRangeFilterProps> = ({
               <ChevronLeft size={18} />
             </button>
             
-            <div className="font-medium">
-              {currentMonth.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
+            <div className="flex items-center space-x-1.5">
+              {/* Month selector dropdown */}
+              <div className="relative month-dropdown">
+                <button
+                  className="flex items-center justify-between px-2 py-1 bg-white border border-gray-200 rounded hover:bg-gray-50 text-sm font-medium min-w-[110px]"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setShowMonthDropdown(!showMonthDropdown);
+                    setShowYearDropdown(false);
+                  }}
+                >
+                  <span>{monthNames[currentMonth.getMonth()]}</span>
+                  <ChevronDown size={14} className="ml-1 text-gray-500" />
+                </button>
+                
+                {showMonthDropdown && (
+                  <div className="absolute top-full left-0 mt-1 bg-white border border-gray-200 rounded-md shadow-lg z-20 max-h-48 overflow-y-auto w-full">
+                    {monthNames.map((month, index) => (
+                      <div
+                        key={month}
+                        className={`px-3 py-1.5 text-sm cursor-pointer hover:bg-indigo-50 
+                          ${index === currentMonth.getMonth() ? 'bg-indigo-50 text-indigo-700 font-medium' : ''}`}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleMonthChange(index);
+                        }}
+                      >
+                        {month}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+              
+              {/* Year selector dropdown */}
+              <div className="relative year-dropdown">
+                <button
+                  className="flex items-center justify-between px-2 py-1 bg-white border border-gray-200 rounded hover:bg-gray-50 text-sm font-medium min-w-[70px]"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setShowYearDropdown(!showYearDropdown);
+                    setShowMonthDropdown(false);
+                  }}
+                >
+                  <span>{currentMonth.getFullYear()}</span>
+                  <ChevronDown size={14} className="ml-1 text-gray-500" />
+                </button>
+                
+                {showYearDropdown && (
+                  <div className="absolute top-full left-0 mt-1 bg-white border border-gray-200 rounded-md shadow-lg z-20 max-h-48 overflow-y-auto w-full">
+                    {getAvailableYears().map((year) => (
+                      <div
+                        key={year}
+                        className={`px-3 py-1.5 text-sm cursor-pointer hover:bg-indigo-50 
+                          ${year === currentMonth.getFullYear() ? 'bg-indigo-50 text-indigo-700 font-medium' : ''}`}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleYearChange(year);
+                        }}
+                      >
+                        {year}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
             
             <button 
