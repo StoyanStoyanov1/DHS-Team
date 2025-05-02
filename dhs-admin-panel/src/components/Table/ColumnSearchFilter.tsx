@@ -5,7 +5,6 @@ import {
   SlidersHorizontal, History, PlusCircle, Hash, Calendar
 } from 'lucide-react';
 
-// Enhanced search method options
 export type EnhancedSearchMethod = 
   | 'contains' 
   | 'equals' 
@@ -16,7 +15,6 @@ export type EnhancedSearchMethod =
   | 'isNotEmpty'
   | 'regex';
 
-// Data type of the field for specialized search options
 export type FieldDataType = 'text' | 'number' | 'date' | 'boolean' | 'array';
 
 interface ColumnSearchFilterProps {
@@ -26,8 +24,8 @@ interface ColumnSearchFilterProps {
   onSearch: (columnKey: string, term: string, field: string, method: SearchMethod) => void;
   initialValue?: string;
   onClose?: () => void;
-  fieldDataType?: FieldDataType; // Optional field type for specialized search options
-  recentSearches?: string[]; // Optional prop for recent searches
+  fieldDataType?: FieldDataType;
+  recentSearches?: string[];
 }
 
 export default function ColumnSearchFilter({
@@ -51,31 +49,26 @@ export default function ColumnSearchFilter({
   const searchInputRef = useRef<HTMLInputElement>(null);
   const recentSearchesRef = useRef<HTMLDivElement>(null);
   
-  // Store initial state to revert changes if closed without search
   const initialState = useRef({
     term: '',
     field: selectedField,
     method: 'contains' as EnhancedSearchMethod
   });
   
-  // Limit recent searches to last 10
   const limitedRecentSearches = recentSearches.slice(0, 10);
   
-  // Reset field when search fields change
   useEffect(() => {
     if (searchFields.length > 0) {
       setSelectedField(searchFields[0].path || searchFields[0].key);
     }
   }, [searchFields]);
 
-  // Auto-focus input when component mounts
   useEffect(() => {
     if (searchInputRef.current) {
       searchInputRef.current.focus();
     }
   }, []);
 
-  // Handle outside clicks for recent searches dropdown
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (
@@ -97,43 +90,31 @@ export default function ColumnSearchFilter({
   }, [showRecentSearches]);
 
   const handleSearch = () => {
-    // If method is not isEmpty/isNotEmpty and search string is empty,
-    // directly remove filter from active filters
     if (searchTerm === "" && !['isEmpty', 'isNotEmpty'].includes(searchMethod)) {
-      // Send null value, which will remove the filter from active filters
       onSearch(columnKey, null, selectedField, searchMethod as SearchMethod);
       
-      // Close filter after removal
       if (onClose) {
         onClose();
       }
       return;
     }
     
-    // For isEmpty and isNotEmpty methods, no search value is needed
     if (['isEmpty', 'isNotEmpty'].includes(searchMethod)) {
       onSearch(columnKey, '', selectedField, searchMethod as SearchMethod);
     } else {
-      // For all other methods, use the entered string
       onSearch(columnKey, searchTerm, selectedField, searchMethod as SearchMethod);
     }
     
-    // This prevents adding empty filters to the list of active filters
-    
-    // If there was no previous filter (initialValue is empty) and searchTerm is empty,
-    // remove the filter from active filters
     if ((initialValue === '' || initialValue === null) && (searchTerm === '' || searchTerm === null)) {
       onSearch(columnKey, null, selectedField, 'contains');
     } 
-    // If we have a previous value, keep it without changes
     else if (typeof initialValue === 'object' && initialValue !== null) {
       const config = initialValue as any;
       if (config.term !== undefined && config.field !== undefined && config.method !== undefined) {
-        // Do nothing - keep the current filter as is
+        // Keep the current filter as is
       }
     }
     
-    // Close filter after applying the search
     if (onClose) {
       onClose();
     }
@@ -149,13 +130,11 @@ export default function ColumnSearchFilter({
     }
   };
 
-  // Custom close handler that doesn't apply changes
   const handleClose = () => {
     if (onClose) {
-      // If user closes the component without searching, do NOT save current state
       const config = initialValue as any;
       if (config.term !== undefined && config.field !== undefined && config.method !== undefined) {
-        // Do nothing - keep the current filter as is
+        // Keep the current filter as is
       }
       
       onClose();
@@ -177,18 +156,15 @@ export default function ColumnSearchFilter({
   const handleRecentSearchSelect = (term: string) => {
     setSearchTerm(term);
     setShowRecentSearches(false);
-    // Auto-focus back to input
     if (searchInputRef.current) {
       searchInputRef.current.focus();
     }
   };
 
-  // Toggle recent searches visibility
   const toggleRecentSearches = () => {
     setShowRecentSearches(!showRecentSearches);
   };
 
-  // Get icon for current field data type
   const getDataTypeIcon = () => {
     switch (fieldDataType) {
       case 'number':
@@ -204,7 +180,6 @@ export default function ColumnSearchFilter({
     }
   };
 
-  // Method options vary based on field data type
   const getMethodOptions = () => {
     const commonOptions = [
       { value: 'contains', label: 'Contains' },
@@ -216,12 +191,10 @@ export default function ColumnSearchFilter({
       { value: 'isNotEmpty', label: 'Is not empty' }
     ];
     
-    // Add regex option for text fields
     if (fieldDataType === 'text') {
       commonOptions.push({ value: 'regex', label: 'Regular expression' });
     }
     
-    // Specialized options for numbers
     if (fieldDataType === 'number') {
       return [
         { value: 'equals', label: 'Equals' },
@@ -235,7 +208,6 @@ export default function ColumnSearchFilter({
       ];
     }
     
-    // Specialized options for dates
     if (fieldDataType === 'date') {
       return [
         { value: 'equals', label: 'Equals' },
@@ -254,12 +226,8 @@ export default function ColumnSearchFilter({
   const selectedFieldLabel = searchFields.find(f => (f.path || f.key) === selectedField)?.label || columnHeader;
   const needsInputField = !['isEmpty', 'isNotEmpty'].includes(searchMethod);
 
-  // Parse initial value - check if it's a search config object or a simple string
   useEffect(() => {
-    // Always update values when initialValue changes significantly
-    // regardless of focus state
     if (typeof initialValue === 'object' && initialValue !== null) {
-      // It's a search config object
       const config = initialValue as any;
       if (config.term !== undefined) {
         setSearchTerm(config.term || '');
@@ -274,7 +242,6 @@ export default function ColumnSearchFilter({
         initialState.current.method = config.method as EnhancedSearchMethod;
       }
     } else if (typeof initialValue === 'string') {
-      // It's a simple string - use it as the search term
       setSearchTerm(initialValue);
       initialState.current.term = initialValue;
     }
@@ -282,7 +249,6 @@ export default function ColumnSearchFilter({
 
   return (
     <div className="space-y-3 p-3 bg-white rounded-lg shadow-lg border border-gray-200 w-72">
-      {/* Header with title */}
       <div className="flex items-center justify-between pb-2 border-b border-gray-100">
         <div className="flex items-center">
           {getDataTypeIcon()}
@@ -298,7 +264,6 @@ export default function ColumnSearchFilter({
         )}
       </div>
       
-      {/* Field selector - Only show if we have multiple searchable fields */}
       {searchFields.length > 1 && (
         <div>
           <label htmlFor="search-field" className="block text-xs font-medium text-gray-700 mb-1">
@@ -324,7 +289,6 @@ export default function ColumnSearchFilter({
         </div>
       )}
 
-      {/* Search method selector */}
       <div>
         <label htmlFor="search-method" className="block text-xs font-medium text-gray-700 mb-1">
           Match condition:
@@ -335,7 +299,6 @@ export default function ColumnSearchFilter({
             className="block w-full pl-3 pr-10 py-1.5 text-sm border border-gray-300 bg-white rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 appearance-none transition-shadow duration-150"
             value={searchMethod}
             onChange={(e) => {
-              // Just update local state, don't apply filter until Search button is clicked
               const newMethod = e.target.value as EnhancedSearchMethod;
               setSearchMethod(newMethod);
             }}
@@ -352,7 +315,6 @@ export default function ColumnSearchFilter({
         </div>
       </div>
 
-      {/* Search input with history icon - Only show for methods that need a value */}
       {needsInputField && (
         <div className="relative">
           <div className="relative">
@@ -368,7 +330,6 @@ export default function ColumnSearchFilter({
               onChange={(e) => setSearchTerm(e.target.value)}
               onKeyDown={handleKeyDown}
               onClick={() => {
-                // Clicking in the input should hide the recent searches
                 if (showRecentSearches) {
                   setShowRecentSearches(false);
                 }
@@ -397,7 +358,6 @@ export default function ColumnSearchFilter({
             </div>
           </div>
           
-          {/* Recent searches dropdown */}
           {showRecentSearches && limitedRecentSearches.length > 0 && (
             <div 
               ref={recentSearchesRef}
@@ -427,7 +387,6 @@ export default function ColumnSearchFilter({
         </div>
       )}
 
-      {/* Advanced options toggle */}
       <button
         type="button"
         className="flex items-center text-xs text-indigo-600 hover:text-indigo-800 focus:outline-none"
@@ -437,10 +396,8 @@ export default function ColumnSearchFilter({
         {showAdvancedOptions ? 'Hide advanced options' : 'Show advanced options'}
       </button>
       
-      {/* Advanced options panel */}
       {showAdvancedOptions && (
         <div className="pt-2 border-t border-gray-100">
-          {/* Case sensitivity toggle - only for text fields */}
           {fieldDataType === 'text' && (
             <div className="flex items-center mb-2">
               <input
@@ -458,7 +415,6 @@ export default function ColumnSearchFilter({
         </div>
       )}
 
-      {/* Action buttons */}
       <div className="flex justify-end pt-2 space-x-2 border-t border-gray-100">
         <button
           type="button"

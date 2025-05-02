@@ -1,9 +1,3 @@
-/**
- * Breadcrumb component for navigation.
- * Displays the current page's location within the app hierarchy.
- * @param props - The properties for the Breadcrumb component.
- * @returns A styled breadcrumb navigation bar.
- */
 'use client';
 
 import React from 'react';
@@ -19,7 +13,6 @@ interface BreadcrumbItem {
 const Breadcrumb = () => {
     const pathname = usePathname();
 
-    // Build breadcrumb items based on the current path
     const getBreadcrumbItems = (): BreadcrumbItem[] => {
         if (!pathname) return [];
 
@@ -29,10 +22,8 @@ const Breadcrumb = () => {
         return pathSegments.map((segment) => {
             currentPath += `/${segment}`;
 
-            // Convert path segments to readable labels
             let label = segment.charAt(0).toUpperCase() + segment.slice(1);
 
-            // Handle special cases
             if (segment === 'auth') {
                 label = 'Authentication';
             }
@@ -46,7 +37,6 @@ const Breadcrumb = () => {
 
     const breadcrumbItems = getBreadcrumbItems();
 
-    // If we're on the home page, don't show the breadcrumb
     if (pathname === '/') {
         return null;
     }

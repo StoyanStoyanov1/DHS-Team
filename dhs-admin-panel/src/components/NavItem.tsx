@@ -12,13 +12,13 @@ interface NavItemProps {
 }
 
 const NavItem: React.FC<NavItemProps> = ({
-                                             icon,
-                                             label,
-                                             badge,
-                                             active,
-                                             onClick,
-                                             isCollapsed
-                                         }) => {
+    icon,
+    label,
+    badge,
+    active,
+    onClick,
+    isCollapsed
+}) => {
     return (
         <div
             className={`flex items-center px-3 py-2 rounded-md cursor-pointer mb-1 transition-colors ${

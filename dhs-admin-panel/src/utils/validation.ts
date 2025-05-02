@@ -4,43 +4,25 @@ export interface ValidationResult {
 }
 
 const EMAIL_REGEX = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-
 const PASSWORD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
 
 export const validateEmail = (email: string): string | null => {
-    if (!email.trim()) {
-        return 'Email is required';
-    }
-
-    if (!EMAIL_REGEX.test(email)) {
-        return 'Please enter a valid email address';
-    }
-
+    if (!email.trim()) return 'Email is required';
+    if (!EMAIL_REGEX.test(email)) return 'Please enter a valid email address';
     return null;
 };
 
 export const validatePassword = (password: string): string | null => {
-    if (!password) {
-        return 'Password is required';
-    }
-
-    if (password.length < 8) {
-        return 'Password must be at least 8 characters long';
-    }
-
+    if (!password) return 'Password is required';
+    if (password.length < 8) return 'Password must be at least 8 characters long';
     if (!PASSWORD_REGEX.test(password)) {
         return 'Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character';
     }
-
     return null;
 };
 
 export const validatePasswordMatch = (password: string, confirmPassword: string): string | null => {
-    if (password !== confirmPassword) {
-        return 'Passwords do not match';
-    }
-
-    return null;
+    return password !== confirmPassword ? 'Passwords do not match' : null;
 };
 
 export const validateLoginForm = (email: string, password: string): ValidationResult => {
@@ -49,9 +31,7 @@ export const validateLoginForm = (email: string, password: string): ValidationRe
     const emailError = validateEmail(email);
     if (emailError) errors.email = emailError;
 
-    if (!password) {
-        errors.password = 'Password is required';
-    }
+    if (!password) errors.password = 'Password is required';
 
     return {
         valid: Object.keys(errors).length === 0,

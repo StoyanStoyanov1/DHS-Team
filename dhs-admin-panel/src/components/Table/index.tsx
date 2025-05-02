@@ -25,7 +25,6 @@ export default function Table<T>({
   showTableSizeControls = true,
   defaultSortKey,
   defaultSortDirection,
-  // Filter related props
   filterGroups = [],
   initialFilterValues = {},
   onFilterChange,
@@ -40,9 +39,7 @@ export default function Table<T>({
   const [columnFilters, setColumnFilters] = useState<SelectedFilters>({});
   const [columns, setColumns] = useState<ITableColumn<T>[]>(initialColumns);
   const [showColumnFilterSummary, setShowColumnFilterSummary] = useState(false);
-  // Initialize sortKey as undefined regardless of defaultSortKey to have no default sorting
   const [sortKey, setSortKey] = useState<string | undefined>(undefined);
-  // Initialize sortDirection as null regardless of defaultSortDirection to have no default sorting
   const [sortDirection, setSortDirection] = useState<SortDirection>(null);
   
   const currentPage = externalCurrentPage ?? internalCurrentPage;
@@ -50,16 +47,13 @@ export default function Table<T>({
   const itemsPerPage = externalItemsPerPage ?? internalItemsPerPage;
   const setItemsPerPage = externalSetItemsPerPage ?? setInternalItemsPerPage;
 
-  // All filters combined (global + column-specific)
   const allFilters = useMemo(() => {
     return { ...filters, ...columnFilters };
   }, [filters, columnFilters]);
 
-  // Apply column filters to the data
   const filteredData = useMemo(() => {
     let result = [...data];
     
-    // Apply column-specific filters
     Object.entries(columnFilters).forEach(([key, value]) => {
       if (value === null || value === '') return;
       
@@ -72,9 +66,7 @@ export default function Table<T>({
           break;
           
         case 'boolean':
-          // Special processing for boolean values
           if (value !== null) {
-            // Important: Convert the value to a boolean type regardless of format
             const boolValue = value === true || value === 'true';
             result = result.filter(item => {
               const itemValue = Boolean((item as any)[key]);
@@ -94,30 +86,22 @@ export default function Table<T>({
             result = result.filter(item => {
               const itemDateValue = (item as any)[key];
               
-              // Skip if the value is null or undefined
               if (itemDateValue === null || itemDateValue === undefined) return true;
               
-              // Convert to Date object according to the data format
               let itemDate: Date;
               
               if (itemDateValue instanceof Date) {
-                // Already a Date object
                 itemDate = itemDateValue;
               } else if (typeof itemDateValue === 'number') {
-                // Timestamp (in milliseconds)
                 itemDate = new Date(itemDateValue);
               } else if (typeof itemDateValue === 'string') {
-                // ISO string or other date string format
                 itemDate = new Date(itemDateValue);
               } else {
-                // Unable to convert to date, skip this item
                 return true;
               }
               
-              // Skip invalid dates
               if (isNaN(itemDate.getTime())) return true;
               
-              // Filter by start date (if provided)
               if (value.start) {
                 const startDate = new Date(value.start);
                 if (startDate > itemDate) {
@@ -125,10 +109,8 @@ export default function Table<T>({
                 }
               }
               
-              // Filter by end date (if provided)
               if (value.end) {
                 const endDate = new Date(value.end);
-                // Make the end date inclusive by setting it to the end of the day
                 endDate.setHours(23, 59, 59, 999);
                 if (endDate < itemDate) {
                   return false;
@@ -141,9 +123,7 @@ export default function Table<T>({
           break;
           
         case 'search':
-          // Check if the value is a complex search configuration object
           if (typeof value === 'object' && value !== null && value.term !== undefined) {
-            // It's a search configuration with method, field, etc.
             const { term, field, method } = value;
             
             if (term === null) break;
@@ -152,17 +132,13 @@ export default function Table<T>({
             
             const searchTerm = String(term).toLowerCase();
             result = result.filter(item => {
-              // Get the value from the item based on the field path
               let itemValue;
               if (field && field !== key) {
-                // Search in a nested field or different field
                 itemValue = String((item as any)[field] || '').toLowerCase();
               } else {
-                // Search in the default column field
                 itemValue = String((item as any)[key] || '').toLowerCase();
               }
               
-              // Apply the appropriate search method
               switch(method) {
                 case 'contains':
                   return itemValue.includes(searchTerm);
@@ -189,7 +165,6 @@ export default function Table<T>({
               }
             });
           } 
-          // For backward compatibility: handle simple string searches
           else if (typeof value === 'string' && value.trim() !== '') {
             const searchTerm = value.toLowerCase();
             result = result.filter(item => {
@@ -213,7 +188,6 @@ export default function Table<T>({
     return result;
   }, [data, columnFilters, columns]);
 
-  // Apply sorting to the filtered data
   const sortedData = useMemo(() => {
     if (!sortKey) return filteredData;
     
@@ -226,40 +200,32 @@ export default function Table<T>({
     );
   }, [tableService, filteredData, sortKey, sortDirection, columns]);
 
-  // Function to determine if a column should be sortable based on its type
   const isSortableColumn = (column: ITableColumn<T>) => {
-    // Don't allow sorting for select/multiselect/boolean columns
     if (column.filterType === 'select' || 
         column.filterType === 'multiselect' || 
         column.filterType === 'boolean') {
       return false;
     }
     
-    // In other cases, respect the sortable property of the column
     return column.sortable === true;
   };
 
-  // Handle sorting when a sortable column header is clicked
   const handleSort = (columnKey: string) => {
     const column = columns.find(col => col.key === columnKey);
     if (!column) return;
     
-    // Don't sort if the column shouldn't be sortable
     if (!isSortableColumn(column)) return;
     
     setSortKey(columnKey);
     if (sortKey === columnKey) {
-      // Cycle through sort directions: null -> asc -> desc -> null
       if (sortDirection === null) setSortDirection('asc');
       else if (sortDirection === 'asc') setSortDirection('desc');
       else setSortDirection(null);
     } else {
-      // Default to ascending for a new sort column
       setSortDirection('asc');
     }
   };
 
-  // Handle column filter changes
   const handleColumnFilterChange = (columnKey: string, value: any) => {
     setColumnFilters(prev => {
       const newFilters = { ...prev };
@@ -270,21 +236,18 @@ export default function Table<T>({
       }
       return newFilters;
     });
-    setCurrentPage(1); // Reset to first page when filters change
+    setCurrentPage(1);
   };
 
-  // Handle global filter changes
   const handleFilterChange = (selectedFilters: SelectedFilters) => {
     setFilters(selectedFilters);
-    setCurrentPage(1); // Reset to first page when filters change
+    setCurrentPage(1);
     
-    // Call external filter change handler if provided
     if (onFilterChange) {
       onFilterChange(selectedFilters);
     }
   };
 
-  // Toggle column visibility
   const handleToggleColumnVisibility = (columnKey: string) => {
     setColumns(prevColumns => 
       prevColumns.map(col => 
@@ -292,10 +255,8 @@ export default function Table<T>({
       )
     );
     
-    // When hiding a column, check if it has an active filter and remove it
     const column = columns.find(col => col.key === columnKey);
     if (column && !column.hidden && columnFilters[columnKey] !== undefined) {
-      // Only if the column was visible and is now being hidden, remove the filter
       setColumnFilters(prev => {
         const newFilters = { ...prev };
         delete newFilters[columnKey];
@@ -304,27 +265,22 @@ export default function Table<T>({
     }
   };
 
-  // Reset all column filters
   const resetColumnFilters = () => {
     setColumnFilters({});
-    setShowColumnFilterSummary(false); // Close the filter dropdown after clearing
+    setShowColumnFilterSummary(false);
   };
 
-  // Visible columns (exclude hidden ones)
   const visibleColumns = useMemo(() => {
     return columns.filter(column => !column.hidden);
   }, [columns]);
 
-  // Get filter summary counts
   const activeColumnFilterCount = useMemo(() => 
     Object.keys(columnFilters).length, 
     [columnFilters]
   );
   
-  // Reference for the filter summary dropdown
   const filterSummaryRef = useRef<HTMLDivElement>(null);
   
-  // Close filter summary when clicking outside
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (filterSummaryRef.current && !filterSummaryRef.current.contains(event.target as Node)) {
@@ -368,13 +324,11 @@ export default function Table<T>({
 
   const emptyRows = itemsPerPage - paginatedData.length;
 
-  // Function to render sort indicator
   const renderSortIndicator = (columnKey: string) => {
     const isColumnSorted = sortKey === columnKey;
     
     return (
       <div className="flex items-center ml-1">
-        {/* Two arrows up and down in a compact container */}
         <div className="flex flex-col -space-y-1 justify-center">
           <ArrowUp 
             size={12} 
@@ -389,7 +343,6 @@ export default function Table<T>({
     );
   };
 
-  // Rest of the component remains unchanged
   return (
     <div className="space-y-4">
       {showFilter && filterGroups.length > 0 && (
@@ -444,7 +397,6 @@ export default function Table<T>({
                           displayValue = `${value.length} selected`;
                         } else if (typeof value === 'object' && value !== null) {
                           if (value.start || value.end) {
-                            // Date range filter
                             const formatDate = (date: Date | string | null | undefined) => {
                               if (!date) return '—';
                               const dateObj = typeof date === 'string' ? new Date(date) : date;
@@ -459,15 +411,12 @@ export default function Table<T>({
                             const end = formatDate(value.end);
                             displayValue = `${start} - ${end}`;
                           } else if (value.min !== undefined || value.max !== undefined) {
-                            // Numeric range filter
                             const min = value.min !== undefined && value.min !== null ? value.min : '—';
                             const max = value.max !== undefined && value.max !== null ? value.max : '—';
                             displayValue = `${min} - ${max}`;
                           } else if (value.term !== undefined) {
-                            // Search filter
                             displayValue = `"${value.term}"`;
                           } else {
-                            // Generic object
                             displayValue = "Custom filter";
                           }
                         } else {

@@ -1,6 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { ITableColumn } from './interfaces';
-import { Eye, EyeOff, Filter as FilterIcon, Check, X, SearchIcon, ListFilter, ArrowDownAZ, ArrowUpAZ, Calendar } from 'lucide-react';
+import { 
+  Eye, EyeOff, Filter as FilterIcon, Check, X, Search as SearchIcon, 
+  ListFilter, ArrowDownAZ, ArrowUpAZ, Calendar 
+} from 'lucide-react';
 import { FilterGroup, SelectedFilters } from '../Filter/interfaces';
 import ColumnSearchFilter from './ColumnSearchFilter';
 import BooleanColumnFilter from './BooleanColumnFilter';
@@ -33,23 +36,17 @@ export default function ColumnMenu<T>({
   const [showSearchFilter, setShowSearchFilter] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   
-  // Get filter options either from column config or generate dynamically from data
   const filterOptions = column.getFilterOptions 
     ? column.getFilterOptions(data)
     : column.filterOptions || [];
 
-  // Check if column has an active filter
   const hasActiveFilter = activeFilters[column.key] !== undefined;
-  
-  // Check if menu should be shown (when there are available options)
   const shouldShowMenu = column.hideable || column.filterable;
 
-  // Initialize filter value from active filters
   useEffect(() => {
     setFilterValue(activeFilters[column.key] || null);
   }, [activeFilters, column.key]);
 
-  // Click outside handler to close any expanded elements
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
@@ -66,11 +63,9 @@ export default function ColumnMenu<T>({
 
   const toggleMenu = () => {
     if (column.filterType === 'search') {
-      // For search columns, show the enhanced search filter
       setShowSearchFilter(!showSearchFilter);
       setIsMenuOpen(false);
     } else {
-      // For other filter types, show the regular menu
       setIsMenuOpen(!isMenuOpen);
       setShowSearchFilter(false);
     }
@@ -92,15 +87,13 @@ export default function ColumnMenu<T>({
     setIsMenuOpen(false);
   };
 
-  // Handle select option change with auto-apply
   const handleSelectChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const value = e.target.value;
     setFilterValue(value);
     onFilterChange(column.key, value === '' ? null : value);
-    setIsMenuOpen(false); // Close menu after selection
+    setIsMenuOpen(false);
   };
 
-  // Handle checkbox change with auto-apply for multiselect
   const handleCheckboxChange = (value: any, checked: boolean) => {
     const newValue = Array.isArray(filterValue) ? [...filterValue] : [];
     
@@ -113,7 +106,6 @@ export default function ColumnMenu<T>({
     
     setFilterValue(newValue);
     
-    // Only apply filter if there are values selected, otherwise clear it
     if (newValue.length > 0) {
       onFilterChange(column.key, newValue);
     } else {
@@ -121,7 +113,6 @@ export default function ColumnMenu<T>({
     }
   };
 
-  // Handle date range filter change
   const handleDateRangeChange = (value: { start?: Date | null; end?: Date | null } | null) => {
     setFilterValue(value);
     onFilterChange(column.key, value);
@@ -130,7 +121,6 @@ export default function ColumnMenu<T>({
     }
   };
 
-  // Get appropriate filter icon based on column type
   const getFilterIcon = () => {
     switch (column.filterType) {
       case 'search':
@@ -147,24 +137,19 @@ export default function ColumnMenu<T>({
     }
   };
 
-  // Handle search from ColumnSearchFilter
   const handleAdvancedSearch = (columnKey: string, term: string, field: string, method: string) => {
     if (term === null || term === '') {
       onFilterChange(columnKey, null);
       return;
     }
     
-    // Store the complete search configuration as an object in the filter value
     const searchConfig = {
       term: term,
       field: field || columnKey,
       method: method || 'contains'
     };
     
-    // Pass the entire search configuration to the filter
     onFilterChange(columnKey, searchConfig);
-    // Don't automatically close the search filter - let the user close it manually
-    // setShowSearchFilter(false);
   };
 
   const renderFilterControls = () => {
@@ -223,21 +208,16 @@ export default function ColumnMenu<T>({
                 setFilterValue(value);
               }}
               onApply={(value) => {
-                // Handle "all selected" case (null value returned from MultiSelectFilter)
                 if (value === null) {
-                  // Clear the filter when all items are selected
                   onFilterChange(column.key, null);
                 } else if (Array.isArray(value) && value.length > 0) {
-                  // Apply filter with selected values
                   onFilterChange(column.key, value);
                 } else {
-                  // Fallback to prevent applying an empty filter
                   onFilterChange(column.key, null);
                 }
                 setIsMenuOpen(false);
               }}
               onClose={() => setIsMenuOpen(false)}
-              // Pass defaultSelectAll from column config, defaulting to true if not specified
               defaultSelectAll={column.defaultSelectAll !== false}
             />
           </div>
@@ -256,7 +236,6 @@ export default function ColumnMenu<T>({
         );
         
       case 'search':
-        // We now handle search differently using the ColumnSearchFilter component
         return (
           <div className="flex items-center space-x-1" onClick={(e) => e.stopPropagation()}>
             <input
@@ -337,27 +316,21 @@ export default function ColumnMenu<T>({
     }
   };
 
-  // Only render the menu if there are options available
   if (!shouldShowMenu) {
     return null;
   }
 
-  // Prepare search fields for the column
   const getSearchFields = () => {
-    // If column has searchFields defined, use those
     if (column.searchFields && column.searchFields.length > 0) {
       return column.searchFields;
     }
     
-    // Otherwise create a default search field based on the column
     return [{ key: column.key, label: column.header, path: column.key }];
   };
 
   return (
     <div className="relative" ref={menuRef}>
-      {/* Action buttons that appear on hover */}
       <div className={`flex items-center column-menu-actions ${hasActiveFilter ? 'active' : ''}`}>
-        {/* Filter button - Show active status with color */}
         {column.filterable && (
           <button 
             onClick={toggleMenu}
@@ -371,7 +344,6 @@ export default function ColumnMenu<T>({
           </button>
         )}
         
-        {/* Column visibility toggle */}
         {column.hideable && (
           <button 
             onClick={handleToggleVisibility}
@@ -384,7 +356,6 @@ export default function ColumnMenu<T>({
         )}
       </div>
       
-      {/* Enhanced search filter for search columns */}
       {showSearchFilter && column.filterType === 'search' && (
         <div 
           className="absolute z-50 mt-1 right-0 transform origin-top-right"
@@ -405,7 +376,6 @@ export default function ColumnMenu<T>({
         </div>
       )}
       
-      {/* Menu with animation - shown only when isMenuOpen is true */}
       {isMenuOpen && column.filterType !== 'search' && (
         <div 
           className={`absolute z-50 mt-1 p-3 bg-white rounded-md shadow-lg border border-gray-200 right-0 ${column.filterType === 'daterange' ? 'min-w-[320px]' : 'min-w-[160px]'}`}

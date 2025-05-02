@@ -9,9 +9,6 @@ interface TableSizeControlsProps {
   options?: Array<{size: number, available: boolean}>;
 }
 
-/**
- * Component for controlling the table size (rows per page)
- */
 const TableSizeControls: React.FC<TableSizeControlsProps> = ({
   itemsPerPage,
   setItemsPerPage,

@@ -1,12 +1,3 @@
-/**
- * Utility functions for managing cookies in the browser and server-side.
- */
-
-/**
- * Get cookie value by name.
- * @param name - The name of the cookie to retrieve.
- * @returns The value of the cookie or null if not found.
- */
 export function getCookie(name: string): string | null {
     if (typeof document === 'undefined') return null;
 
@@ -20,12 +11,6 @@ export function getCookie(name: string): string | null {
     return null;
 }
 
-/**
- * Set a cookie with the given name, value, and options.
- * @param name - The name of the cookie.
- * @param value - The value of the cookie.
- * @param options - Additional options for the cookie (e.g., expires, path, domain, secure).
- */
 export function setCookie(
     name: string,
     value: string,
@@ -71,21 +56,11 @@ export function setCookie(
     document.cookie = cookieString;
 }
 
-/**
- * Remove a cookie by name.
- * @param name - The name of the cookie to remove.
- * @param path - The path of the cookie (default is '/').
- */
 export function removeCookie(name: string, path = '/'): void {
     if (typeof document === 'undefined') return;
     document.cookie = `${encodeURIComponent(name)}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=${path}`;
 }
 
-/**
- * Parse cookies from a request header string (for server-side use).
- * @param cookieHeader - The raw cookie header string.
- * @returns An object mapping cookie names to their values.
- */
 export function parseCookies(cookieHeader: string): Record<string, string> {
     const cookies: Record<string, string> = {};
     if (!cookieHeader) return cookies;
@@ -99,13 +74,6 @@ export function parseCookies(cookieHeader: string): Record<string, string> {
     return cookies;
 }
 
-/**
- * Serialize a cookie for use in HTTP response headers.
- * @param name - The name of the cookie.
- * @param value - The value of the cookie.
- * @param options - Additional options for the cookie (e.g., expires, path, domain, secure).
- * @returns A serialized cookie string.
- */
 export function serializeCookie(
     name: string,
     value: string,

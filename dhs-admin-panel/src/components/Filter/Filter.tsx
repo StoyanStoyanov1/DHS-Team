@@ -5,10 +5,6 @@ import { FilterProps, SelectedFilters, FilterGroup } from './interfaces';
 import { Search, X, ChevronDown, Filter as FilterIcon, RotateCcw, Sliders, Check, PlusCircle, Calendar } from 'lucide-react';
 import DateRangeFilter from './DateRangeFilter';
 
-/**
- * A modern, abstract, and visually appealing filter component with animations
- * and responsive design for filtering table data.
- */
 const Filter: React.FC<FilterProps> = ({
   filterGroups,
   initialValues = {},
@@ -17,40 +13,27 @@ const Filter: React.FC<FilterProps> = ({
   layout = 'horizontal',
   title = 'Filters',
   showReset = true,
-  requireConfirmation = true, // Changed default to true
+  requireConfirmation = true,
   applyButtonText = 'Apply Filters',
   resetButtonText = 'Reset',
   animated = true,
   compact = false,
   styles = {},
 }) => {
-  // Track the currently edited filters (before apply button is clicked)
   const [editedFilters, setEditedFilters] = useState<SelectedFilters>({});
-  
-  // Track the applied filters (only used when requireConfirmation is true)
   const [appliedFilters, setAppliedFilters] = useState<SelectedFilters>({});
-  
-  // Track which filters have dropdown menus open
   const [openDropdowns, setOpenDropdowns] = useState<Record<string, boolean>>({});
-  
-  // Track if the entire filter panel is expanded
   const [isExpanded, setIsExpanded] = useState(true);
-  
-  // Use a ref to track if this is the first render
   const isFirstRender = useRef(true);
   
-  // Determine which filters to actually use based on requireConfirmation setting
   const selectedFilters = requireConfirmation ? appliedFilters : editedFilters;
   
-  // Count active filters
   const activeFilterCount = Object.values(selectedFilters).filter(
     value => value !== null && value !== '' && 
     (Array.isArray(value) ? value.length > 0 : true)
   ).length;
   
-  // Initialize filter values from initialValues or default values from filter groups
   useEffect(() => {
-    // Skip if not first render to prevent endless loop
     if (!isFirstRender.current) return;
     
     isFirstRender.current = false;
@@ -58,15 +41,12 @@ const Filter: React.FC<FilterProps> = ({
     const initialFilters: SelectedFilters = {};
     
     filterGroups.forEach(group => {
-      // If initialValues contains a value for this filter, use it
       if (initialValues && initialValues[group.id] !== undefined) {
         initialFilters[group.id] = initialValues[group.id];
       } 
-      // Otherwise use the initialValue specified in the group, if any
       else if (group.initialValue !== undefined) {
         initialFilters[group.id] = group.initialValue;
       } 
-      // Set default values based on filter type
       else {
         switch (group.type) {
           case 'multiselect':
@@ -87,21 +67,16 @@ const Filter: React.FC<FilterProps> = ({
       }
     });
     
-    // Initialize both state variables with deep copies to avoid reference issues
     setEditedFilters({...initialFilters});
     setAppliedFilters({...initialFilters});
-  }, []); // Empty dependency array - run only once
+  }, []);
 
-  // Use a separate effect to handle filter group changes
   useEffect(() => {
-    // Skip the first render since we already initialized
     if (isFirstRender.current) return;
     
-    // Create object to track new filter groups that weren't in state before
     const newFilterValues: SelectedFilters = {};
     let hasNewFilters = false;
     
-    // Check for new filter groups that need default values
     filterGroups.forEach(group => {
       if (editedFilters[group.id] === undefined) {
         hasNewFilters = true;
@@ -133,36 +108,28 @@ const Filter: React.FC<FilterProps> = ({
       }
     });
     
-    // Only update state if we have new filters to add
     if (hasNewFilters) {
       setEditedFilters(prev => ({...prev, ...newFilterValues}));
       setAppliedFilters(prev => ({...prev, ...newFilterValues}));
     }
   }, [filterGroups, initialValues, editedFilters]);
 
-  // Use useEffect to notify parent when filters change
   useEffect(() => {
-    // Only call onFilterChange if we have filters to report
-    // and we're past the first render
     if (!isFirstRender.current && Object.keys(selectedFilters).length > 0) {
       onFilterChange(selectedFilters);
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedFilters]); // Dependency is on the actual filters we're using
+  }, [selectedFilters, onFilterChange]);
   
-  // Apply the edited filters (when using confirmation mode)
   const handleApplyFilters = useCallback(() => {
     setAppliedFilters({...editedFilters});
   }, [editedFilters]);
 
-  // Handle filter changes (only updates the edited state)
   const handleFilterChange = useCallback((groupId: string, value: any) => {
     setEditedFilters(prev => ({
       ...prev,
       [groupId]: value
     }));
     
-    // If not requiring confirmation, also update applied filters
     if (!requireConfirmation) {
       setAppliedFilters(prev => ({
         ...prev,
@@ -171,7 +138,6 @@ const Filter: React.FC<FilterProps> = ({
     }
   }, [requireConfirmation]);
 
-  // Reset all filters to their initial state
   const handleResetFilters = useCallback(() => {
     const resetFilters: SelectedFilters = {};
     
@@ -199,35 +165,28 @@ const Filter: React.FC<FilterProps> = ({
     });
     
     setEditedFilters({...resetFilters});
-    // Always update applied filters when resetting
     setAppliedFilters({...resetFilters});
   }, [filterGroups]);
 
-  // Toggle a dropdown's open state
   const toggleDropdown = useCallback((filterId: string) => {
     setOpenDropdowns(prev => {
       const newState = { ...prev };
-      // Close all other dropdowns
       Object.keys(newState).forEach(key => {
         if (key !== filterId) newState[key] = false;
       });
-      // Toggle the current dropdown
       newState[filterId] = !prev[filterId];
       return newState;
     });
   }, []);
 
-  // Toggle filter panel expansion
   const toggleExpansion = () => {
     setIsExpanded(prev => !prev);
   };
 
-  // Close all dropdowns
   const closeAllDropdowns = useCallback(() => {
     setOpenDropdowns({});
   }, []);
 
-  // Clear a single filter
   const clearFilter = useCallback((filterId: string) => {
     const filter = filterGroups.find(f => f.id === filterId);
     if (!filter) return;
@@ -263,12 +222,9 @@ const Filter: React.FC<FilterProps> = ({
     }
   }, [filterGroups, requireConfirmation]);
 
-  // Render filter control based on its type
   const renderFilterControl = (filter: FilterGroup) => {
-    // Always read from the edited filters, not the applied ones
     const value = editedFilters[filter.id];
     
-    // Modern styles with subtle shadows and glows
     const selectBaseStyles = "block w-full rounded-lg border border-gray-200 bg-white text-gray-800 px-4 py-2.5 text-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-400 focus:ring-opacity-30 transition-all shadow-sm";
     const inputBaseStyles = "block w-full rounded-lg border border-gray-200 bg-white text-gray-800 px-4 py-2.5 text-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-400 focus:ring-opacity-30 transition-all shadow-sm";
     
@@ -277,7 +233,6 @@ const Filter: React.FC<FilterProps> = ({
     const checkboxStyles = styles.checkbox || "h-5 w-5 rounded-md border-gray-300 text-indigo-600 focus:ring-indigo-500 transition-all";
     const radioStyles = styles.radio || "h-5 w-5 border-gray-300 text-indigo-600 focus:ring-indigo-500 transition-all";
     
-    // Use compact sizing if requested
     const paddingClasses = compact ? 'py-1.5 px-3 text-xs' : 'py-2.5 px-4 text-sm';
     
     switch (filter.type) {
@@ -470,11 +425,9 @@ const Filter: React.FC<FilterProps> = ({
               onChange={(e) => handleFilterChange(filter.id, e.target.value)}
               onKeyDown={(e) => {
                 if (e.key === 'Enter') {
-                  // Apply filter immediately when Enter key is pressed
                   if (requireConfirmation) {
                     handleApplyFilters();
                   }
-                  // Close any open dropdowns
                   closeAllDropdowns();
                 }
               }}
@@ -540,15 +493,12 @@ const Filter: React.FC<FilterProps> = ({
     }
   };
 
-  // Render active filter pills with a modern, animated design
   const renderActiveFilters = () => {
-    // Only show if we have active filters
     if (activeFilterCount === 0) return null;
     
     return (
       <div className="flex flex-wrap gap-2 mt-4 pt-4 border-t border-gray-200">
         {Object.entries(selectedFilters).map(([filterId, value]) => {
-          // Skip empty filters
           if (value === null || value === '' || (Array.isArray(value) && value.length === 0)) {
             return null;
           }
@@ -614,13 +564,11 @@ const Filter: React.FC<FilterProps> = ({
     );
   };
 
-  // Base container styles with improved animations
   const animationClass = animated ? 'transition-all duration-300 ease-in-out' : '';
   const wrapperClass = `${styles.wrapper || `rounded-xl bg-white border border-gray-200 shadow-sm hover:shadow-md ${animationClass}`} ${className}`;
   const filterItemClass = styles.filterItem || (layout === 'horizontal' ? 'mb-0' : 'mb-4 last:mb-0');
   const buttonClass = styles.button || `px-4 py-2 rounded-lg text-sm font-medium ${animationClass} focus:outline-none focus:ring-2 focus:ring-offset-1`;
   
-  // Click outside handler to close dropdowns
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       const target = event.target as HTMLElement;
@@ -700,7 +648,6 @@ const Filter: React.FC<FilterProps> = ({
         
         {renderActiveFilters()}
         
-        {/* Always show apply button since we changed requireConfirmation default to true */}
         <div className="p-5 pt-4 border-t border-gray-200 flex justify-end space-x-3 bg-gray-50 rounded-b-xl">
           {showReset && (
             <button
@@ -727,7 +674,6 @@ const Filter: React.FC<FilterProps> = ({
         </div>
       </div>
       
-      {/* Quick filter toggle when collapsed */}
       {!isExpanded && (
         <div className="p-4 flex items-center justify-between">
           <div className="flex items-center text-sm text-gray-500">

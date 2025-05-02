@@ -47,11 +47,6 @@ class AuthService {
         }
     }
 
-    /**
-     * Log in a user.
-     * @param credentials - The user's login credentials (e.g., email and password).
-     * @returns A promise resolving to the authentication response.
-     */
     async login(credentials: LoginCredentials): Promise<TokenPayload> {
         try {
             const response = await api.post<AuthResponse>('/api/auth/sign-in', credentials);
@@ -66,11 +61,6 @@ class AuthService {
         }
     }
 
-    /**
-     * Register a new user.
-     * @param userDetails - The details of the user to register.
-     * @returns A promise resolving to the registration response.
-     */
     async register(userData: RegisterCredentials): Promise<TokenPayload> {
         try {
             const response = await api.post<AuthResponse>('/api/auth/sign-up', userData);
@@ -85,10 +75,6 @@ class AuthService {
         }
     }
 
-    /**
-     * Log out the current user.
-     * @returns A promise resolving when the user is logged out.
-     */
     async logout(): Promise<void> {
         try {
             await api.post('/api/auth/sign-out');
@@ -103,10 +89,6 @@ class AuthService {
         }
     }
 
-    /**
-     * Refresh the access token.
-     * @returns A promise resolving when the token is refreshed.
-     */
     async refreshToken(): Promise<void> {
         try {
             const response = await api.post<AuthResponse>('/api/auth/refresh');
@@ -120,10 +102,6 @@ class AuthService {
         }
     }
 
-    /**
-     * Check if the user is authenticated.
-     * @returns A boolean indicating whether the user is authenticated.
-     */
     isAuthenticated(): boolean {
         const token = this.getToken();
         if (!token) return false;
@@ -142,10 +120,6 @@ class AuthService {
         }
     }
 
-    /**
-     * Get the current user's information from the token.
-     * @returns The decoded token payload or null if not authenticated.
-     */
     getCurrentUser(): TokenPayload | null {
         try {
             return this.isAuthenticated() ? (this.getDecodedToken() as TokenPayload) : null;
@@ -154,33 +128,21 @@ class AuthService {
         }
     }
 
-    /**
-     * Store JWT token in localStorage
-     */
     private setToken(token: string): void {
         if (!isBrowser) return;
         localStorage.setItem(this.tokenKey, token);
     }
 
-    /**
-     * Retrieve JWT token from localStorage
-     */
     getToken(): string | null {
         if (!isBrowser) return null;
         return localStorage.getItem(this.tokenKey);
     }
 
-    /**
-     * Remove JWT token from localStorage
-     */
     private clearToken(): void {
         if (!isBrowser) return;
         localStorage.removeItem(this.tokenKey);
     }
 
-    /**
-     * Decode JWT token
-     */
     private getDecodedToken(): TokenPayload | null {
         const token = this.getToken();
         if (!token) return null;
@@ -193,9 +155,6 @@ class AuthService {
         }
     }
 
-    /**
-     * Set up automatic token refresh based on expiration
-     */
     private initTokenRefresh(): void {
         if (!isBrowser) return;
 
@@ -222,9 +181,6 @@ class AuthService {
         }, refreshTime);
     }
 
-    /**
-     * Handle authentication errors
-     */
     private handleAuthError(error: AxiosError): void {
         if (error.response) {
             const { status, data } = error.response;

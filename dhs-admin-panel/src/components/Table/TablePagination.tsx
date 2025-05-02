@@ -4,9 +4,6 @@ import React, { useState } from 'react';
 import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, ArrowRight } from 'lucide-react';
 import { ITablePagination } from './interfaces';
 
-/**
- * Component for displaying and managing table pagination
- */
 const TablePagination: React.FC<ITablePagination> = ({ 
   currentPage, 
   totalPages, 
@@ -24,45 +21,30 @@ const TablePagination: React.FC<ITablePagination> = ({
   const startItem = totalItems === 0 ? 0 : (currentPage - 1) * itemsPerPage + 1;
   const endItem = Math.min(currentPage * itemsPerPage, totalItems);
 
-  /**
-   * Handle going to first page
-   */
   const handleFirstPage = () => {
     if (currentPage > 1) {
       onPageChange(1);
     }
   };
 
-  /**
-   * Handle going to previous page
-   */
   const handlePrevPage = () => {
     if (currentPage > 1) {
       onPageChange(currentPage - 1);
     }
   };
 
-  /**
-   * Handle going to next page
-   */
   const handleNextPage = () => {
     if (currentPage < effectiveTotalPages) {
       onPageChange(currentPage + 1);
     }
   };
 
-  /**
-   * Handle going to last page
-   */
   const handleLastPage = () => {
     if (currentPage < effectiveTotalPages) {
       onPageChange(effectiveTotalPages);
     }
   };
 
-  /**
-   * Handle changing items per page
-   */
   const handleItemsPerPageChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const newItemsPerPage = parseInt(e.target.value, 10);
     if (onItemsPerPageChange) {
@@ -71,9 +53,6 @@ const TablePagination: React.FC<ITablePagination> = ({
     }
   };
 
-  /**
-   * Handle direct page input change
-   */
   const handleGoToPageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value.replace(/[^0-9]/g, '');
     
@@ -89,9 +68,6 @@ const TablePagination: React.FC<ITablePagination> = ({
     }
   };
 
-  /**
-   * Handle go to page form submission
-   */
   const handleGoToPageSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const pageNumber = parseInt(goToPage, 10);
@@ -102,21 +78,16 @@ const TablePagination: React.FC<ITablePagination> = ({
     }
   };
 
-  /**
-   * Generate array of page numbers to display
-   */
   const getPageNumbers = () => {
     const pageNumbers: (number | string)[] = [];
     
     if (effectiveTotalPages <= 7) {
-      // Show all pages if total pages are 7 or less
       for (let i = 1; i <= effectiveTotalPages; i++) {
         pageNumbers.push(i);
       }
     } else {
       pageNumbers.push(1);
       
-      // Calculate which page numbers to show based on current page
       if (currentPage <= 3) {
         pageNumbers.push(2, 3, 4, '...', effectiveTotalPages - 1);
       } else if (currentPage >= effectiveTotalPages - 2) {

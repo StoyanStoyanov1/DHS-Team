@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { Search } from 'lucide-react';
 
 interface SearchBarProps {
@@ -20,7 +20,6 @@ const SearchBar: React.FC<SearchBarProps> = ({
 }) => {
     const [searchTerm, setSearchTerm] = useState(initialValue);
     
-    // Handle input change
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const value = e.target.value;
         setSearchTerm(value);
@@ -29,9 +28,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
         }
     };
     
-    // Handle keyboard shortcuts
     const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLInputElement>) => {
-        // Clear search on Escape
         if (e.key === 'Escape') {
             setSearchTerm('');
             if (onSearch) {
@@ -41,10 +38,8 @@ const SearchBar: React.FC<SearchBarProps> = ({
         }
     }, [onSearch]);
 
-    // Global keyboard shortcut handler
-    React.useEffect(() => {
+    useEffect(() => {
         const handleGlobalKeyDown = (e: KeyboardEvent) => {
-            // Focus search box on CTRL+K or CMD+K
             if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
                 e.preventDefault();
                 document.querySelector<HTMLInputElement>('input[type="text"][data-search-input="true"]')?.focus();

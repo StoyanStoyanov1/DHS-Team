@@ -1,11 +1,5 @@
 'use client';
 
-/**
- * Sidebar component for navigation.
- * Provides links to different sections of the application.
- * @param props - The properties for the Sidebar component.
- * @returns A styled sidebar navigation menu.
- */
 import React, { useState, useEffect } from 'react';
 import {
     Grid,
@@ -41,32 +35,29 @@ interface SidebarProps {
 }
 
 const Sidebar: React.FC<SidebarProps> = ({
-                                             activeSection,
-                                             setActiveSection,
-                                             isCollapsed,
-                                             toggleCollapse
-                                         }) => {
+    activeSection,
+    setActiveSection,
+    isCollapsed,
+    toggleCollapse
+}) => {
     const router = useRouter();
     const pathname = usePathname();
     const [isAuthOpen, setIsAuthOpen] = useState(false);
-    const [isUsersOpen, setIsUsersOpen] = useState(false); // Добавен state за Users менюто
+    const [isUsersOpen, setIsUsersOpen] = useState(false);
     const [isHovering, setIsHovering] = useState(false);
     const [isPinned, setIsPinned] = useState(false);
 
-    // Check if current path is an auth path
     const isAuthPath = pathname?.startsWith('/auth');
     const isLoginPath = pathname === '/auth/login';
     const isRegisterPath = pathname === '/auth/register';
-    const isUsersListPath = pathname === '/users-list'; // Проверка за users-list path
+    const isUsersListPath = pathname === '/users-list';
 
-    // Effect to auto-open auth submenu when on auth pages
     useEffect(() => {
         if (isAuthPath) {
             setIsAuthOpen(true);
         }
     }, [pathname, isAuthPath]);
 
-    // Effect to auto-open users submenu when on users pages
     useEffect(() => {
         if (isUsersListPath) {
             setIsUsersOpen(true);
@@ -81,7 +72,6 @@ const Sidebar: React.FC<SidebarProps> = ({
         }
     };
 
-    // Нова функция за превключване на Users менюто
     const handleUsersClick = () => {
         setIsUsersOpen(!isUsersOpen);
         setActiveSection('users');
@@ -99,7 +89,6 @@ const Sidebar: React.FC<SidebarProps> = ({
         setIsPinned(!isPinned);
     };
 
-    // Should the sidebar be expanded?
     const shouldExpand = isPinned || isHovering;
 
     return (
@@ -108,7 +97,6 @@ const Sidebar: React.FC<SidebarProps> = ({
             onMouseEnter={() => !isPinned && setIsHovering(true)}
             onMouseLeave={() => !isPinned && setIsHovering(false)}
         >
-            {/* Logo and Title */}
             <div className="sidebar-header relative flex items-center justify-between p-5 border-b border-gray-100">
                 <div className="flex items-center">
                     <div className="h-10 w-10 rounded bg-blue-500 flex items-center justify-center">
@@ -121,7 +109,7 @@ const Sidebar: React.FC<SidebarProps> = ({
                 <button
                     onClick={togglePin}
                     className={`pin-btn ${isPinned ? 'active' : ''} text-gray-500 hover:text-gray-700 hover:bg-gray-100 p-1 rounded-md transition-colors`}
-                    title={isPinned ? "Прибери сайдбара" : "Закачи сайдбара отворен"}
+                    title={isPinned ? "Unpin sidebar" : "Pin sidebar"}
                 >
                     {isPinned ? <Pin size={20} /> : <PinOff size={20} />}
                 </button>
@@ -130,7 +118,6 @@ const Sidebar: React.FC<SidebarProps> = ({
                 )}
             </div>
 
-            {/* Navigation - with scroll support */}
             <div className="px-4 py-2 overflow-y-auto flex-grow custom-scrollbar">
                 <div className="mb-6">
                     <NavItem
@@ -230,19 +217,19 @@ const Sidebar: React.FC<SidebarProps> = ({
                     <div className="relative">
                         <div
                             className={`flex items-center px-3 py-2 rounded-md cursor-pointer mb-1 ${activeSection === 'users' ? 'bg-gray-100 text-blue-600' : 'text-gray-600 hover:bg-gray-50'}`}
-                            onClick={handleUsersClick} // Променено от setActiveSection на handleUsersClick
+                            onClick={handleUsersClick}
                         >
                             <div className="text-gray-500"><Users size={18} /></div>
                             {shouldExpand && (
                                 <>
                                     <span className="ml-3 text-sm font-medium">Users</span>
                                     <div className="ml-auto">
-                                        {isUsersOpen ? <ChevronUp size={16} /> : <ChevronDown size={16} />} {/* Променено от activeSection на isUsersOpen */}
+                                        {isUsersOpen ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
                                     </div>
                                 </>
                             )}
                         </div>
-                        {shouldExpand && isUsersOpen && ( // Променено от activeSection на isUsersOpen
+                        {shouldExpand && isUsersOpen && (
                             <div className="ml-4 mt-1 space-y-1">
                                 <button
                                     onClick={() => router.push('/users-list')}

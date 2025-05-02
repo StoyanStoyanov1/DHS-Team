@@ -13,7 +13,6 @@ const Header: React.FC = () => {
     const [dropdownOpen, setDropdownOpen] = useState(false);
     const dropdownRef = useRef<HTMLDivElement>(null);
 
-    // Check if user is logged in
     useEffect(() => {
         if (!user && !isDebugMode) {
             const redirectPath = encodeURIComponent(pathname || '/');
@@ -21,7 +20,6 @@ const Header: React.FC = () => {
         }
     }, [user, router, pathname, isDebugMode]);
 
-    // Close dropdown when clicking outside
     useEffect(() => {
         function handleClickOutside(event: MouseEvent) {
             if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
@@ -35,21 +33,17 @@ const Header: React.FC = () => {
         };
     }, []);
 
-    // Handle logout
     const handleLogout = async () => {
         await logout();
-        // Save the current path for redirection after login
         const redirectPath = encodeURIComponent(pathname || '/');
         router.push(`/auth/login?redirect=${redirectPath}`);
     };
 
-    // Get user initials for avatar
     const getInitials = () => {
         if (!user || !user.email) return 'U';
         return user.email.charAt(0).toUpperCase();
     };
 
-    // If user is not authenticated and not in debug mode, don't render the header content
     if (!user && !isDebugMode) {
         return null;
     }
@@ -60,7 +54,6 @@ const Header: React.FC = () => {
                 <SearchBar />
 
                 <div className="flex items-center space-x-4">
-                    {/* Debug Mode Indicator - Only shown in development environment */}
                     {process.env.NODE_ENV === 'development' && isDebugMode && (
                         <div className="flex items-center text-green-700 bg-green-100 px-2 py-1 rounded text-xs font-medium">
                             <Bug size={14} className="mr-1" />
@@ -84,7 +77,6 @@ const Header: React.FC = () => {
                         <Settings size={20} />
                     </button>
                     
-                    {/* Profile dropdown */}
                     <div className="relative" ref={dropdownRef}>
                         <button 
                             onClick={() => setDropdownOpen(!dropdownOpen)}

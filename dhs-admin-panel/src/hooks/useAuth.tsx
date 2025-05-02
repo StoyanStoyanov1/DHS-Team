@@ -8,18 +8,16 @@ import authService, {
     ValidationErrors
 } from '../services/auth.service';
 
-// Debug mode configuration
 const DEBUG_MODE = process.env.NODE_ENV === 'development' ? 
-    (process.env.NEXT_PUBLIC_DEBUG_AUTH !== 'false') : // Debug mode is ON by default in development
-    (process.env.NEXT_PUBLIC_DEBUG_AUTH === 'true');   // Explicitly enabled in production
+    (process.env.NEXT_PUBLIC_DEBUG_AUTH !== 'false') : 
+    (process.env.NEXT_PUBLIC_DEBUG_AUTH === 'true');
 
-// Mock user for debug mode
 const DEBUG_USER: TokenPayload = {
     sub: 'debug-user-id',
     email: 'debug@example.com',
     roles: ['admin'],
     iat: Math.floor(Date.now() / 1000),
-    exp: Math.floor(Date.now() / 1000) + 3600, // 1 hour from now
+    exp: Math.floor(Date.now() / 1000) + 3600,
     iss: 'debug-issuer', 
     jti: 'debug-token-id'
 };
@@ -38,7 +36,6 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// Inner component that safely uses useSearchParams
 function AuthProviderContent({ children }: { children: ReactNode }) {
     const [user, setUser] = useState<TokenPayload | null>(null);
     const [loading, setLoading] = useState<boolean>(true);
@@ -52,12 +49,10 @@ function AuthProviderContent({ children }: { children: ReactNode }) {
         const initAuth = async () => {
             setLoading(true);
             try {
-                // If in debug mode, use mock user
                 if (isDebugMode) {
                     setUser(DEBUG_USER);
                     console.info('Debug Mode Activated!');
                 } else {
-                    // Normal authentication flow
                     const currentUser = authService.getCurrentUser();
                     setUser(currentUser);
                     
@@ -84,7 +79,6 @@ function AuthProviderContent({ children }: { children: ReactNode }) {
         setError(null);
         setValidationErrors(null);
 
-        // If in debug mode, fake successful login
         if (isDebugMode) {
             setUser(DEBUG_USER);
             setLoading(false);
@@ -92,7 +86,6 @@ function AuthProviderContent({ children }: { children: ReactNode }) {
             return;
         }
 
-        // Normal login flow
         try {
             const user = await authService.login(credentials);
             if (user) {
@@ -111,7 +104,6 @@ function AuthProviderContent({ children }: { children: ReactNode }) {
         setError(null);
         setValidationErrors(null);
 
-        // If in debug mode, fake successful registration
         if (isDebugMode) {
             setUser(DEBUG_USER);
             setLoading(false);
@@ -119,7 +111,6 @@ function AuthProviderContent({ children }: { children: ReactNode }) {
             return;
         }
 
-        // Normal registration flow
         try {
             const user = await authService.register(userData);
             setUser(user);
@@ -134,7 +125,6 @@ function AuthProviderContent({ children }: { children: ReactNode }) {
     const logout = async () => {
         setLoading(true);
         
-        // If in debug mode, just clear the user
         if (isDebugMode) {
             setUser(null);
             router.push('/auth/login');
@@ -142,7 +132,6 @@ function AuthProviderContent({ children }: { children: ReactNode }) {
             return;
         }
 
-        // Normal logout flow
         try {
             await authService.logout();
             setUser(null);
@@ -206,7 +195,6 @@ function AuthProviderContent({ children }: { children: ReactNode }) {
     return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 
-// Wrapper component that adds Suspense
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
     return (
         <Suspense fallback={

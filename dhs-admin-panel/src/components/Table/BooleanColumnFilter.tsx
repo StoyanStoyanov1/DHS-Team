@@ -2,10 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { Check, X, Filter } from 'lucide-react';
 
 interface BooleanColumnFilterProps {
-  value: string | boolean | null; // Current selected value: true, false, или null (за всички)
-  onChange: (value: boolean | null) => void; // Callback when filter changes
-  onApply: (value: boolean | null) => void; // Callback за потвърждение и затваряне с текуща стойност
-  onClose?: () => void; // Callback за затваряне без промени
+  value: string | boolean | null;
+  onChange: (value: boolean | null) => void;
+  onApply: (value: boolean | null) => void;
+  onClose?: () => void;
   labelTrue?: string;
   labelFalse?: string;
   labelAll?: string;
@@ -20,40 +20,27 @@ const BooleanColumnFilter: React.FC<BooleanColumnFilterProps> = ({
   labelFalse = 'False',
   labelAll = 'All'
 }) => {
-  // Ensure value is properly converted to a boolean or null
   const getInitialValue = (): boolean | null => {
     if (value === true || value === 'true') return true;
     if (value === false || value === 'false') return false;
     return null;
   };
     
-  // Статус за избраната стойност в компонента
   const [selectedValue, setSelectedValue] = useState<boolean | null>(getInitialValue());
   
-  // Синхронизира стойността когато се променя външно
   useEffect(() => {
     setSelectedValue(getInitialValue());
   }, [value]);
   
-  // Обработка на избор
   const handleSelect = (newValue: boolean | null) => {
     setSelectedValue(newValue);
   };
   
-  // Обработка на потвърждение
   const handleApply = () => {
-    // Изпрати стойността директно към родителя
-    // ВАЖНО: Тук директно подаваме избраната стойност към родителя без да чакаме за актуализация на състоянието
-    console.log("Applying boolean filter with value:", selectedValue);
-    
-    // Обновяваме родителския компонент с текущата избрана стойност
     onChange(selectedValue);
-    
-    // След това извикваме onApply, което трябва да затвори менюто
-    onApply(selectedValue); // Подаваме стойността и на onApply за директна обработка
+    onApply(selectedValue);
   };
   
-  // Обработка на отмяна/затваряне
   const handleCancel = () => {
     if (onClose) onClose();
   };
@@ -68,7 +55,6 @@ const BooleanColumnFilter: React.FC<BooleanColumnFilterProps> = ({
       </div>
       
       <div className="space-y-2 mb-3">
-        {/* All option */}
         <div 
           className={`flex items-center p-2 rounded cursor-pointer transition-colors
             ${selectedValue === null ? 'bg-indigo-50 text-indigo-700' : 'hover:bg-gray-50'}`}
@@ -83,7 +69,6 @@ const BooleanColumnFilter: React.FC<BooleanColumnFilterProps> = ({
           <span className="text-sm">{labelAll}</span>
         </div>
         
-        {/* True option */}
         <div 
           className={`flex items-center p-2 rounded cursor-pointer transition-colors
             ${selectedValue === true ? 'bg-green-50 text-green-700' : 'hover:bg-gray-50'}`}
@@ -98,7 +83,6 @@ const BooleanColumnFilter: React.FC<BooleanColumnFilterProps> = ({
           <span className="text-sm">{labelTrue}</span>
         </div>
         
-        {/* False option */}
         <div 
           className={`flex items-center p-2 rounded cursor-pointer transition-colors
             ${selectedValue === false ? 'bg-red-50 text-red-700' : 'hover:bg-gray-50'}`}
@@ -114,7 +98,6 @@ const BooleanColumnFilter: React.FC<BooleanColumnFilterProps> = ({
         </div>
       </div>
       
-      {/* Actions */}
       <div className="flex justify-end space-x-2 pt-2 border-t border-gray-100">
         <button
           type="button"
