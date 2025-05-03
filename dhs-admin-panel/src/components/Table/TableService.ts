@@ -29,6 +29,17 @@ export class TableService<T> implements ITableService<T> {
       const aValue = this.getNestedValue(a, sortKey);
       const bValue = this.getNestedValue(b, sortKey);
 
+      // Специальная обработка для null и undefined значений
+      if (aValue === null || aValue === undefined) {
+        if (bValue === null || bValue === undefined) {
+          return 0; // Оба null/undefined - считаются равными
+        }
+        return sortDirection === 'asc' ? -1 : 1; // null в начале при asc
+      }
+      if (bValue === null || bValue === undefined) {
+        return sortDirection === 'asc' ? 1 : -1; // null в конце при asc
+      }
+
       if (typeof aValue === 'string' && typeof bValue === 'string') {
         return sortDirection === 'asc' 
           ? aValue.localeCompare(bValue) 

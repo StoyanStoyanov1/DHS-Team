@@ -47,7 +47,7 @@ export default function ColumnMenu<T>({
         setShowSearchFilter(false);
       }
     }
-    
+
     document.addEventListener('mousedown', handleClickOutside);
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
@@ -107,7 +107,7 @@ export default function ColumnMenu<T>({
           <button 
             onClick={toggleMenu}
             className={`p-1 rounded-md mr-1 focus:outline-none transition-colors duration-150 ${
-              hasActiveFilter ? 'text-indigo-600 bg-indigo-50' : 'text-gray-400 hover:text-gray-600 hover:bg-gray-100'
+              hasActiveFilter ? 'text-indigo-600 bg-indigo-50' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100'
             }`}
             aria-label={`Filter ${column.header}`}
             title={`Filter ${column.header}`}
@@ -115,11 +115,11 @@ export default function ColumnMenu<T>({
             {getFilterIcon()}
           </button>
         )}
-        
+
         {column.hideable && (
           <button 
             onClick={handleToggleVisibility}
-            className="p-1 rounded-md text-gray-400 hover:text-gray-600 hover:bg-gray-100 focus:outline-none transition-colors duration-150"
+            className="p-1 rounded-md text-gray-500 hover:text-gray-700 hover:bg-gray-100 focus:outline-none transition-colors duration-150"
             aria-label={column.hidden ? "Show Column" : "Hide Column"}
             title={column.hidden ? "Show Column" : "Hide Column"}
           >
@@ -127,7 +127,7 @@ export default function ColumnMenu<T>({
           </button>
         )}
       </div>
-      
+
       {showSearchFilter && column.filterType === 'search' && (
         <div 
           className="absolute z-50 mt-1 right-0 transform origin-top-right"
@@ -146,7 +146,7 @@ export default function ColumnMenu<T>({
           />
         </div>
       )}
-      
+
       {isMenuOpen && column.filterType !== 'search' && (
         <div 
           className={`absolute z-50 mt-1 right-0 transform origin-top-right bg-white rounded-md shadow-lg border border-gray-200 ${column.filterType === 'daterange' ? 'min-w-[320px]' : 'min-w-[160px]'}`}

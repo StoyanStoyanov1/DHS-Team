@@ -96,12 +96,12 @@ const TablePagination: React.FC<ITablePagination> = ({
     return pageNumbers;
   };
 
+  // When there's no data or only a single page
   if (effectiveTotalPages <= 1 && !showPageSizeControl) {
     return (
       <div className="flex items-center justify-between border-t border-gray-200 px-6 py-3">
-        <p className="text-sm text-gray-700">
-          Showing <span className="font-medium">{startItem}</span> to <span className="font-medium">{endItem}</span> of{' '}
-          <span className="font-medium">{totalItems}</span> results
+        <p className="text-sm text-gray-700" data-testid="items-info">
+          {`Showing ${startItem} to ${endItem} of ${totalItems} results`}
         </p>
       </div>
     );
@@ -110,9 +110,8 @@ const TablePagination: React.FC<ITablePagination> = ({
   return (
     <div className="flex flex-col sm:flex-row items-center justify-between border-t border-gray-200 px-6 py-3 space-y-3 sm:space-y-0">
       <div className="flex flex-col sm:flex-row items-center space-y-2 sm:space-y-0 sm:space-x-4">
-        <p className="text-sm text-gray-700">
-          Showing <span className="font-medium">{startItem}</span> to <span className="font-medium">{endItem}</span> of{' '}
-          <span className="font-medium">{totalItems}</span> results
+        <p className="text-sm text-gray-700" data-testid="items-info">
+          {`Showing ${startItem} to ${endItem} of ${totalItems} results`}
         </p>
         
         {showPageSizeControl && onItemsPerPageChange && (

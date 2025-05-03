@@ -279,7 +279,7 @@ export default function ColumnSearchFilter({
       case 'array':
         return <PlusCircle size={14} className="text-amber-500" />;
       default:
-        return <Search size={14} className="text-gray-400" />;
+        return <Search size={14} className="text-gray-500" />;
     }
   };
 
@@ -394,7 +394,10 @@ export default function ColumnSearchFilter({
         {onClose && (
           <button 
             onClick={handleClose}
-            className="text-gray-400 hover:text-gray-600 p-1 rounded-full hover:bg-gray-100"
+            className="text-gray-500 hover:text-gray-700 p-1 rounded-full hover:bg-gray-100"
+            aria-label="close"
+            role="button"
+            name="close"
           >
             <X size={14} />
           </button>
@@ -403,7 +406,7 @@ export default function ColumnSearchFilter({
 
       {searchFields.length > 1 && (
         <div>
-          <label htmlFor="search-field" className="block text-xs font-medium text-gray-700 mb-1">
+          <label htmlFor="search-field" className="block text-xs font-medium text-gray-800 mb-1">
             Search in field:
           </label>
           <div className="relative">
@@ -420,14 +423,14 @@ export default function ColumnSearchFilter({
               ))}
             </select>
             <div className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
-              <ChevronDown size={16} className="text-gray-500" />
+              <ChevronDown size={16} className="text-gray-600" />
             </div>
           </div>
         </div>
       )}
 
       <div>
-        <label htmlFor="search-method" className="block text-xs font-medium text-gray-700 mb-1">
+        <label htmlFor="search-method" className="block text-xs font-medium text-gray-800 mb-1">
           Match condition:
         </label>
         <div className="relative">
@@ -447,7 +450,7 @@ export default function ColumnSearchFilter({
             ))}
           </select>
           <div className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
-            <ChevronDown size={16} className="text-gray-500" />
+            <ChevronDown size={16} className="text-gray-600" />
           </div>
         </div>
       </div>
@@ -456,12 +459,12 @@ export default function ColumnSearchFilter({
         <div className="relative">
           <div className="relative">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <Search size={16} className="text-gray-400" />
+              <Search size={16} className="text-gray-500" />
             </div>
             <input
               ref={searchInputRef}
               type="text"
-              className="block w-full pl-10 pr-8 py-2 border border-gray-300 rounded-md text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-shadow duration-150"
+              className="block w-full pl-10 pr-8 py-2 border border-gray-300 rounded-md text-sm placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-shadow duration-150"
               placeholder={`Search ${selectedFieldLabel}...`}
               value={searchTerm ?? ''}
               onChange={(e) => setSearchTerm(e.target.value)}
@@ -476,7 +479,7 @@ export default function ColumnSearchFilter({
             <div className="absolute inset-y-0 right-0 pr-3 flex items-center">
               {searchTerm && (
                 <button
-                  className="text-gray-400 hover:text-gray-600 mr-1"
+                  className="text-gray-500 hover:text-gray-700 mr-1"
                   onClick={() => setSearchTerm('')}
                   title="Clear search"
                 >
@@ -485,7 +488,7 @@ export default function ColumnSearchFilter({
               )}
               {limitedRecentSearches.length > 0 && (
                 <button 
-                  className={`text-gray-400 hover:text-gray-600 ${showRecentSearches ? 'text-indigo-600' : ''}`}
+                  className={`text-gray-500 hover:text-gray-700 ${showRecentSearches ? 'text-indigo-600' : ''}`}
                   onClick={toggleRecentSearches}
                   title="Recent searches"
                 >
@@ -501,9 +504,9 @@ export default function ColumnSearchFilter({
               className="absolute z-10 mt-1 w-full bg-white rounded-md shadow-lg border border-gray-200 max-h-60 overflow-auto"
             >
               <div className="flex justify-between items-center px-3 py-2 bg-gray-50 border-b border-gray-200">
-                <span className="text-xs font-medium text-gray-700">Recent searches</span>
+                <span className="text-xs font-medium text-gray-800">Recent searches</span>
                 <button
-                  className="text-gray-400 hover:text-gray-600 p-1 rounded-full hover:bg-gray-200"
+                  className="text-gray-500 hover:text-gray-700 p-1 rounded-full hover:bg-gray-200"
                   onClick={() => setShowRecentSearches(false)}
                 >
                   <X size={12} />
@@ -515,7 +518,7 @@ export default function ColumnSearchFilter({
                   className="flex items-center w-full px-3 py-2 text-sm text-left hover:bg-gray-50 border-b border-gray-100 last:border-b-0"
                   onClick={() => handleRecentSearchSelect(term)}
                 >
-                  <Clock size={14} className="text-gray-400 mr-2" />
+                  <Clock size={14} className="text-gray-500 mr-2" />
                   <span className="truncate">{term}</span>
                 </button>
               ))}
@@ -544,7 +547,7 @@ export default function ColumnSearchFilter({
                 checked={caseSensitive}
                 onChange={(e) => setCaseSensitive(e.target.checked)}
               />
-              <label htmlFor="case-sensitive" className="ml-2 block text-sm text-gray-700">
+              <label htmlFor="case-sensitive" className="ml-2 block text-sm text-gray-800">
                 Case sensitive
               </label>
             </div>

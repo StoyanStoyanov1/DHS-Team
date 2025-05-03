@@ -237,7 +237,7 @@ export default function FilterRenderer<T>({
 
     default:
       return (
-        <div className="p-2 text-sm text-gray-500">
+        <div className="p-2 text-sm text-gray-600">
           No filter available for this column.
         </div>
       );
