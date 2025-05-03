@@ -253,6 +253,12 @@ function UsersListContent() {
           showTableSizeControls={true}
           defaultSortKey={undefined}
           defaultSortDirection={null}
+          multiSort={true} // Enable multi-column sorting
+          // Optional: Set default sorting criteria if needed
+          // defaultSortCriteria={[
+          //   { key: 'role', direction: 'asc' },
+          //   { key: 'isActive', direction: 'desc' }
+          // ]}
           // Global filter props (optional)
           filterGroups={filterGroups}
           initialFilterValues={{}}

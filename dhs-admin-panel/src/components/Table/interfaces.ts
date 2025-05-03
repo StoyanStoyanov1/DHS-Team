@@ -4,6 +4,11 @@ import { FilterGroup, SelectedFilters } from '../Filter/interfaces';
 export type SortDirection = 'asc' | 'desc' | null;
 export type SearchMethod = 'contains' | 'equals' | 'startsWith' | 'endsWith' | 'notContains' | 'isEmpty' | 'isNotEmpty' | 'regex';
 
+export interface SortCriterion {
+  key: string;
+  direction: 'asc' | 'desc';
+}
+
 export interface SearchField {
   key: string;
   label: string;
@@ -49,6 +54,7 @@ export interface ITableService<T> {
   getPaginatedData(data: T[], currentPage: number, itemsPerPage: number): T[];
   calculateTotalPages(totalItems: number, itemsPerPage: number): number;
   sortData(data: T[], sortKey: string, sortDirection: SortDirection, sortFn?: (a: T, b: T, direction: SortDirection) => number): T[];
+  multiSortData(data: T[], sortCriteria: SortCriterion[], columns: ITableColumn<T>[]): T[];
 }
 
 export interface ITablePagination {
@@ -80,6 +86,8 @@ export interface ITableProps<T> {
   showTableSizeControls?: boolean;
   defaultSortKey?: string;
   defaultSortDirection?: SortDirection;
+  defaultSortCriteria?: SortCriterion[];
+  multiSort?: boolean;
   
   filterGroups?: FilterGroup[];
   initialFilterValues?: SelectedFilters;

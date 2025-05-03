@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useMemo, useEffect, useRef } from 'react';
-import { ITableProps, ITableColumn, SortDirection } from './interfaces';
+import { ITableProps, ITableColumn, SortDirection, SortCriterion } from './interfaces';
 import { TableService } from './TableService';
 import TablePagination from './TablePagination';
 import PageSizeControl from './PageSizeControl';
@@ -9,7 +9,7 @@ import ColumnMenu from './ColumnMenu';
 import TableContextMenu from './TableContextMenu';
 import { Filter } from '../Filter';
 import { SelectedFilters } from '../Filter/interfaces';
-import { Filter as FilterIcon, RotateCcw, X, Eye, ArrowUp, ArrowDown } from 'lucide-react';
+import { Filter as FilterIcon, RotateCcw, X, Eye, ArrowUp, ArrowDown, Hash } from 'lucide-react';
 
 export default function Table<T>({
   columns: initialColumns,
@@ -26,6 +26,8 @@ export default function Table<T>({
   showTableSizeControls = true,
   defaultSortKey,
   defaultSortDirection,
+  defaultSortCriteria = [],
+  multiSort = false,
   filterGroups = [],
   initialFilterValues = {},
   onFilterChange,
@@ -40,8 +42,18 @@ export default function Table<T>({
   const [columnFilters, setColumnFilters] = useState<SelectedFilters>({});
   const [columns, setColumns] = useState<ITableColumn<T>[]>(initialColumns);
   const [showColumnFilterSummary, setShowColumnFilterSummary] = useState(false);
+  
+  // Legacy single sort state - maintain for backward compatibility
   const [sortKey, setSortKey] = useState<string | undefined>(defaultSortKey);
   const [sortDirection, setSortDirection] = useState<SortDirection>(defaultSortDirection || null);
+  
+  // New multi-sort state
+  const [sortCriteria, setSortCriteria] = useState<SortCriterion[]>(
+    defaultSortCriteria || (defaultSortKey && defaultSortDirection ? 
+      [{ key: defaultSortKey, direction: defaultSortDirection as 'asc'|'desc' }] : 
+      [])
+  );
+  
   // Add state for context menu
   const [contextMenuPosition, setContextMenuPosition] = useState<{ x: number; y: number } | null>(null);
 
@@ -192,16 +204,14 @@ export default function Table<T>({
   }, [data, columnFilters, columns]);
 
   const sortedData = useMemo(() => {
-    if (!sortKey) return filteredData;
-
-    const column = columns.find(col => col.key === sortKey);
-    return tableService.sortData(
-      filteredData, 
-      sortKey, 
-      sortDirection, 
-      column?.sortFn
-    );
-  }, [tableService, filteredData, sortKey, sortDirection, columns]);
+    if (multiSort && sortCriteria.length > 0) {
+      return tableService.multiSortData(filteredData, sortCriteria, columns);
+    } else if (sortKey && sortDirection) {
+      const column = columns.find(col => col.key === sortKey);
+      return tableService.sortData(filteredData, sortKey, sortDirection, column?.sortFn);
+    }
+    return filteredData;
+  }, [tableService, filteredData, sortKey, sortDirection, sortCriteria, columns, multiSort]);
 
   const isSortableColumn = (column: ITableColumn<T>) => {
     if (column.filterType === 'select' || 
@@ -215,18 +225,111 @@ export default function Table<T>({
 
   const handleSort = (columnKey: string) => {
     const column = columns.find(col => col.key === columnKey);
-    if (!column) return;
+    if (!column || !isSortableColumn(column)) return;
 
-    if (!isSortableColumn(column)) return;
+    if (multiSort) {
+      setSortCriteria(prevCriteria => {
+        // Check if this column is already in the criteria
+        const existingIndex = prevCriteria.findIndex(c => c.key === columnKey);
+        
+        if (existingIndex >= 0) {
+          // Column already exists in criteria, toggle its direction or remove it
+          const existing = prevCriteria[existingIndex];
+          const newCriteria = [...prevCriteria];
+          
+          if (existing.direction === 'asc') {
+            // Change to descending
+            newCriteria[existingIndex] = { ...existing, direction: 'desc' };
+          } else {
+            // Remove this criterion
+            newCriteria.splice(existingIndex, 1);
+          }
+          
+          return newCriteria;
+        } else {
+          // Add new sorting criterion
+          return [...prevCriteria, { key: columnKey, direction: 'asc' }];
+        }
+      });
 
-    setSortKey(columnKey);
-    if (sortKey === columnKey) {
-      if (sortDirection === null) setSortDirection('asc');
-      else if (sortDirection === 'asc') setSortDirection('desc');
-      else setSortDirection(null);
+      // Also update legacy state for backward compatibility
+      const existingIndex = sortCriteria.findIndex(c => c.key === columnKey);
+      if (existingIndex >= 0) {
+        const existing = sortCriteria[existingIndex];
+        if (existing.direction === 'asc') {
+          setSortKey(columnKey);
+          setSortDirection('desc');
+        } else {
+          setSortKey(undefined);
+          setSortDirection(null);
+        }
+      } else {
+        setSortKey(columnKey);
+        setSortDirection('asc');
+      }
     } else {
-      setSortDirection('asc');
+      // Original single-sort behavior
+      setSortKey(columnKey);
+      if (sortKey === columnKey) {
+        if (sortDirection === null) setSortDirection('asc');
+        else if (sortDirection === 'asc') setSortDirection('desc');
+        else setSortDirection(null);
+      } else {
+        setSortDirection('asc');
+      }
+      
+      // Keep sortCriteria in sync with legacy sort state
+      if (sortDirection === 'asc' || sortDirection === 'desc') {
+        setSortCriteria([{ key: columnKey, direction: sortDirection }]);
+      } else {
+        setSortCriteria([]);
+      }
     }
+  };
+
+  const handleRemoveSortCriterion = (index: number) => {
+    setSortCriteria(prevCriteria => {
+      const newCriteria = [...prevCriteria];
+      newCriteria.splice(index, 1);
+      
+      // Update legacy sort state to match
+      if (newCriteria.length > 0) {
+        setSortKey(newCriteria[0].key);
+        setSortDirection(newCriteria[0].direction);
+      } else {
+        setSortKey(undefined);
+        setSortDirection(null);
+      }
+      
+      return newCriteria;
+    });
+  };
+
+  const handleMoveSortCriterion = (index: number, direction: 'up' | 'down') => {
+    setSortCriteria(prevCriteria => {
+      const newCriteria = [...prevCriteria];
+      if (direction === 'up' && index > 0) {
+        // Swap current criterion with the one above
+        [newCriteria[index-1], newCriteria[index]] = [newCriteria[index], newCriteria[index-1]];
+      } else if (direction === 'down' && index < newCriteria.length - 1) {
+        // Swap current criterion with the one below
+        [newCriteria[index], newCriteria[index+1]] = [newCriteria[index+1], newCriteria[index]];
+      }
+      
+      // Update legacy sort state to match the primary sort
+      if (newCriteria.length > 0) {
+        setSortKey(newCriteria[0].key);
+        setSortDirection(newCriteria[0].direction);
+      }
+      
+      return newCriteria;
+    });
+  };
+
+  const handleClearAllSorting = () => {
+    setSortCriteria([]);
+    setSortKey(undefined);
+    setSortDirection(null);
   };
 
   const handleColumnFilterChange = (columnKey: string, value: any) => {
@@ -283,6 +386,8 @@ export default function Table<T>({
   );
 
   const filterSummaryRef = useRef<HTMLDivElement>(null);
+  const sortCriteriaRef = useRef<HTMLDivElement>(null);
+  const [showSortCriteriaSummary, setShowSortCriteriaSummary] = useState(false);
 
   // Handle right click on table to show context menu
   const handleTableRightClick = (e: React.MouseEvent) => {
@@ -313,19 +418,21 @@ export default function Table<T>({
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
-      if (filterSummaryRef.current && !filterSummaryRef.current.contains(event.target as Node)) {
+      if ((filterSummaryRef.current && !filterSummaryRef.current.contains(event.target as Node)) ||
+          (sortCriteriaRef.current && !sortCriteriaRef.current.contains(event.target as Node))) {
         setShowColumnFilterSummary(false);
+        setShowSortCriteriaSummary(false);
       }
     }
 
-    if (showColumnFilterSummary) {
+    if (showColumnFilterSummary || showSortCriteriaSummary) {
       document.addEventListener('mousedown', handleClickOutside);
     }
 
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
-  }, [showColumnFilterSummary]);
+  }, [showColumnFilterSummary, showSortCriteriaSummary]);
 
   useEffect(() => {
     if (externalItemsPerPage !== undefined) {
@@ -355,18 +462,54 @@ export default function Table<T>({
   const emptyRows = itemsPerPage - paginatedData.length;
 
   const renderSortIndicator = (columnKey: string) => {
-    const isColumnSorted = sortKey === columnKey;
-
+    if (!multiSort) {
+      // Legacy single sort indicator
+      const isColumnSorted = sortKey === columnKey;
+      return (
+        <div className="flex items-center ml-1">
+          <div className="flex flex-col -space-y-1 justify-center">
+            <ArrowUp 
+              size={12} 
+              className={`${isColumnSorted && sortDirection === 'asc' ? 'text-indigo-600 transition-colors duration-200' : 'text-gray-400'}`} 
+            />
+            <ArrowDown 
+              size={12} 
+              className={`${isColumnSorted && sortDirection === 'desc' ? 'text-indigo-600 transition-colors duration-200' : 'text-gray-400'}`} 
+            />
+          </div>
+        </div>
+      );
+    }
+    
+    // Multi-sort indicator
+    const criterionIndex = sortCriteria.findIndex(c => c.key === columnKey);
+    if (criterionIndex === -1) {
+      return (
+        <div className="flex items-center ml-1">
+          <div className="flex flex-col -space-y-1 justify-center">
+            <ArrowUp size={12} className="text-gray-400" />
+            <ArrowDown size={12} className="text-gray-400" />
+          </div>
+        </div>
+      );
+    }
+    
+    const criterion = sortCriteria[criterionIndex];
     return (
-      <div className="flex items-center ml-1">
+      <div className="flex items-center ml-1 gap-1">
+        {criterionIndex > 0 && (
+          <span className="inline-flex items-center justify-center rounded-full bg-gray-100 text-xs px-1 font-medium text-gray-700 min-w-[1.25rem] h-5">
+            {criterionIndex + 1}
+          </span>
+        )}
         <div className="flex flex-col -space-y-1 justify-center">
           <ArrowUp 
             size={12} 
-            className={`${isColumnSorted && sortDirection === 'asc' ? 'text-indigo-600 transition-colors duration-200' : 'text-gray-400'}`} 
+            className={criterion.direction === 'asc' ? 'text-indigo-600 transition-colors duration-200' : 'text-gray-400'} 
           />
           <ArrowDown 
             size={12} 
-            className={`${isColumnSorted && sortDirection === 'desc' ? 'text-indigo-600 transition-colors duration-200' : 'text-gray-400'}`} 
+            className={criterion.direction === 'desc' ? 'text-indigo-600 transition-colors duration-200' : 'text-gray-400'} 
           />
         </div>
       </div>
@@ -477,6 +620,84 @@ export default function Table<T>({
                               <button 
                                 className="ml-2 text-gray-400 hover:text-gray-600"
                                 onClick={() => handleColumnFilterChange(key, null)}
+                              >
+                                <X size={12} />
+                              </button>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+            
+            {/* Multi-sort criteria indicator */}
+            {multiSort && sortCriteria.length > 0 && (
+              <div className="relative" ref={sortCriteriaRef}>
+                <button 
+                  className="flex items-center text-sm text-indigo-600 hover:text-indigo-800 font-medium"
+                  onClick={() => setShowSortCriteriaSummary(!showSortCriteriaSummary)}
+                >
+                  <Hash size={14} className="mr-1.5" />
+                  {sortCriteria.length} {sortCriteria.length === 1 ? 'sort' : 'sorts'}
+                </button>
+
+                {showSortCriteriaSummary && (
+                  <div className="absolute left-0 top-full mt-1 z-10 w-72 bg-white rounded-md shadow-lg border border-gray-200 p-3">
+                    <div className="flex justify-between items-center mb-2 pb-1 border-b border-gray-100">
+                      <h3 className="text-sm font-medium text-gray-800">Sort Order</h3>
+                      <button 
+                        className="text-xs text-gray-500 hover:text-gray-700 flex items-center"
+                        onClick={handleClearAllSorting}
+                      >
+                        <RotateCcw size={12} className="mr-1" />
+                        Clear All
+                      </button>
+                    </div>
+                    <div className="space-y-2 max-h-48 overflow-y-auto">
+                      {sortCriteria.map((criterion, index) => {
+                        const column = columns.find(col => col.key === criterion.key);
+                        if (!column) return null;
+
+                        return (
+                          <div key={index} className="flex justify-between items-center text-xs bg-gray-50 p-2 rounded-md">
+                            <div className="flex items-center gap-2">
+                              <span className="inline-flex items-center justify-center rounded-full bg-indigo-100 text-xs px-1.5 font-medium text-indigo-700 min-w-[1.5rem] h-6">
+                                {index + 1}
+                              </span>
+                              <span className="font-medium text-gray-700">{column.header}</span>
+                              <span className="text-gray-600">
+                                {criterion.direction === 'asc' ? '↑ Ascending' : '↓ Descending'}
+                              </span>
+                            </div>
+                            
+                            <div className="flex items-center space-x-1">
+                              {index > 0 && (
+                                <button 
+                                  className="p-1 text-gray-500 hover:text-gray-700 hover:bg-gray-200 rounded"
+                                  onClick={() => handleMoveSortCriterion(index, 'up')}
+                                  title="Move up"
+                                >
+                                  <ArrowUp size={12} />
+                                </button>
+                              )}
+                              
+                              {index < sortCriteria.length - 1 && (
+                                <button 
+                                  className="p-1 text-gray-500 hover:text-gray-700 hover:bg-gray-200 rounded"
+                                  onClick={() => handleMoveSortCriterion(index, 'down')}
+                                  title="Move down"
+                                >
+                                  <ArrowDown size={12} />
+                                </button>
+                              )}
+                              
+                              <button 
+                                className="p-1 text-gray-500 hover:text-red-500 hover:bg-gray-200 rounded"
+                                onClick={() => handleRemoveSortCriterion(index)}
+                                title="Remove"
                               >
                                 <X size={12} />
                               </button>
