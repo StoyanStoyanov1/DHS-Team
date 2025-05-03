@@ -1,9 +1,9 @@
 import React from 'react';
-import { ITableColumn } from './interfaces';
+import { ITableColumn } from '../Table/interfaces';
 import ColumnSearchFilter from './ColumnSearchFilter';
 import BooleanColumnFilter from './BooleanColumnFilter';
-import DateRangeFilter from '../Filter/DateRangeFilter';
-import MultiSelectFilter from '../Filter/MultiSelectFilter';
+import DateRangeFilter from './DateRangeFilter';
+import MultiSelectFilter from './MultiSelectFilter';
 import { X, Check, RotateCcw } from 'lucide-react';
 
 /**
@@ -125,7 +125,6 @@ export default function FilterRenderer<T>({
 
     case 'boolean':
       return (
-        <div className="p-2">
           <BooleanColumnFilter 
             value={filterValue}
             onChange={onFilterValueChange}
@@ -135,12 +134,10 @@ export default function FilterRenderer<T>({
             labelFalse={column.labelFalse || 'False'}
             labelAll={column.labelAll || 'All'}
           />
-        </div>
       );
 
     case 'multiselect':
       return (
-        <div className="p-2">
           <MultiSelectFilter
             options={filterOptions}
             value={Array.isArray(filterValue) ? filterValue : []}
@@ -155,7 +152,6 @@ export default function FilterRenderer<T>({
             onClose={onClose}
             defaultSelectAll={column.defaultSelectAll !== false}
           />
-        </div>
       );
 
     case 'daterange':

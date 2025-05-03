@@ -7,9 +7,8 @@ import TablePagination from './TablePagination';
 import PageSizeControl from './PageSizeControl';
 import ColumnMenu from './ColumnMenu';
 import TableContextMenu from './TableContextMenu';
-import { Filter } from '../Filter';
-import { SelectedFilters } from '../Filter/interfaces';
-import { Filter as FilterIcon, RotateCcw, X, Eye, ArrowUp, ArrowDown, Hash, GripVertical } from 'lucide-react';
+import { FilterIcon, RotateCcw, X, Eye, ArrowUp, GripVertical, Hash } from 'lucide-react';
+import { isSortableColumn, formatFilterDisplayValue, addTableStyles } from './utils';
 
 export default function Table<T>({
   columns: initialColumns,
@@ -28,17 +27,16 @@ export default function Table<T>({
   defaultSortDirection,
   defaultSortCriteria = [],
   multiSort = false,
-  filterGroups = [],
-  initialFilterValues = {},
-  onFilterChange,
-  showFilter = false,
-  filterTitle = "Table Filters",
+  autoResizeColumns = false,
+  minColumnWidth,
+  maxColumnWidth,
+  columnPadding,
+  tableId = `table-${Math.random().toString(36).substr(2, 9)}`,
 }: ITableProps<T>) {
   const tableService = useMemo(() => new TableService<T>(), []);
 
   const [internalCurrentPage, setInternalCurrentPage] = useState(1);
   const [internalItemsPerPage, setInternalItemsPerPage] = useState(externalItemsPerPage);
-  const [filters, setFilters] = useState<SelectedFilters>(initialFilterValues);
   const [columnFilters, setColumnFilters] = useState<SelectedFilters>({});
   const [filterOrder, setFilterOrder] = useState<string[]>([]);
   const [columns, setColumns] = useState<ITableColumn<T>[]>(initialColumns);
@@ -64,8 +62,8 @@ export default function Table<T>({
   const setItemsPerPage = externalSetItemsPerPage ?? setInternalItemsPerPage;
 
   const allFilters = useMemo(() => {
-    return { ...filters, ...columnFilters };
-  }, [filters, columnFilters]);
+    return { ...columnFilters };
+  }, [columnFilters]);
 
   const filteredData = useMemo(() => {
     let result = [...data];
@@ -214,16 +212,6 @@ export default function Table<T>({
     return filteredData;
   }, [tableService, filteredData, sortKey, sortDirection, sortCriteria, columns, multiSort]);
 
-  const isSortableColumn = (column: ITableColumn<T>) => {
-    if (column.filterType === 'select' || 
-        column.filterType === 'multiselect' || 
-        column.filterType === 'boolean') {
-      return false;
-    }
-
-    return column.sortable === true;
-  };
-
   const handleSort = (columnKey: string) => {
     const column = columns.find(col => col.key === columnKey);
     if (!column || !isSortableColumn(column)) return;
@@ -332,15 +320,6 @@ export default function Table<T>({
       return newFilters;
     });
     setCurrentPage(1);
-  };
-
-  const handleFilterChange = (selectedFilters: SelectedFilters) => {
-    setFilters(selectedFilters);
-    setCurrentPage(1);
-
-    if (onFilterChange) {
-      onFilterChange(selectedFilters);
-    }
   };
 
   const handleToggleColumnVisibility = (columnKey: string) => {
@@ -558,6 +537,24 @@ export default function Table<T>({
   };
 
   // Add CSS for animation
+  useEffect(() => {
+    addTableStyles();
+  }, []);
+
+  // Auto-resize columns when data changes or columns visibility changes
+  useEffect(() => {
+    if (autoResizeColumns) {
+      // Defer execution to next frame to ensure DOM is updated
+      const timer = setTimeout(() => {
+        import('./utils').then(({ autoResizeTableColumns }) => {
+          autoResizeTableColumns(tableId, minColumnWidth, maxColumnWidth, columnPadding);
+        });
+      }, 0);
+
+      return () => clearTimeout(timer);
+    }
+  }, [data, visibleColumns, autoResizeColumns, tableId, minColumnWidth, maxColumnWidth, columnPadding]);
+
   // Handle drop event for sort indicators
   const handleSortDrop = (e: React.DragEvent<HTMLTableCellElement>, targetColumnKey: string) => {
     e.preventDefault();
@@ -638,57 +635,12 @@ export default function Table<T>({
   };
 
   useEffect(() => {
-    // Create style element for menu animation if it doesn't exist
-    if (!document.getElementById('table-context-menu-styles')) {
-      const styleElement = document.createElement('style');
-      styleElement.id = 'table-context-menu-styles';
-      styleElement.textContent = `
-        @keyframes menuAppear {
-          from { opacity: 0; transform: scale(0.95); }
-          to { opacity: 1; transform: scale(1); }
-        }
-
-        .sort-indicator-dragging {
-          opacity: 0.5;
-        }
-
-        th.sort-drop-target {
-          background-color: rgba(79, 70, 229, 0.1);
-        }
-
-        .sort-criteria-item {
-          transition: all 0.2s ease;
-        }
-
-        .sort-criteria-item.dragging {
-          opacity: 0.5;
-          transform: scale(0.98);
-          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        }
-
-        .sort-criteria-item.drop-target {
-          background-color: rgba(79, 70, 229, 0.1);
-          border: 1px dashed rgba(79, 70, 229, 0.5);
-        }
-      `;
-      document.head.appendChild(styleElement);
-    }
+    addTableStyles();
   }, []);
 
   return (
     <div className="space-y-4">
-      {showFilter && filterGroups.length > 0 && (
-        <Filter
-          filterGroups={filterGroups}
-          initialValues={initialFilterValues}
-          onFilterChange={handleFilterChange}
-          title={filterTitle}
-          layout="horizontal"
-          animated={true}
-          showReset={true}
-          compact={false}
-        />
-      )}
+      {/* Remove unused Filter component reference */}
 
       <div className={`bg-white rounded-lg shadow ${className}`}>
         <div className="px-6 py-3 flex items-center justify-between border-b border-gray-200 bg-white">
@@ -728,36 +680,7 @@ export default function Table<T>({
                         const column = columns.find(col => col.key === key);
                         if (!column || value === undefined) return null;
 
-                        let displayValue: string;
-                        if (Array.isArray(value)) {
-                          displayValue = `${value.length} selected`;
-                        } else if (typeof value === 'object' && value !== null) {
-                          if (value.start || value.end) {
-                            const formatDate = (date: Date | string | null | undefined) => {
-                              if (!date) return '—';
-                              const dateObj = typeof date === 'string' ? new Date(date) : date;
-                              return dateObj.toLocaleDateString('bg-BG', { 
-                                day: '2-digit', 
-                                month: '2-digit', 
-                                year: 'numeric' 
-                              });
-                            };
-
-                            const start = formatDate(value.start);
-                            const end = formatDate(value.end);
-                            displayValue = `${start} - ${end}`;
-                          } else if (value.min !== undefined || value.max !== undefined) {
-                            const min = value.min !== undefined && value.min !== null ? value.min : '—';
-                            const max = value.max !== undefined && value.max !== null ? value.max : '—';
-                            displayValue = `${min} - ${max}`;
-                          } else if (value.term !== undefined) {
-                            displayValue = `"${value.term}"`;
-                          } else {
-                            displayValue = "Custom filter";
-                          }
-                        } else {
-                          displayValue = String(value);
-                        }
+                        const displayValue = formatFilterDisplayValue(value);
 
                         return (
                           <div 
@@ -962,7 +885,7 @@ export default function Table<T>({
           className="overflow-x-auto"
           onContextMenu={handleTableRightClick}
         >
-          <table className="min-w-full divide-y divide-gray-200">
+          <table id={tableId} className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
                 {visibleColumns.map((column) => (

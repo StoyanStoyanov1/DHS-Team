@@ -94,4 +94,10 @@ export interface ITableProps<T> {
   onFilterChange?: (selectedFilters: SelectedFilters) => void;
   showFilter?: boolean;
   filterTitle?: string;
+  
+  autoResizeColumns?: boolean;
+  minColumnWidth?: number;
+  maxColumnWidth?: number;
+  columnPadding?: number;
+  tableId?: string;
 }

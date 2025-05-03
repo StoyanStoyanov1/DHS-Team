@@ -1,11 +1,11 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { ITableColumn } from './interfaces';
 import { 
-  Eye, EyeOff, Filter as FilterIcon, Check, X, Search as SearchIcon, 
-  ListFilter, ArrowDownAZ, ArrowUpAZ, Calendar, RotateCcw, Badge
+  Eye, EyeOff, Filter as FilterIcon , X, Search as SearchIcon, 
+  ListFilter, Calendar, Badge
 } from 'lucide-react';
 import { SelectedFilters } from '../Filter/interfaces';
-import FilterRenderer from './FilterRenderer';
+import FilterRenderer from '../Filter/FilterRenderer';
 
 interface ColumnMenuProps<T> {
   column: ITableColumn<T>;
@@ -24,9 +24,7 @@ export default function ColumnMenu<T>({
   onFilterChange,
   onToggleVisibility,
   activeFilters,
-  onSortChange,
-  currentSortKey,
-  currentSortDirection,
+
 }: ColumnMenuProps<T>) {
   const [filterValue, setFilterValue] = useState<any>(activeFilters[column.key] || null);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -84,7 +82,6 @@ export default function ColumnMenu<T>({
     switch (column.filterType) {
       case 'search':
         return <SearchIcon size={14} />;
-      case 'select':
       case 'multiselect':
         return <ListFilter size={14} />;
       case 'daterange':
@@ -101,56 +98,13 @@ export default function ColumnMenu<T>({
   }
 
   // Function to get a simplified display of the current filter value
-  const getFilterDisplayValue = () => {
-    const value = activeFilters[column.key];
-    if (!value) return null;
-
-    if (Array.isArray(value)) {
-      return `${value.length} selected`;
-    } else if (typeof value === 'object' && value !== null) {
-      if (value.start || value.end) {
-        return 'Date range';
-      } else if (value.min !== undefined || value.max !== undefined) {
-        return 'Range';
-      } else if (value.term !== undefined) {
-        return value.term ? `"${value.term}"` : 'Empty';
-      }
-    } else if (typeof value === 'boolean') {
-      return value ? 'Yes' : 'No';
-    } else if (value !== '') {
-      return String(value);
-    }
-
-    return 'Active';
-  };
 
   return (
     <div className="relative" ref={menuRef}>
       <div className={`flex items-center column-menu-actions ${hasActiveFilter ? 'active' : ''}`}>
         {column.filterable && (
           <div className="flex items-center">
-            {hasActiveFilter && (
-              <div className="flex items-center mr-1">
-                <span 
-                  className="inline-flex items-center px-1.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800 cursor-pointer hover:bg-indigo-200"
-                  onClick={toggleMenu}
-                  title="Click to edit filter"
-                >
-                  <Badge size={10} className="mr-1" />
-                  {getFilterDisplayValue()}
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleFilterClear();
-                    }}
-                    className="ml-1 text-indigo-600 hover:text-indigo-800"
-                    title="Clear filter"
-                  >
-                    <X size={10} />
-                  </button>
-                </span>
-              </div>
-            )}
+           
             <button 
               onClick={toggleMenu}
               className={`p-1 rounded-md mr-1 focus:outline-none transition-colors duration-150 ${

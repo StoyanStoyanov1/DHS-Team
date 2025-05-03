@@ -1,7 +1,7 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import '@testing-library/jest-dom';
-import BooleanColumnFilter from '../BooleanColumnFilter';
+import BooleanColumnFilter from '../../Filter/BooleanColumnFilter';
 
 describe('BooleanColumnFilter', () => {
   // Mock functions for props

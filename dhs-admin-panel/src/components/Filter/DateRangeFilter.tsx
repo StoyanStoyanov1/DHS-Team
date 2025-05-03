@@ -25,7 +25,6 @@ const DateRangeFilter: React.FC<DateRangeFilterProps> = ({
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [filterMode, setFilterMode] = useState<FilterMode>('range');
   
-  // Month and Year selection dropdowns
   const [showMonthDropdown, setShowMonthDropdown] = useState<boolean>(false);
   const [showYearDropdown, setShowYearDropdown] = useState<boolean>(false);
   
@@ -201,6 +200,15 @@ const DateRangeFilter: React.FC<DateRangeFilterProps> = ({
     return date > draftState.start && date < draftState.end;
   };
   
+  const isToday = (date: Date | null) => {
+    if (!date) return false;
+    
+    const today = new Date();
+    return date.getDate() === today.getDate() &&
+           date.getMonth() === today.getMonth() &&
+           date.getFullYear() === today.getFullYear();
+  };
+  
   const goToPrevMonth = () => {
     setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1, 1));
   };
@@ -292,9 +300,9 @@ const DateRangeFilter: React.FC<DateRangeFilterProps> = ({
   const displayValue = () => {
     if (!value || (!value.start && !value.end)) {
       return (
-        <span className="flex items-center gap-1.5 text-gray-400">
-          <Calendar size={14} />
-          <span>All time</span>
+        <span className="flex items-center gap-1.5 text-gray-500">
+          <Calendar size={16} className="text-gray-400" />
+          <span>{placeholder}</span>
         </span>
       );
     }
@@ -303,8 +311,8 @@ const DateRangeFilter: React.FC<DateRangeFilterProps> = ({
     if (value.start && !value.end) {
       return (
         <div className="flex items-center">
-          <span className="text-indigo-700 flex items-center">
-            <ArrowRight size={14} className="mr-1.5 text-indigo-500" />
+          <span className="text-blue-600 flex items-center font-medium">
+            <ArrowRight size={16} className="mr-1.5 text-blue-500" />
             After {formatDate(value.start)}
           </span>
         </div>
@@ -315,8 +323,8 @@ const DateRangeFilter: React.FC<DateRangeFilterProps> = ({
     if (!value.start && value.end) {
       return (
         <div className="flex items-center">
-          <span className="text-indigo-700 flex items-center">
-            <ArrowLeft size={14} className="mr-1.5 text-indigo-500" />
+          <span className="text-blue-600 flex items-center font-medium">
+            <ArrowLeft size={16} className="mr-1.5 text-blue-500" />
             Before {formatDate(value.end)}
           </span>
         </div>
@@ -326,8 +334,8 @@ const DateRangeFilter: React.FC<DateRangeFilterProps> = ({
     // Date range
     return (
       <div className="flex items-center">
-        <span className="text-indigo-700 flex items-center">
-          <ArrowLeftRight size={14} className="mr-1.5 text-indigo-500" />
+        <span className="text-blue-600 flex items-center font-medium">
+          <ArrowLeftRight size={16} className="mr-1.5 text-blue-500" />
           {formatDate(value.start)} — {formatDate(value.end)}
         </span>
       </div>
@@ -344,11 +352,10 @@ const DateRangeFilter: React.FC<DateRangeFilterProps> = ({
   
   return (
     <div className={`relative ${className}`}>
-      {/* Main button - may be hidden if calendar should always show */}
       <div 
-        className={`flex items-center justify-between rounded-md border px-3 py-2 text-sm cursor-pointer transition-all duration-200
-          ${showCalendar ? 'border-indigo-500 ring-1 ring-indigo-500' : 'border-gray-300 hover:border-gray-400'}
-          ${value?.start || value?.end ? 'border-indigo-200 bg-indigo-50/30' : ''}`}
+        className={`flex items-center justify-between rounded-lg border px-3.5 py-2.5 text-sm cursor-pointer transition-all duration-200 shadow-sm
+          ${showCalendar ? 'border-blue-500 ring-1 ring-blue-300' : 'border-gray-300 hover:border-gray-400 hover:shadow'}
+          ${value?.start || value?.end ? 'border-blue-200 bg-blue-50/40' : ''}`}
         onClick={() => setShowCalendar(!showCalendar)}
       >
         {displayValue()}
@@ -356,52 +363,51 @@ const DateRangeFilter: React.FC<DateRangeFilterProps> = ({
         <div className="flex items-center gap-1">
           {(value?.start || value?.end) && (
             <button 
-              className="p-1 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded"
+              className="p-1 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full transition-colors"
               onClick={(e) => { e.stopPropagation(); clearFilter(); }}
             >
-              <X size={14} />
+              <X size={16} />
             </button>
           )}
         </div>
       </div>
       
-      {/* Calendar - shown either conditionally (showCalendar) or always */}
       {showCalendar && (
-        <div className="absolute z-10 mt-1 bg-white rounded-md shadow-lg border border-gray-200 p-3 min-w-[320px] right-0">
+        <div className="absolute z-10 mt-2 bg-white rounded-xl shadow-xl border border-gray-200 p-4 right-0 w-80 daterange-animation">
           {/* Filter mode selector */}
-          <div className="mb-3 flex justify-center border-b border-gray-100 pb-3">
-            <div className="inline-flex rounded-md shadow-sm bg-gray-100 p-1" role="group">
+          <div className="mb-4 flex justify-center border-b border-gray-100 pb-3">
+            <div className="inline-flex rounded-lg shadow-sm bg-gray-50 p-1.5" role="group">
               <button
                 type="button"
                 onClick={() => switchFilterMode('range')}
-                className={`px-3 py-1.5 text-sm font-medium rounded-l-md flex items-center
+                className={`px-3.5 py-1.5 text-sm font-medium rounded-l-lg flex items-center transition-all
                   ${draftState.mode === 'range' 
-                    ? 'bg-white text-indigo-700 shadow' 
-                    : 'text-gray-700 hover:bg-gray-50'}`}
+                    ? 'bg-white text-blue-600 shadow-sm' 
+                    : 'text-gray-700 hover:bg-gray-100'}`}
               >
-                <ArrowLeftRight size={14} className="mr-1.5" />
+                <ArrowLeftRight size={15} className="mr-1.5" />
                 Range
               </button>
               <button
                 type="button"
                 onClick={() => switchFilterMode('before')}
-                className={`px-3 py-1.5 text-sm font-medium flex items-center
+                className={`px-3.5 py-1.5 text-sm font-medium flex items-center transition-all
                   ${draftState.mode === 'before' 
-                    ? 'bg-white text-indigo-700 shadow' 
-                    : 'text-gray-700 hover:bg-gray-50'}`}
+                    ? 'bg-white text-blue-600 shadow-sm' 
+                    : 'text-gray-700 hover:bg-gray-100'}`}
               >
-                <ArrowLeft size={14} className="mr-1.5" />
+                <ArrowLeft size={15} className="mr-1.5" />
                 Before
               </button>
               <button
                 type="button"
                 onClick={() => switchFilterMode('after')}
-                className={`px-3 py-1.5 text-sm font-medium rounded-r-md flex items-center
+                className={`px-3.5 py-1.5 text-sm font-medium rounded-r-lg flex items-center transition-all
                   ${draftState.mode === 'after' 
-                    ? 'bg-white text-indigo-700 shadow' 
-                    : 'text-gray-700 hover:bg-gray-50'}`}
+                    ? 'bg-white text-blue-600 shadow-sm' 
+                    : 'text-gray-700 hover:bg-gray-100'}`}
               >
-                <ArrowRight size={14} className="mr-1.5" />
+                <ArrowRight size={15} className="mr-1.5" />
                 After
               </button>
             </div>
@@ -410,17 +416,17 @@ const DateRangeFilter: React.FC<DateRangeFilterProps> = ({
           {/* Calendar header with month/year selectors */}
           <div className="mb-3 flex items-center justify-between">
             <button 
-              className="p-1 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded"
+              className="p-1.5 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-full transition-colors"
               onClick={(e) => { e.stopPropagation(); goToPrevMonth(); }}
             >
-              <ChevronLeft size={18} />
+              <ChevronLeft size={20} />
             </button>
             
-            <div className="flex items-center space-x-1.5">
+            <div className="flex items-center space-x-2">
               {/* Month selector dropdown */}
               <div className="relative month-dropdown">
                 <button
-                  className="flex items-center justify-between px-2 py-1 bg-white border border-gray-200 rounded hover:bg-gray-50 text-sm font-medium min-w-[110px]"
+                  className="flex items-center justify-between px-3 py-1.5 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 text-sm font-medium min-w-[120px] transition-colors"
                   onClick={(e) => {
                     e.stopPropagation();
                     setShowMonthDropdown(!showMonthDropdown);
@@ -432,12 +438,12 @@ const DateRangeFilter: React.FC<DateRangeFilterProps> = ({
                 </button>
                 
                 {showMonthDropdown && (
-                  <div className="absolute top-full left-0 mt-1 bg-white border border-gray-200 rounded-md shadow-lg z-20 max-h-48 overflow-y-auto w-full">
+                  <div className="absolute top-full left-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-20 max-h-52 overflow-y-auto w-full">
                     {monthNames.map((month, index) => (
                       <div
                         key={month}
-                        className={`px-3 py-1.5 text-sm cursor-pointer hover:bg-indigo-50 
-                          ${index === currentMonth.getMonth() ? 'bg-indigo-50 text-indigo-700 font-medium' : ''}`}
+                        className={`px-4 py-2 text-sm cursor-pointer hover:bg-blue-50 transition-colors
+                          ${index === currentMonth.getMonth() ? 'bg-blue-50 text-blue-600 font-medium' : ''}`}
                         onClick={(e) => {
                           e.stopPropagation();
                           handleMonthChange(index);
@@ -453,7 +459,7 @@ const DateRangeFilter: React.FC<DateRangeFilterProps> = ({
               {/* Year selector dropdown */}
               <div className="relative year-dropdown">
                 <button
-                  className="flex items-center justify-between px-2 py-1 bg-white border border-gray-200 rounded hover:bg-gray-50 text-sm font-medium min-w-[70px]"
+                  className="flex items-center justify-between px-3 py-1.5 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 text-sm font-medium min-w-[80px] transition-colors"
                   onClick={(e) => {
                     e.stopPropagation();
                     setShowYearDropdown(!showYearDropdown);
@@ -465,12 +471,12 @@ const DateRangeFilter: React.FC<DateRangeFilterProps> = ({
                 </button>
                 
                 {showYearDropdown && (
-                  <div className="absolute top-full left-0 mt-1 bg-white border border-gray-200 rounded-md shadow-lg z-20 max-h-48 overflow-y-auto w-full">
+                  <div className="absolute top-full left-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-20 max-h-52 overflow-y-auto w-full">
                     {getAvailableYears().map((year) => (
                       <div
                         key={year}
-                        className={`px-3 py-1.5 text-sm cursor-pointer hover:bg-indigo-50 
-                          ${year === currentMonth.getFullYear() ? 'bg-indigo-50 text-indigo-700 font-medium' : ''}`}
+                        className={`px-4 py-2 text-sm cursor-pointer hover:bg-blue-50 transition-colors
+                          ${year === currentMonth.getFullYear() ? 'bg-blue-50 text-blue-600 font-medium' : ''}`}
                         onClick={(e) => {
                           e.stopPropagation();
                           handleYearChange(year);
@@ -485,17 +491,17 @@ const DateRangeFilter: React.FC<DateRangeFilterProps> = ({
             </div>
             
             <button 
-              className="p-1 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded"
+              className="p-1.5 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-full transition-colors"
               onClick={(e) => { e.stopPropagation(); goToNextMonth(); }}
             >
-              <ChevronRight size={18} />
+              <ChevronRight size={20} />
             </button>
           </div>
           
-          <div className="grid grid-cols-7 gap-1">
+          <div className="grid grid-cols-7 gap-1.5 mb-2">
             {/* Weekday headers */}
             {weekDays.map((day, i) => (
-              <div key={i} className="text-center text-xs font-medium text-gray-500 py-1">
+              <div key={i} className="text-center text-xs font-medium text-gray-500 py-1.5">
                 {day}
               </div>
             ))}
@@ -505,16 +511,18 @@ const DateRangeFilter: React.FC<DateRangeFilterProps> = ({
               <button
                 key={i}
                 className={`
-                  rounded-full w-7 h-7 flex items-center justify-center text-sm transition-all duration-150
-                  ${!day ? 'invisible' : 'cursor-pointer hover:bg-indigo-50'}
+                  rounded-full w-8 h-8 flex items-center justify-center text-sm transition-all duration-150
+                  ${!day ? 'invisible' : 'cursor-pointer hover:bg-blue-50'}
+                  ${isToday(day) && !isRangeDateSelected(day) && !isDateInRange(day) && !isSingleDateSelected(day) 
+                    ? 'border border-blue-300 text-blue-600 font-medium' : ''}
                   ${draftState.mode === 'range'
                     ? isRangeDateSelected(day) 
-                      ? 'bg-indigo-600 text-white hover:bg-indigo-700' 
+                      ? 'bg-blue-600 text-white hover:bg-blue-700 font-medium' 
                       : isDateInRange(day)
-                        ? 'bg-indigo-100 hover:bg-indigo-200'
+                        ? 'bg-blue-100 hover:bg-blue-200 text-blue-800'
                         : ''
                     : isSingleDateSelected(day) 
-                      ? 'bg-indigo-600 text-white hover:bg-indigo-700'
+                      ? 'bg-blue-600 text-white hover:bg-blue-700 font-medium'
                       : ''
                   }
                 `}
@@ -529,7 +537,7 @@ const DateRangeFilter: React.FC<DateRangeFilterProps> = ({
           {/* Selection status */}
           <div className="mt-3 pt-3 border-t border-gray-100">
             {draftState.mode === 'range' ? (
-              <div className="text-xs font-medium text-gray-600 mb-2">
+              <div className="text-xs font-medium text-gray-600 mb-3 bg-gray-50 p-2 rounded-lg">
                 {!draftState.start && !draftState.end 
                   ? 'Select start date'
                   : !draftState.end 
@@ -537,7 +545,7 @@ const DateRangeFilter: React.FC<DateRangeFilterProps> = ({
                     : `Range: ${formatDate(draftState.start)} — ${formatDate(draftState.end)}`}
               </div>
             ) : (
-              <div className="text-xs font-medium text-gray-600 mb-2">
+              <div className="text-xs font-medium text-gray-600 mb-3 bg-gray-50 p-2 rounded-lg">
                 {draftState.singleDate 
                   ? `${draftState.mode === 'before' ? 'Before' : 'After'} date: ${formatDate(draftState.singleDate)}`
                   : 'Select a date'}
@@ -547,7 +555,7 @@ const DateRangeFilter: React.FC<DateRangeFilterProps> = ({
             {/* Action buttons */}
             <div className="flex justify-between">
               <button
-                className="px-3 py-1.5 text-sm border border-gray-200 rounded-md hover:bg-gray-50 transition-colors"
+                className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors shadow-sm"
                 onClick={(e) => { 
                   e.stopPropagation();
                   setShowCalendar(false);
@@ -585,9 +593,9 @@ const DateRangeFilter: React.FC<DateRangeFilterProps> = ({
               
               <button
                 disabled={!canApplyFilter()}
-                className={`px-3 py-1.5 text-sm rounded-md transition-colors ${
+                className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
                   canApplyFilter()
-                    ? 'bg-indigo-600 text-white hover:bg-indigo-700'
+                    ? 'bg-blue-600 text-white hover:bg-blue-700 shadow-sm'
                     : 'bg-gray-100 text-gray-400 cursor-not-allowed'
                 }`}
                 onClick={(e) => { e.stopPropagation(); applyFilter(); }}
@@ -606,35 +614,42 @@ const DateRangeFilter: React.FC<DateRangeFilterProps> = ({
 export const DirectCalendarFilter: React.FC<DateRangeFilterProps> = (props) => {
   return (
     <div className="calendar-filter-container">
-      <style jsx global>{`
+      <style jsx>{`
         .calendar-only .absolute {
-          box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-          border-radius: 8px;
+          box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+          border-radius: 12px;
           overflow: hidden;
-          position: absolute;
+          position: relative;
           top: 0;
           right: 0;
           z-index: 1000;
+          border: 1px solid rgba(0, 0, 0, 0.08);
         }
         .calendar-only .absolute > div:first-child {
-          display: none; /* Hide the filter mode selector */
+          display: none;
         }
         .calendar-only > div:first-child {
-          display: none !important; /* Completely hide the main button with LAST LOGIN text */
-        }
-        /* Hide any header or date display */
-        .calendar-only h3,
-        .calendar-only .border-b,
-        .calendar-only .flex.items-center.justify-between.rounded-md {
           display: none !important;
         }
-        /* Hide the Last Login field completely */
+        .calendar-only h3,
+        .calendar-only .border-b,
+        .calendar-only .flex.items-center.justify-between.rounded-lg {
+          display: none !important;
+        }
         .calendar-only-wrapper .flex.items-center.justify-between {
           display: none !important;
         }
-        /* Hide any parent elements that might display the Last Login text */
         .last-login-field {
           display: none !important;
+        }
+
+        .daterange-animation {
+          animation: fadeIn 0.2s ease-out forwards;
+        }
+
+        @keyframes fadeIn {
+          from { opacity: 0; transform: translateY(-10px); }
+          to { opacity: 1; transform: translateY(0); }
         }
       `}</style>
       <DateRangeFilter 

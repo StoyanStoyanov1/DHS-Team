@@ -13,7 +13,8 @@ import {
   ChevronRight
 } from 'lucide-react';
 import { SelectedFilters } from '../Filter/interfaces';
-import FilterRenderer from './FilterRenderer';
+import FilterRenderer from '../Filter/FilterRenderer';
+import { isSortableColumn } from './utils';
 
 interface TableContextMenuProps<T> {
   columns: ITableColumn<T>[];
@@ -242,16 +243,6 @@ export default function TableContextMenu<T>({
   };
 
   if (!position) return null;
-
-  const isSortableColumn = (column: ITableColumn<T>) => {
-    if (column.filterType === 'select' || 
-        column.filterType === 'multiselect' || 
-        column.filterType === 'boolean') {
-      return false;
-    }
-
-    return column.sortable === true;
-  };
 
   return (
     <div 
