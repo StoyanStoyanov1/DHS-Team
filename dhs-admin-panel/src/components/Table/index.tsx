@@ -9,7 +9,7 @@ import ColumnMenu from './ColumnMenu';
 import TableContextMenu from './TableContextMenu';
 import { Filter } from '../Filter';
 import { SelectedFilters } from '../Filter/interfaces';
-import { Filter as FilterIcon, RotateCcw, X, Eye, ArrowUp, ArrowDown, Hash } from 'lucide-react';
+import { Filter as FilterIcon, RotateCcw, X, Eye, ArrowUp, ArrowDown, Hash, GripVertical } from 'lucide-react';
 
 export default function Table<T>({
   columns: initialColumns,
@@ -40,20 +40,21 @@ export default function Table<T>({
   const [internalItemsPerPage, setInternalItemsPerPage] = useState(externalItemsPerPage);
   const [filters, setFilters] = useState<SelectedFilters>(initialFilterValues);
   const [columnFilters, setColumnFilters] = useState<SelectedFilters>({});
+  const [filterOrder, setFilterOrder] = useState<string[]>([]);
   const [columns, setColumns] = useState<ITableColumn<T>[]>(initialColumns);
   const [showColumnFilterSummary, setShowColumnFilterSummary] = useState(false);
-  
+
   // Legacy single sort state - maintain for backward compatibility
   const [sortKey, setSortKey] = useState<string | undefined>(defaultSortKey);
   const [sortDirection, setSortDirection] = useState<SortDirection>(defaultSortDirection || null);
-  
+
   // New multi-sort state
   const [sortCriteria, setSortCriteria] = useState<SortCriterion[]>(
     defaultSortCriteria || (defaultSortKey && defaultSortDirection ? 
       [{ key: defaultSortKey, direction: defaultSortDirection as 'asc'|'desc' }] : 
       [])
   );
-  
+
   // Add state for context menu
   const [contextMenuPosition, setContextMenuPosition] = useState<{ x: number; y: number } | null>(null);
 
@@ -231,12 +232,12 @@ export default function Table<T>({
       setSortCriteria(prevCriteria => {
         // Check if this column is already in the criteria
         const existingIndex = prevCriteria.findIndex(c => c.key === columnKey);
-        
+
         if (existingIndex >= 0) {
           // Column already exists in criteria, toggle its direction or remove it
           const existing = prevCriteria[existingIndex];
           const newCriteria = [...prevCriteria];
-          
+
           if (existing.direction === 'asc') {
             // Change to descending
             newCriteria[existingIndex] = { ...existing, direction: 'desc' };
@@ -244,7 +245,7 @@ export default function Table<T>({
             // Remove this criterion
             newCriteria.splice(existingIndex, 1);
           }
-          
+
           return newCriteria;
         } else {
           // Add new sorting criterion
@@ -277,7 +278,7 @@ export default function Table<T>({
       } else {
         setSortDirection('asc');
       }
-      
+
       // Keep sortCriteria in sync with legacy sort state
       if (sortDirection === 'asc' || sortDirection === 'desc') {
         setSortCriteria([{ key: columnKey, direction: sortDirection }]);
@@ -291,7 +292,7 @@ export default function Table<T>({
     setSortCriteria(prevCriteria => {
       const newCriteria = [...prevCriteria];
       newCriteria.splice(index, 1);
-      
+
       // Update legacy sort state to match
       if (newCriteria.length > 0) {
         setSortKey(newCriteria[0].key);
@@ -300,28 +301,7 @@ export default function Table<T>({
         setSortKey(undefined);
         setSortDirection(null);
       }
-      
-      return newCriteria;
-    });
-  };
 
-  const handleMoveSortCriterion = (index: number, direction: 'up' | 'down') => {
-    setSortCriteria(prevCriteria => {
-      const newCriteria = [...prevCriteria];
-      if (direction === 'up' && index > 0) {
-        // Swap current criterion with the one above
-        [newCriteria[index-1], newCriteria[index]] = [newCriteria[index], newCriteria[index-1]];
-      } else if (direction === 'down' && index < newCriteria.length - 1) {
-        // Swap current criterion with the one below
-        [newCriteria[index], newCriteria[index+1]] = [newCriteria[index+1], newCriteria[index]];
-      }
-      
-      // Update legacy sort state to match the primary sort
-      if (newCriteria.length > 0) {
-        setSortKey(newCriteria[0].key);
-        setSortDirection(newCriteria[0].direction);
-      }
-      
       return newCriteria;
     });
   };
@@ -337,8 +317,17 @@ export default function Table<T>({
       const newFilters = { ...prev };
       if (value === null) {
         delete newFilters[columnKey];
+        // Remove from filter order when filter is removed
+        setFilterOrder(prevOrder => prevOrder.filter(key => key !== columnKey));
       } else {
         newFilters[columnKey] = value;
+        // Add to filter order if not already present
+        setFilterOrder(prevOrder => {
+          if (!prevOrder.includes(columnKey)) {
+            return [...prevOrder, columnKey];
+          }
+          return prevOrder;
+        });
       }
       return newFilters;
     });
@@ -368,11 +357,14 @@ export default function Table<T>({
         delete newFilters[columnKey];
         return newFilters;
       });
+      // Also remove from filter order
+      setFilterOrder(prevOrder => prevOrder.filter(key => key !== columnKey));
     }
   };
 
   const resetColumnFilters = () => {
     setColumnFilters({});
+    setFilterOrder([]);
     setShowColumnFilterSummary(false);
   };
 
@@ -463,60 +455,188 @@ export default function Table<T>({
 
   const renderSortIndicator = (columnKey: string) => {
     if (!multiSort) {
-      // Legacy single sort indicator
+      // Single draggable sort indicator
       const isColumnSorted = sortKey === columnKey;
       return (
-        <div className="flex items-center ml-1">
-          <div className="flex flex-col -space-y-1 justify-center">
-            <ArrowUp 
-              size={12} 
-              className={`${isColumnSorted && sortDirection === 'asc' ? 'text-indigo-600 transition-colors duration-200' : 'text-gray-400'}`} 
-            />
-            <ArrowDown 
-              size={12} 
-              className={`${isColumnSorted && sortDirection === 'desc' ? 'text-indigo-600 transition-colors duration-200' : 'text-gray-400'}`} 
-            />
+        <div 
+          className={`flex items-center ml-1 cursor-grab active:cursor-grabbing ${isColumnSorted ? 'sort-active' : ''}`}
+          draggable={true}
+          onDragStart={(e) => {
+            e.dataTransfer.setData('text/plain', columnKey);
+            e.dataTransfer.effectAllowed = 'move';
+            const img = new Image();
+            img.src = 'data:image/gif;base64,R0lGODlhAQABAIAAAAUEBAAAACwAAAAAAQABAAACAkQBADs=';
+            e.dataTransfer.setDragImage(img, 0, 0);
+            e.currentTarget.classList.add('dragging');
+          }}
+          onDragEnd={(e) => {
+            e.currentTarget.classList.remove('dragging');
+          }}
+        >
+          <div 
+            className={`w-5 h-5 rounded-full flex items-center justify-center transition-all duration-200 ${
+              isColumnSorted 
+                ? sortDirection === 'asc' 
+                  ? 'bg-indigo-100 text-indigo-600 rotate-0' 
+                  : 'bg-indigo-100 text-indigo-600 rotate-180' 
+                : 'bg-gray-100 text-gray-400 hover:bg-gray-200'
+            }`}
+            title={isColumnSorted 
+              ? sortDirection === 'asc' 
+                ? 'Sorted ascending. Click to sort descending.' 
+                : 'Sorted descending. Click to clear sort.' 
+              : 'Click to sort ascending. Drag to reorder columns.'}
+          >
+            <ArrowUp size={14} className="transform transition-transform duration-200" />
           </div>
         </div>
       );
     }
-    
+
     // Multi-sort indicator
     const criterionIndex = sortCriteria.findIndex(c => c.key === columnKey);
     if (criterionIndex === -1) {
       return (
-        <div className="flex items-center ml-1">
-          <div className="flex flex-col -space-y-1 justify-center">
-            <ArrowUp size={12} className="text-gray-400" />
-            <ArrowDown size={12} className="text-gray-400" />
+        <div 
+          className="flex items-center ml-1 cursor-grab active:cursor-grabbing"
+          draggable={true}
+          onDragStart={(e) => {
+            e.dataTransfer.setData('text/plain', columnKey);
+            e.dataTransfer.effectAllowed = 'move';
+            const img = new Image();
+            img.src = 'data:image/gif;base64,R0lGODlhAQABAIAAAAUEBAAAACwAAAAAAQABAAACAkQBADs=';
+            e.dataTransfer.setDragImage(img, 0, 0);
+            e.currentTarget.classList.add('dragging');
+          }}
+          onDragEnd={(e) => {
+            e.currentTarget.classList.remove('dragging');
+          }}
+        >
+          <div className="w-5 h-5 rounded-full bg-gray-100 text-gray-400 hover:bg-gray-200 flex items-center justify-center">
+            <ArrowUp size={14} />
           </div>
         </div>
       );
     }
-    
+
     const criterion = sortCriteria[criterionIndex];
     return (
-      <div className="flex items-center ml-1 gap-1">
+      <div 
+        className="flex items-center ml-1 gap-1 cursor-grab active:cursor-grabbing"
+        draggable={true}
+        onDragStart={(e) => {
+          e.dataTransfer.setData('text/plain', JSON.stringify({ key: columnKey, index: criterionIndex }));
+          e.dataTransfer.effectAllowed = 'move';
+          const img = new Image();
+          img.src = 'data:image/gif;base64,R0lGODlhAQABAIAAAAUEBAAAACwAAAAAAQABAAACAkQBADs=';
+          e.dataTransfer.setDragImage(img, 0, 0);
+          e.currentTarget.classList.add('dragging');
+        }}
+        onDragEnd={(e) => {
+          e.currentTarget.classList.remove('dragging');
+        }}
+      >
         {criterionIndex > 0 && (
-          <span className="inline-flex items-center justify-center rounded-full bg-gray-100 text-xs px-1 font-medium text-gray-700 min-w-[1.25rem] h-5">
+          <span className="inline-flex items-center justify-center rounded-full bg-indigo-100 text-xs px-1.5 font-medium text-indigo-700 min-w-[1.5rem] h-5">
             {criterionIndex + 1}
           </span>
         )}
-        <div className="flex flex-col -space-y-1 justify-center">
-          <ArrowUp 
-            size={12} 
-            className={criterion.direction === 'asc' ? 'text-indigo-600 transition-colors duration-200' : 'text-gray-400'} 
-          />
-          <ArrowDown 
-            size={12} 
-            className={criterion.direction === 'desc' ? 'text-indigo-600 transition-colors duration-200' : 'text-gray-400'} 
-          />
+        <div 
+          className={`w-5 h-5 rounded-full flex items-center justify-center ${
+            criterion.direction === 'asc' 
+              ? 'bg-indigo-100 text-indigo-600 rotate-0' 
+              : 'bg-indigo-100 text-indigo-600 rotate-180'
+          }`}
+          title={criterion.direction === 'asc' 
+            ? 'Sorted ascending. Click to sort descending.' 
+            : 'Sorted descending. Click to clear sort.'}
+        >
+          <ArrowUp size={14} className="transform transition-transform duration-200" />
         </div>
       </div>
     );
   };
 
   // Add CSS for animation
+  // Handle drop event for sort indicators
+  const handleSortDrop = (e: React.DragEvent<HTMLTableCellElement>, targetColumnKey: string) => {
+    e.preventDefault();
+
+    try {
+      // Check if this is a multi-sort criterion
+      const data = e.dataTransfer.getData('text/plain');
+      if (data.startsWith('{')) {
+        // This is a multi-sort criterion being reordered
+        const { key, index } = JSON.parse(data);
+
+        if (key && index !== undefined) {
+          // Move the criterion to a new position
+          setSortCriteria(prevCriteria => {
+            const newCriteria = [...prevCriteria];
+            const item = newCriteria.splice(index, 1)[0];
+
+            // Find the target index
+            const targetIndex = newCriteria.findIndex(c => c.key === targetColumnKey);
+            if (targetIndex !== -1) {
+              newCriteria.splice(targetIndex, 0, item);
+            } else {
+              // If target column is not in criteria, add it to the end
+              newCriteria.push(item);
+            }
+
+            // Update legacy sort state
+            if (newCriteria.length > 0) {
+              setSortKey(newCriteria[0].key);
+              setSortDirection(newCriteria[0].direction);
+            }
+
+            return newCriteria;
+          });
+        }
+      } else {
+        // This is a single column being dragged to create a sort
+        const sourceColumnKey = data;
+        const sourceColumn = columns.find(col => col.key === sourceColumnKey);
+        const targetColumn = columns.find(col => col.key === targetColumnKey);
+
+        if (sourceColumn && targetColumn && isSortableColumn(sourceColumn) && isSortableColumn(targetColumn)) {
+          if (multiSort) {
+            // In multi-sort mode, add the source column as a new criterion
+            setSortCriteria(prevCriteria => {
+              const existingIndex = prevCriteria.findIndex(c => c.key === sourceColumnKey);
+
+              if (existingIndex >= 0) {
+                // If source column is already in criteria, move it
+                const newCriteria = [...prevCriteria];
+                const item = newCriteria.splice(existingIndex, 1)[0];
+
+                // Find the target index
+                const targetIndex = newCriteria.findIndex(c => c.key === targetColumnKey);
+                if (targetIndex !== -1) {
+                  newCriteria.splice(targetIndex, 0, item);
+                } else {
+                  // If target column is not in criteria, add it to the end
+                  newCriteria.push(item);
+                }
+
+                return newCriteria;
+              } else {
+                // Add new sorting criterion
+                return [...prevCriteria, { key: sourceColumnKey, direction: 'asc' }];
+              }
+            });
+          } else {
+            // In single-sort mode, just set the source column as the sort key
+            setSortKey(sourceColumnKey);
+            setSortDirection('asc');
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Error handling sort drop:', error);
+    }
+  };
+
   useEffect(() => {
     // Create style element for menu animation if it doesn't exist
     if (!document.getElementById('table-context-menu-styles')) {
@@ -526,6 +646,29 @@ export default function Table<T>({
         @keyframes menuAppear {
           from { opacity: 0; transform: scale(0.95); }
           to { opacity: 1; transform: scale(1); }
+        }
+
+        .sort-indicator-dragging {
+          opacity: 0.5;
+        }
+
+        th.sort-drop-target {
+          background-color: rgba(79, 70, 229, 0.1);
+        }
+
+        .sort-criteria-item {
+          transition: all 0.2s ease;
+        }
+
+        .sort-criteria-item.dragging {
+          opacity: 0.5;
+          transform: scale(0.98);
+          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .sort-criteria-item.drop-target {
+          background-color: rgba(79, 70, 229, 0.1);
+          border: 1px dashed rgba(79, 70, 229, 0.5);
         }
       `;
       document.head.appendChild(styleElement);
@@ -566,20 +709,24 @@ export default function Table<T>({
 
                 {showColumnFilterSummary && (
                   <div className="absolute left-0 top-full mt-1 z-10 w-64 bg-white rounded-md shadow-lg border border-gray-200 p-3">
-                    <div className="flex justify-between items-center mb-2 pb-1 border-b border-gray-100">
-                      <h3 className="text-sm font-medium text-gray-800">Active Filters</h3>
-                      <button 
-                        className="text-xs text-gray-500 hover:text-gray-700 flex items-center"
-                        onClick={resetColumnFilters}
-                      >
-                        <RotateCcw size={12} className="mr-1" />
-                        Clear All
-                      </button>
+                    <div className="mb-2 pb-1 border-b border-gray-100">
+                      <div className="flex justify-between items-center">
+                        <h3 className="text-sm font-medium text-gray-800">Active Filters</h3>
+                        <button 
+                          className="text-xs text-gray-500 hover:text-gray-700 flex items-center"
+                          onClick={resetColumnFilters}
+                        >
+                          <RotateCcw size={12} className="mr-1" />
+                          Clear All
+                        </button>
+                      </div>
+                      <p className="text-xs text-gray-500 mt-1">Drag and drop items to reorder</p>
                     </div>
                     <div className="space-y-2 max-h-48 overflow-y-auto">
-                      {Object.entries(columnFilters).map(([key, value]) => {
+                      {filterOrder.map((key, index) => {
+                        const value = columnFilters[key];
                         const column = columns.find(col => col.key === key);
-                        if (!column) return null;
+                        if (!column || value === undefined) return null;
 
                         let displayValue: string;
                         if (Array.isArray(value)) {
@@ -613,17 +760,56 @@ export default function Table<T>({
                         }
 
                         return (
-                          <div key={key} className="flex justify-between items-center text-xs">
-                            <span className="font-medium text-gray-700">{column.header}:</span>
-                            <div className="flex items-center">
+                          <div 
+                            key={key} 
+                            className="flex justify-between items-center text-xs bg-gray-50 p-2 rounded-md cursor-grab active:cursor-grabbing sort-criteria-item"
+                            draggable={true}
+                            onDragStart={(e) => {
+                              e.dataTransfer.setData('text/plain', JSON.stringify({ index }));
+                              e.currentTarget.classList.add('dragging');
+                            }}
+                            onDragEnd={(e) => {
+                              e.currentTarget.classList.remove('dragging');
+                            }}
+                            onDragOver={(e) => {
+                              e.preventDefault();
+                              e.currentTarget.classList.add('drop-target');
+                            }}
+                            onDragLeave={(e) => {
+                              e.currentTarget.classList.remove('drop-target');
+                            }}
+                            onDrop={(e) => {
+                              e.preventDefault();
+                              e.currentTarget.classList.remove('drop-target');
+                              try {
+                                const data = JSON.parse(e.dataTransfer.getData('text/plain'));
+                                if (data.index !== undefined && data.index !== index) {
+                                  // Move the filter from the source index to the target index
+                                  setFilterOrder(prevOrder => {
+                                    const newOrder = [...prevOrder];
+                                    const [movedItem] = newOrder.splice(data.index, 1);
+                                    newOrder.splice(index, 0, movedItem);
+                                    return newOrder;
+                                  });
+                                }
+                              } catch (error) {
+                                console.error('Error handling filter drop:', error);
+                              }
+                            }}
+                          >
+                            <div className="flex items-center gap-2">
+                              <span className="text-gray-400 mr-1" title="Drag to reorder">
+                                <GripVertical size={14} />
+                              </span>
+                              <span className="font-medium text-gray-700">{column.header}:</span>
                               <span className="text-gray-600">{displayValue}</span>
-                              <button 
-                                className="ml-2 text-gray-400 hover:text-gray-600"
-                                onClick={() => handleColumnFilterChange(key, null)}
-                              >
-                                <X size={12} />
-                              </button>
                             </div>
+                            <button 
+                              className="ml-2 text-gray-400 hover:text-gray-600"
+                              onClick={() => handleColumnFilterChange(key, null)}
+                            >
+                              <X size={12} />
+                            </button>
                           </div>
                         );
                       })}
@@ -632,7 +818,7 @@ export default function Table<T>({
                 )}
               </div>
             )}
-            
+
             {/* Multi-sort criteria indicator */}
             {multiSort && sortCriteria.length > 0 && (
               <div className="relative" ref={sortCriteriaRef}>
@@ -646,15 +832,18 @@ export default function Table<T>({
 
                 {showSortCriteriaSummary && (
                   <div className="absolute left-0 top-full mt-1 z-10 w-72 bg-white rounded-md shadow-lg border border-gray-200 p-3">
-                    <div className="flex justify-between items-center mb-2 pb-1 border-b border-gray-100">
-                      <h3 className="text-sm font-medium text-gray-800">Sort Order</h3>
-                      <button 
-                        className="text-xs text-gray-500 hover:text-gray-700 flex items-center"
-                        onClick={handleClearAllSorting}
-                      >
-                        <RotateCcw size={12} className="mr-1" />
-                        Clear All
-                      </button>
+                    <div className="mb-2 pb-1 border-b border-gray-100">
+                      <div className="flex justify-between items-center">
+                        <h3 className="text-sm font-medium text-gray-800">Sort Order</h3>
+                        <button 
+                          className="text-xs text-gray-500 hover:text-gray-700 flex items-center"
+                          onClick={handleClearAllSorting}
+                        >
+                          <RotateCcw size={12} className="mr-1" />
+                          Clear All
+                        </button>
+                      </div>
+                      <p className="text-xs text-gray-500 mt-1">Drag and drop items to reorder</p>
                     </div>
                     <div className="space-y-2 max-h-48 overflow-y-auto">
                       {sortCriteria.map((criterion, index) => {
@@ -662,8 +851,54 @@ export default function Table<T>({
                         if (!column) return null;
 
                         return (
-                          <div key={index} className="flex justify-between items-center text-xs bg-gray-50 p-2 rounded-md">
+                          <div 
+                            key={index} 
+                            className="flex justify-between items-center text-xs bg-gray-50 p-2 rounded-md cursor-grab active:cursor-grabbing sort-criteria-item"
+                            draggable={true}
+                            onDragStart={(e) => {
+                              e.dataTransfer.setData('text/plain', JSON.stringify({ index }));
+                              e.currentTarget.classList.add('dragging');
+                            }}
+                            onDragEnd={(e) => {
+                              e.currentTarget.classList.remove('dragging');
+                            }}
+                            onDragOver={(e) => {
+                              e.preventDefault();
+                              e.currentTarget.classList.add('drop-target');
+                            }}
+                            onDragLeave={(e) => {
+                              e.currentTarget.classList.remove('drop-target');
+                            }}
+                            onDrop={(e) => {
+                              e.preventDefault();
+                              e.currentTarget.classList.remove('drop-target');
+                              try {
+                                const data = JSON.parse(e.dataTransfer.getData('text/plain'));
+                                if (data.index !== undefined && data.index !== index) {
+                                  // Move the criterion from the source index to the target index
+                                  setSortCriteria(prevCriteria => {
+                                    const newCriteria = [...prevCriteria];
+                                    const [movedItem] = newCriteria.splice(data.index, 1);
+                                    newCriteria.splice(index, 0, movedItem);
+
+                                    // Update legacy sort state
+                                    if (newCriteria.length > 0) {
+                                      setSortKey(newCriteria[0].key);
+                                      setSortDirection(newCriteria[0].direction);
+                                    }
+
+                                    return newCriteria;
+                                  });
+                                }
+                              } catch (error) {
+                                console.error('Error handling sort criteria drop:', error);
+                              }
+                            }}
+                          >
                             <div className="flex items-center gap-2">
+                              <span className="text-gray-400 mr-1" title="Drag to reorder">
+                                <GripVertical size={14} />
+                              </span>
                               <span className="inline-flex items-center justify-center rounded-full bg-indigo-100 text-xs px-1.5 font-medium text-indigo-700 min-w-[1.5rem] h-6">
                                 {index + 1}
                               </span>
@@ -672,28 +907,8 @@ export default function Table<T>({
                                 {criterion.direction === 'asc' ? '↑ Ascending' : '↓ Descending'}
                               </span>
                             </div>
-                            
+
                             <div className="flex items-center space-x-1">
-                              {index > 0 && (
-                                <button 
-                                  className="p-1 text-gray-500 hover:text-gray-700 hover:bg-gray-200 rounded"
-                                  onClick={() => handleMoveSortCriterion(index, 'up')}
-                                  title="Move up"
-                                >
-                                  <ArrowUp size={12} />
-                                </button>
-                              )}
-                              
-                              {index < sortCriteria.length - 1 && (
-                                <button 
-                                  className="p-1 text-gray-500 hover:text-gray-700 hover:bg-gray-200 rounded"
-                                  onClick={() => handleMoveSortCriterion(index, 'down')}
-                                  title="Move down"
-                                >
-                                  <ArrowDown size={12} />
-                                </button>
-                              )}
-                              
                               <button 
                                 className="p-1 text-gray-500 hover:text-red-500 hover:bg-gray-200 rounded"
                                 onClick={() => handleRemoveSortCriterion(index)}
@@ -761,6 +976,21 @@ export default function Table<T>({
                       setContextMenuPosition({ x: e.clientX, y: rect.bottom });
                       // Store the current column for the context menu
                       (window as any).__currentColumnForContextMenu = column;
+                    }}
+                    onDragOver={(e) => {
+                      if (isSortableColumn(column)) {
+                        e.preventDefault();
+                        e.currentTarget.classList.add('sort-drop-target');
+                      }
+                    }}
+                    onDragLeave={(e) => {
+                      e.currentTarget.classList.remove('sort-drop-target');
+                    }}
+                    onDrop={(e) => {
+                      e.currentTarget.classList.remove('sort-drop-target');
+                      if (isSortableColumn(column)) {
+                        handleSortDrop(e, column.key);
+                      }
                     }}
                   >
                     <div className="flex items-center justify-between">

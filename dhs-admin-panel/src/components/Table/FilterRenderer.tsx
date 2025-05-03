@@ -4,6 +4,7 @@ import ColumnSearchFilter from './ColumnSearchFilter';
 import BooleanColumnFilter from './BooleanColumnFilter';
 import DateRangeFilter from '../Filter/DateRangeFilter';
 import MultiSelectFilter from '../Filter/MultiSelectFilter';
+import { X, Check, RotateCcw } from 'lucide-react';
 
 /**
  * Props for the FilterRenderer component.
@@ -80,6 +81,7 @@ export default function FilterRenderer<T>({
     case 'select':
       return (
         <div className="p-2">
+          <label className="block text-xs font-medium text-gray-700 mb-1">Select value</label>
           <select
             className="w-full p-1.5 border rounded-md text-sm bg-white transition-all duration-200"
             value={filterValue || ''}
@@ -93,19 +95,30 @@ export default function FilterRenderer<T>({
             ))}
           </select>
 
-          <div className="flex justify-end gap-2 mt-3">
+          <div className="flex justify-between items-center gap-2 mt-3">
             <button
               onClick={onFilterClear}
-              className="px-2 py-1 text-xs border border-gray-200 rounded-md hover:bg-gray-50"
+              className="px-2 py-1 text-xs flex items-center text-gray-600 border border-gray-200 rounded-md hover:bg-gray-50 transition-colors"
             >
-              Clear
+              <RotateCcw size={12} className="mr-1" />
+              Reset
             </button>
-            <button
-              onClick={() => onFilterApply(filterValue)}
-              className="px-2 py-1 text-xs bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
-            >
-              Apply
-            </button>
+            <div className="flex gap-2">
+              <button
+                onClick={onClose}
+                className="px-2 py-1 text-xs flex items-center border border-gray-200 rounded-md hover:bg-gray-50 transition-colors"
+              >
+                <X size={12} className="mr-1" />
+                Cancel
+              </button>
+              <button
+                onClick={() => onFilterApply(filterValue)}
+                className="px-2 py-1 text-xs flex items-center bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors"
+              >
+                <Check size={12} className="mr-1" />
+                Apply
+              </button>
+            </div>
           </div>
         </div>
       );
@@ -148,6 +161,7 @@ export default function FilterRenderer<T>({
     case 'daterange':
       return (
         <div className="p-2 min-w-[300px]">
+          <label className="block text-xs font-medium text-gray-700 mb-1">Select date range</label>
           <DateRangeFilter 
             value={filterValue}
             onChange={onFilterValueChange}
@@ -155,19 +169,30 @@ export default function FilterRenderer<T>({
             defaultOpen={true}
           />
 
-          <div className="flex justify-end gap-2 mt-3">
+          <div className="flex justify-between items-center gap-2 mt-3">
             <button
               onClick={onFilterClear}
-              className="px-2 py-1 text-xs border border-gray-200 rounded-md hover:bg-gray-50"
+              className="px-2 py-1 text-xs flex items-center text-gray-600 border border-gray-200 rounded-md hover:bg-gray-50 transition-colors"
             >
-              Clear
+              <RotateCcw size={12} className="mr-1" />
+              Reset
             </button>
-            <button
-              onClick={() => onFilterApply(filterValue)}
-              className="px-2 py-1 text-xs bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
-            >
-              Apply
-            </button>
+            <div className="flex gap-2">
+              <button
+                onClick={onClose}
+                className="px-2 py-1 text-xs flex items-center border border-gray-200 rounded-md hover:bg-gray-50 transition-colors"
+              >
+                <X size={12} className="mr-1" />
+                Cancel
+              </button>
+              <button
+                onClick={() => onFilterApply(filterValue)}
+                className="px-2 py-1 text-xs flex items-center bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors"
+              >
+                <Check size={12} className="mr-1" />
+                Apply
+              </button>
+            </div>
           </div>
         </div>
       );
@@ -191,46 +216,64 @@ export default function FilterRenderer<T>({
     case 'range':
       return (
         <div className="p-2">
+          <label className="block text-xs font-medium text-gray-700 mb-1">Enter value range</label>
           <div className="flex space-x-2">
-            <input
-              type="number"
-              placeholder="Min"
-              className="w-1/2 p-1.5 border rounded-md text-sm bg-white transition-all duration-200"
-              value={filterValue?.min || ''}
-              onChange={(e) => {
-                onFilterValueChange({
-                  ...filterValue || {},
-                  min: e.target.value ? Number(e.target.value) : null
-                });
-              }}
-            />
-            <input
-              type="number"
-              placeholder="Max"
-              className="w-1/2 p-1.5 border rounded-md text-sm bg-white transition-all duration-200"
-              value={filterValue?.max || ''}
-              onChange={(e) => {
-                onFilterValueChange({
-                  ...filterValue || {},
-                  max: e.target.value ? Number(e.target.value) : null
-                });
-              }}
-            />
+            <div className="w-1/2">
+              <label className="block text-xs text-gray-500 mb-1">Minimum</label>
+              <input
+                type="number"
+                placeholder="Min"
+                className="w-full p-1.5 border rounded-md text-sm bg-white transition-all duration-200"
+                value={filterValue?.min || ''}
+                onChange={(e) => {
+                  onFilterValueChange({
+                    ...filterValue || {},
+                    min: e.target.value ? Number(e.target.value) : null
+                  });
+                }}
+              />
+            </div>
+            <div className="w-1/2">
+              <label className="block text-xs text-gray-500 mb-1">Maximum</label>
+              <input
+                type="number"
+                placeholder="Max"
+                className="w-full p-1.5 border rounded-md text-sm bg-white transition-all duration-200"
+                value={filterValue?.max || ''}
+                onChange={(e) => {
+                  onFilterValueChange({
+                    ...filterValue || {},
+                    max: e.target.value ? Number(e.target.value) : null
+                  });
+                }}
+              />
+            </div>
           </div>
 
-          <div className="flex justify-end gap-2 mt-3">
+          <div className="flex justify-between items-center gap-2 mt-3">
             <button
               onClick={onFilterClear}
-              className="px-2 py-1 text-xs border border-gray-200 rounded-md hover:bg-gray-50"
+              className="px-2 py-1 text-xs flex items-center text-gray-600 border border-gray-200 rounded-md hover:bg-gray-50 transition-colors"
             >
-              Clear
+              <RotateCcw size={12} className="mr-1" />
+              Reset
             </button>
-            <button
-              onClick={() => onFilterApply(filterValue)}
-              className="px-3 py-1 text-xs bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
-            >
-              Apply
-            </button>
+            <div className="flex gap-2">
+              <button
+                onClick={onClose}
+                className="px-2 py-1 text-xs flex items-center border border-gray-200 rounded-md hover:bg-gray-50 transition-colors"
+              >
+                <X size={12} className="mr-1" />
+                Cancel
+              </button>
+              <button
+                onClick={() => onFilterApply(filterValue)}
+                className="px-2 py-1 text-xs flex items-center bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors"
+              >
+                <Check size={12} className="mr-1" />
+                Apply
+              </button>
+            </div>
           </div>
         </div>
       );

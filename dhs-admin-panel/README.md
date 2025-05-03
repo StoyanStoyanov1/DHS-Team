@@ -29,6 +29,19 @@ The project is organized as follows:
    ```
    Open [http://localhost:3000](http://localhost:3000) to view the app.
 
+   If changes are not visible on the page, see:
+   - [Troubleshooting Guide](TROUBLESHOOTING.md) - Step-by-step instructions to resolve the issue
+   - [Solution Document](SOLUTION.md) - Detailed explanation of the issue and its solutions
+
+   Or run the automated fix script:
+   ```bash
+   # Make the script executable first
+   chmod +x restart-dev.sh
+
+   # Then run it
+   ./restart-dev.sh
+   ```
+
 2. **Authentication**:
    - Navigate to `/auth/login` to log in.
    - Navigate to `/auth/register` to create a new account.

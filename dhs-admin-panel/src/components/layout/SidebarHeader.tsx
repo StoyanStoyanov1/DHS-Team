@@ -27,13 +27,15 @@ export const SidebarHeader: React.FC<SidebarHeaderProps> = ({
                     <span className="ml-3 text-xl font-bold text-gray-800">Admin Panel</span>
                 )}
             </div>
-            <button
-                onClick={togglePin}
-                className={`pin-btn ${isPinned ? 'active' : ''} text-gray-500 hover:text-gray-700 hover:bg-gray-100 p-1 rounded-md transition-colors`}
-                title={isPinned ? "Unpin sidebar" : "Pin sidebar"}
-            >
-                {isPinned ? <Pin size={20} /> : <PinOff size={20} />}
-            </button>
+            {shouldExpand && (
+                <button
+                    onClick={togglePin}
+                    className={`pin-btn ${isPinned ? 'active' : ''} text-gray-500 hover:text-gray-700 hover:bg-gray-100 p-1 rounded-md transition-colors`}
+                    title={isPinned ? "Unpin sidebar" : "Pin sidebar"}
+                >
+                    {isPinned ? <Pin size={20} /> : <PinOff size={20} />}
+                </button>
+            )}
             {isPinned && !shouldExpand && (
                 <div className="pinned-indicator"></div>
             )}
