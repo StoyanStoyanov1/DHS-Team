@@ -1,6 +1,4 @@
-'use client';
-
-// This file re-exports the Table component and its related types/interfaces
+// Re-export the main Table component and its related components
 export { default } from './Table';
 export * from './interfaces';
 export * from './TableService';

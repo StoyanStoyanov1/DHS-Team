@@ -254,11 +254,38 @@ function UsersListContent() {
           defaultSortKey={undefined}
           defaultSortDirection={null}
           multiSort={true} // Enable multi-column sorting
-          // Optional: Set default sorting criteria if needed
-          // defaultSortCriteria={[
-          //   { key: 'role', direction: 'asc' },
-          //   { key: 'isActive', direction: 'desc' }
-          // ]}
+          // Enable row selection with checkbox column
+          showSelectionColumn={true}
+          onSelectionChange={(selectedUsers) => {
+            console.log('Selected users:', selectedUsers);
+          }}
+          // Add bulk editing capabilities
+          editableColumns={[
+            {
+              columnKey: 'isActive',
+              label: 'Status',
+              type: 'boolean'
+            },
+            {
+              columnKey: 'role',
+              label: 'Role',
+              type: 'select',
+              options: [
+                { label: 'Admin', value: 'Admin' },
+                { label: 'Editor', value: 'Editor' },
+                { label: 'Viewer', value: 'Viewer' },
+                { label: 'Support', value: 'Support' },
+                { label: 'Manager', value: 'Manager' },
+                { label: 'Analyst', value: 'Analyst' },
+                { label: 'Developer', value: 'Developer' }
+              ]
+            }
+          ]}
+          onBulkEdit={async (selectedUsers, columnKey, newValue) => {
+            console.log(`Bulk updating ${selectedUsers.length} users:`, { columnKey, newValue });
+            // In a real app, you would call an API here
+            return new Promise(resolve => setTimeout(resolve, 1000));
+          }}
           // Global filter props (optional)
           filterGroups={filterGroups}
           initialFilterValues={{}}

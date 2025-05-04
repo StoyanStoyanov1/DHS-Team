@@ -1,5 +1,6 @@
 import { ReactNode } from 'react';
 import { FilterGroup, SelectedFilters } from '../Filter/interfaces';
+import { EditableColumn } from './BulkEditBar';
 
 export type SortDirection = 'asc' | 'desc' | null;
 export type SearchMethod = 'contains' | 'equals' | 'startsWith' | 'endsWith' | 'notContains' | 'isEmpty' | 'isNotEmpty' | 'regex';
@@ -100,4 +101,28 @@ export interface ITableProps<T> {
   maxColumnWidth?: number;
   columnPadding?: number;
   tableId?: string;
+
+  // Selection props
+  selectedItems?: T[];
+  onSelectionChange?: (selectedItems: T[]) => void;
+  showSelectionColumn?: boolean;
+  
+  // Bulk edit props
+  editableColumns?: EditableColumn<T>[];
+  onBulkEdit?: (selectedItems: T[], columnKey: string, newValue: any) => Promise<void>;
+}
+
+export interface TableContextMenuProps<T> {
+  columns: ITableColumn<T>[];
+  data: T[];
+  onFilterChange: (columnKey: string, value: any) => void;
+  activeFilters: Record<string, any>;
+  position: { x: number; y: number } | null;
+  onClose: () => void;
+  onSortChange: (columnKey: string) => void;
+  currentSortKey?: string;
+  currentSortDirection: SortDirection;
+  onToggleVisibility: (columnKey: string) => void;
+  onResetColumnFilter: (columnKey: string) => void;
+  onResetAllFilters: () => void;
 }
