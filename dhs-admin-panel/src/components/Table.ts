@@ -1,4 +1,3 @@
-// Re-export from Table directory
-import Table from './Table/index';
-export type { ITableColumn, ITableProps } from './Table/interfaces';
-export default Table;
+// Export the Table component from the Table directory
+export * from './Table';
+export { default } from './Table/Table';
