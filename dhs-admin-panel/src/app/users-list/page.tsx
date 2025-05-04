@@ -62,6 +62,15 @@ function UsersListContent() {
 
   // Generate role filter options dynamically
   const getRoleFilterOptions = (data: User[]) => {
+    // Add null check to prevent errors when data is undefined
+    if (!data || !Array.isArray(data)) {
+      return allRoles.map(role => ({
+        id: role.toLowerCase(),
+        label: role,
+        value: role
+      }));
+    }
+
     const uniqueRoles = Array.from(new Set(data.map(user => user.role)));
     return uniqueRoles.map(role => ({
       id: role.toLowerCase(),
@@ -72,6 +81,14 @@ function UsersListContent() {
 
   // Generate status filter options dynamically
   const getStatusFilterOptions = (data: User[]) => {
+    // Add null check to prevent errors when data is undefined
+    if (!data || !Array.isArray(data)) {
+      return [
+        { id: 'active', label: 'Active', value: 'Active' },
+        { id: 'inactive', label: 'Inactive', value: 'Inactive' }
+      ];
+    }
+
     const uniqueStatuses = Array.from(new Set(data.map(user => user.status)));
     return uniqueStatuses.map(status => ({
       id: status.toLowerCase(),
