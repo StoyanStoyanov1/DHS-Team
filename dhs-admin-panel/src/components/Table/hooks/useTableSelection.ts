@@ -5,6 +5,8 @@ export interface UseTableSelectionProps<T> {
   keyExtractor: (item: T) => string | number;
   onSelectionChange?: (selectedItems: T[]) => void;
   initialSelectedItems?: T[];
+  currentPage?: number;
+  itemsPerPage?: number;
 }
 
 export interface UseTableSelectionReturn<T> {
@@ -17,6 +19,7 @@ export interface UseTableSelectionReturn<T> {
   isItemSelected: (item: T) => boolean;
   clearSelection: () => void;
   selectItems: (items: T[]) => void;
+  selectCurrentPageItems: () => void;
 }
 
 export function useTableSelection<T>({
@@ -24,14 +27,33 @@ export function useTableSelection<T>({
   keyExtractor,
   onSelectionChange,
   initialSelectedItems = [],
+  currentPage = 1,
+  itemsPerPage = 10,
 }: UseTableSelectionProps<T>): UseTableSelectionReturn<T> {
   const [selectedItems, setSelectedItems] = useState<T[]>(initialSelectedItems);
   const [selectedItemIds, setSelectedItemIds] = useState<Set<string | number>>(
     new Set(initialSelectedItems.map(item => keyExtractor(item)))
   );
 
-  const isAllSelected = data.length > 0 && selectedItemIds.size === data.length;
-  const isPartiallySelected = selectedItemIds.size > 0 && !isAllSelected;
+  // Calculate current page items for "select all on current page" functionality
+  const getCurrentPageItems = useCallback(() => {
+    if (!currentPage || !itemsPerPage) return data;
+    
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+    return data.slice(startIndex, endIndex);
+  }, [data, currentPage, itemsPerPage]);
+
+  // Get current page items
+  const currentPageItems = getCurrentPageItems();
+
+  // Check if all items on current page are selected
+  const isAllSelected = currentPageItems.length > 0 && 
+    currentPageItems.every(item => selectedItemIds.has(keyExtractor(item)));
+
+  // Check if some but not all items on current page are selected
+  const isPartiallySelected = !isAllSelected && 
+    currentPageItems.some(item => selectedItemIds.has(keyExtractor(item)));
 
   // Update selection when data changes (to remove selected items that are no longer in the data)
   useEffect(() => {
@@ -55,13 +77,44 @@ export function useTableSelection<T>({
 
   const toggleSelectAll = useCallback(() => {
     if (isAllSelected) {
-      setSelectedItems([]);
-      setSelectedItemIds(new Set());
+      // If all items on current page are selected, unselect them
+      const currentPageIds = new Set(currentPageItems.map(item => keyExtractor(item)));
+      const newSelectedItems = selectedItems.filter(item => !currentPageIds.has(keyExtractor(item)));
+      
+      setSelectedItems(newSelectedItems);
+      setSelectedItemIds(new Set(newSelectedItems.map(item => keyExtractor(item))));
     } else {
-      setSelectedItems([...data]);
-      setSelectedItemIds(new Set(data.map(item => keyExtractor(item))));
+      // Otherwise, select all items on current page
+      const currentPageItemIds = currentPageItems.map(item => keyExtractor(item));
+      const newSelectedItemIds = new Set([...selectedItemIds, ...currentPageItemIds]);
+      
+      // Find the actual items from data that correspond to the selected IDs
+      const allSelectedItems = [
+        ...selectedItems,
+        ...currentPageItems.filter(item => !selectedItemIds.has(keyExtractor(item)))
+      ];
+      
+      setSelectedItems(allSelectedItems);
+      setSelectedItemIds(newSelectedItemIds);
     }
-  }, [data, isAllSelected, keyExtractor]);
+  }, [currentPageItems, isAllSelected, keyExtractor, selectedItems, selectedItemIds]);
+
+  // Select all items on the current page
+  const selectCurrentPageItems = useCallback(() => {
+    if (currentPageItems.length === 0) return;
+    
+    const currentPageItemIds = currentPageItems.map(item => keyExtractor(item));
+    const newSelectedItemIds = new Set([...selectedItemIds, ...currentPageItemIds]);
+    
+    // Find the actual items from data that correspond to the selected IDs
+    const allSelectedItems = [
+      ...selectedItems,
+      ...currentPageItems.filter(item => !selectedItemIds.has(keyExtractor(item)))
+    ];
+    
+    setSelectedItems(allSelectedItems);
+    setSelectedItemIds(newSelectedItemIds);
+  }, [currentPageItems, keyExtractor, selectedItems, selectedItemIds]);
 
   const toggleSelectItem = useCallback((item: T) => {
     const id = keyExtractor(item);
@@ -102,5 +155,6 @@ export function useTableSelection<T>({
     isItemSelected,
     clearSelection,
     selectItems,
+    selectCurrentPageItems,
   };
 }

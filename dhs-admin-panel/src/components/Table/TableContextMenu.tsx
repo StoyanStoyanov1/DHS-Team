@@ -10,7 +10,9 @@ import {
   RotateCcw,
   ArrowUp,
   ArrowDown,
-  ChevronRight
+  ChevronRight,
+  Trash2,
+  CheckSquare
 } from 'lucide-react';
 import { SelectedFilters } from '../Filter/interfaces';
 import FilterRenderer from '../Filter/FilterRenderer';
@@ -29,6 +31,9 @@ interface TableContextMenuProps<T> {
   onToggleVisibility?: (columnKey: string) => void;
   onResetColumnFilter?: (columnKey: string) => void;
   onResetAllFilters?: () => void;
+  selectedItemCount?: number;
+  onDeleteSelected?: () => void;
+  onSelectAll?: () => void;
 }
 
 export default function TableContextMenu<T>({
@@ -44,6 +49,9 @@ export default function TableContextMenu<T>({
   onToggleVisibility,
   onResetColumnFilter,
   onResetAllFilters,
+  selectedItemCount = 0,
+  onDeleteSelected,
+  onSelectAll,
 }: TableContextMenuProps<T>) {
   const [selectedColumn, setSelectedColumn] = useState<string | null>(null);
   const [filterValue, setFilterValue] = useState<any>(null);
@@ -430,7 +438,7 @@ export default function TableContextMenu<T>({
       {!headerColumn && !selectedColumn && (
         <>
           <div className="px-3 py-2 border-b border-gray-100 flex justify-between items-center">
-            <h3 className="font-medium text-sm text-gray-800">Filter by column</h3>
+            <h3 className="font-medium text-sm text-gray-800">Options</h3>
             <button
               className="text-gray-500 hover:text-gray-700"
               onClick={onClose}
@@ -438,25 +446,61 @@ export default function TableContextMenu<T>({
               <X size={16} />
             </button>
           </div>
-          <div className="max-h-[400px] overflow-y-auto py-1">
-            {filterableColumns.length === 0 && (
-              <div className="px-3 py-2 text-sm text-gray-600">
-                No filterable columns available.
-              </div>
-            )}
-
-            {filterableColumns.map((column) => (
+          
+          {/* Selection specific actions */}
+          {selectedItemCount > 0 && onDeleteSelected && (
+            <div className="py-1 border-b border-gray-100">
               <button
-                key={column.key}
-                className={`w-full text-left px-3 py-2 text-sm hover:bg-gray-50 flex items-center justify-between ${
-                  activeFilters[column.key] !== undefined ? 'text-indigo-600 font-medium' : 'text-gray-800'
-                }`}
-                onClick={() => handleColumnSelect(column.key)}
+                className="w-full text-left px-3 py-2 text-sm hover:bg-red-50 hover:text-red-600 flex items-center"
+                onClick={() => {
+                  onDeleteSelected();
+                  onClose();
+                }}
               >
-                <span>{column.header}</span>
-                {getColumnIcon(column)}
+                <Trash2 size={16} className="mr-2 text-red-500" />
+                <span>Delete Selected ({selectedItemCount})</span>
               </button>
-            ))}
+              
+              {onSelectAll && (
+                <button
+                  className="w-full text-left px-3 py-2 text-sm hover:bg-gray-50 flex items-center"
+                  onClick={() => {
+                    onSelectAll();
+                    onClose();
+                  }}
+                >
+                  <CheckSquare size={16} className="mr-2 text-gray-500" />
+                  <span>Select All on This Page</span>
+                </button>
+              )}
+            </div>
+          )}
+          
+          <div className="py-1">
+            <div className="px-3 py-2 text-sm font-medium text-gray-600">
+              Filter by column
+            </div>
+            
+            <div className="max-h-[400px] overflow-y-auto py-1">
+              {filterableColumns.length === 0 && (
+                <div className="px-3 py-2 text-sm text-gray-600">
+                  No filterable columns available.
+                </div>
+              )}
+
+              {filterableColumns.map((column) => (
+                <button
+                  key={column.key}
+                  className={`w-full text-left px-3 py-2 text-sm hover:bg-gray-50 flex items-center justify-between ${
+                    activeFilters[column.key] !== undefined ? 'text-indigo-600 font-medium' : 'text-gray-800'
+                  }`}
+                  onClick={() => handleColumnSelect(column.key)}
+                >
+                  <span>{column.header}</span>
+                  {getColumnIcon(column)}
+                </button>
+              ))}
+            </div>
           </div>
         </>
       )}

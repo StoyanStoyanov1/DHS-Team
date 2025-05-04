@@ -9,21 +9,19 @@ import { Edit, Trash2, FileText, MoreVertical, UserIcon, ShieldCheck, Activity }
 import { User, mockUsers } from '@/src/data/mock/users';
 import ClientOnly from '@/src/components/ClientOnly';
 
-// Separate the actual content into a client component
 function UsersListContent() {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
   
-  // Get all unique roles for default selection
   const allRoles = ['Admin', 'Editor', 'Viewer', 'Support', 'Manager', 'Analyst', 'Developer'];
   
-  // Initialize filters with all roles selected
   const [filters, setFilters] = useState<SelectedFilters>({
     role: allRoles
   });
   const [filteredUsers, setFilteredUsers] = useState<User[]>(mockUsers);
+  const [selectedUsers, setSelectedUsers] = useState<User[]>([]);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
-  // Define filter groups for the users table
   const filterGroups: FilterGroup[] = [
     {
       id: 'search',
@@ -60,9 +58,7 @@ function UsersListContent() {
     },
   ];
 
-  // Generate role filter options dynamically
   const getRoleFilterOptions = (data: User[]) => {
-    // Add null check to prevent errors when data is undefined
     if (!data || !Array.isArray(data)) {
       return allRoles.map(role => ({
         id: role.toLowerCase(),
@@ -79,9 +75,7 @@ function UsersListContent() {
     }));
   };
 
-  // Generate status filter options dynamically
   const getStatusFilterOptions = (data: User[]) => {
-    // Add null check to prevent errors when data is undefined
     if (!data || !Array.isArray(data)) {
       return [
         { id: 'active', label: 'Active', value: 'Active' },
@@ -97,11 +91,9 @@ function UsersListContent() {
     }));
   };
 
-  // Apply filters whenever they change
   useEffect(() => {
     let result = [...mockUsers];
     
-    // Apply search filter
     if (filters.search) {
       const searchTerm = filters.search.toLowerCase();
       result = result.filter(
@@ -110,15 +102,12 @@ function UsersListContent() {
       );
     }
     
-    // Apply role filter (multiselect)
     if (filters.role && Array.isArray(filters.role)) {
       if (filters.role.length > 0) {
         result = result.filter(user => filters.role.includes(user.role));
       }
-      // If no roles are selected, we don't filter (show all)
     }
     
-    // Apply status filter (select)
     if (filters.isActive !== undefined) {
       result = result.filter(user => user.isActive === filters.isActive);
     }
@@ -126,12 +115,10 @@ function UsersListContent() {
     setFilteredUsers(result);
   }, [filters]);
 
-  // Handle filter changes
   const handleFilterChange = (selectedFilters: SelectedFilters) => {
     setFilters(selectedFilters);
   };
 
-  // Custom sort function for the lastLogin field
   const sortLastLogin = (a: User, b: User, direction: 'asc' | 'desc' | null) => {
     const dateA = new Date(a.lastLogin);
     const dateB = new Date(b.lastLogin);
@@ -141,6 +128,34 @@ function UsersListContent() {
     } else {
       return dateB.getTime() - dateA.getTime();
     }
+  };
+
+  const handleSelectionChange = (selected: User[]) => {
+    setSelectedUsers(selected);
+  };
+
+  const handleDelete = () => {
+    if (selectedUsers.length > 0) {
+      setShowDeleteConfirm(true);
+    }
+  };
+
+  const confirmDelete = () => {
+    setFilteredUsers(prev => 
+      prev.filter(user => !selectedUsers.find(selected => selected.id === user.id))
+    );
+    setSelectedUsers([]);
+    setShowDeleteConfirm(false);
+  };
+
+  const handleUpdate = () => {
+    // The BulkEditBar will automatically show when items are selected
+  };
+
+  const handleBulkEdit = async (selectedItems: User[], columnKey: string, newValue: any) => {
+    console.log(`Bulk updating ${selectedItems.length} users:`, { columnKey, newValue });
+    // In a real app, you would call an API here
+    return new Promise(resolve => setTimeout(resolve, 1000));
   };
 
   const columns: ITableColumn<User>[] = [
@@ -164,13 +179,11 @@ function UsersListContent() {
       filterType: 'search',
       hideable: true,
       sortable: true,
-      // Add search fields for both name and email
       searchFields: [
         { key: 'name', label: 'Name', path: 'name' },
         { key: 'email', label: 'Email', path: 'email' }
       ],
       fieldDataType: 'text',
-      // Add example recent searches
       recentSearches: ['John', 'admin', 'support']
     },
     {
@@ -188,9 +201,9 @@ function UsersListContent() {
       filterType: 'multiselect',
       getFilterOptions: getRoleFilterOptions,
       labelAll: 'All Roles',
-      defaultSelectAll: true, // Explicitly set to select all by default
+      defaultSelectAll: true,
       hideable: true,
-      sortable: true
+      sortable: false // Disable sorting for Role
     },
     {
       header: 'Status',
@@ -207,7 +220,7 @@ function UsersListContent() {
       labelFalse: 'Inactive',
       labelAll: 'All Statuses',
       hideable: true,
-      sortable: true
+      sortable: false // Disable sorting for Status
     },
     {
       header: 'Last Login',
@@ -219,7 +232,7 @@ function UsersListContent() {
       filterType: 'daterange',
       hideable: true,
       sortable: true,
-      sortFn: sortLastLogin  // Custom sort function for dates
+      sortFn: sortLastLogin
     },
     {
       header: 'Actions',
@@ -242,7 +255,7 @@ function UsersListContent() {
       ),
       filterable: false,
       hideable: false,
-      sortable: false  // Actions column doesn't need sorting
+      sortable: false
     }
   ];
 
@@ -254,7 +267,30 @@ function UsersListContent() {
           <p className="text-gray-600">Manage your users and their permissions</p>
         </div>
 
-        {/* Users Table with column-specific filters, visibility options, and sorting */}
+        {selectedUsers.length > 0 && (
+          <div className="mb-4 p-4 bg-indigo-50 border border-indigo-200 rounded-lg flex items-center justify-between">
+            <div className="flex items-center">
+              <span className="text-sm font-medium text-indigo-700 mr-4">
+                {selectedUsers.length} user{selectedUsers.length > 1 ? 's' : ''} selected
+              </span>
+              <button
+                onClick={handleDelete}
+                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 mr-3"
+              >
+                <Trash2 size={16} className="mr-2" />
+                Delete Selected
+              </button>
+              <button
+                onClick={handleUpdate}
+                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+              >
+                <Edit size={16} className="mr-2" />
+                Update Selected
+              </button>
+            </div>
+          </div>
+        )}
+
         <Table 
           columns={columns}
           data={filteredUsers}
@@ -270,13 +306,9 @@ function UsersListContent() {
           showTableSizeControls={true}
           defaultSortKey={undefined}
           defaultSortDirection={null}
-          multiSort={true} // Enable multi-column sorting
-          // Enable row selection with checkbox column
+          multiSort={true}
           showSelectionColumn={true}
-          onSelectionChange={(selectedUsers) => {
-            console.log('Selected users:', selectedUsers);
-          }}
-          // Add bulk editing capabilities
+          onSelectionChange={handleSelectionChange}
           editableColumns={[
             {
               columnKey: 'isActive',
@@ -298,24 +330,58 @@ function UsersListContent() {
               ]
             }
           ]}
-          onBulkEdit={async (selectedUsers, columnKey, newValue) => {
-            console.log(`Bulk updating ${selectedUsers.length} users:`, { columnKey, newValue });
-            // In a real app, you would call an API here
-            return new Promise(resolve => setTimeout(resolve, 1000));
-          }}
-          // Global filter props (optional)
+          onBulkEdit={handleBulkEdit}
           filterGroups={filterGroups}
           initialFilterValues={{}}
           onFilterChange={handleFilterChange}
-          showFilter={false} // We'll use column filters instead
+          showFilter={false}
           filterTitle="Filter Users"
         />
+
+        {showDeleteConfirm && (
+          <div className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity z-50 flex items-center justify-center">
+            <div className="bg-white rounded-lg overflow-hidden shadow-xl transform transition-all max-w-sm w-full mx-4">
+              <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                <div className="sm:flex sm:items-start">
+                  <div className="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-red-100 sm:mx-0 sm:h-10 sm:w-10">
+                    <Trash2 className="h-6 w-6 text-red-600" />
+                  </div>
+                  <div className="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
+                    <h3 className="text-lg leading-6 font-medium text-gray-900">
+                      Delete {selectedUsers.length} user{selectedUsers.length > 1 ? 's' : ''}
+                    </h3>
+                    <div className="mt-2">
+                      <p className="text-sm text-gray-500">
+                        Are you sure you want to delete {selectedUsers.length} selected user{selectedUsers.length > 1 ? 's' : ''}? This action cannot be undone.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div className="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                <button
+                  type="button"
+                  className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-red-600 text-base font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 sm:ml-3 sm:w-auto sm:text-sm"
+                  onClick={confirmDelete}
+                >
+                  Delete
+                </button>
+                <button
+                  type="button"
+                  className="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
+                  onClick={() => setShowDeleteConfirm(false)}
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </Layout>
   );
 }
 
-// Export a wrapper that ensures client-side only rendering
 export default function UsersListPage() {
   return (
     <ClientOnly>
