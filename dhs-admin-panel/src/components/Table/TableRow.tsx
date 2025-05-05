@@ -38,12 +38,7 @@ function TableRow<T>({
   return (
     <tr 
       className={`group h-14 transition-all duration-150 hover:bg-indigo-50/60 ${dynamicRowClass} ${alternatingRowClass} ${selectedRowClass} ${isSelected ? '' : 'border-l-4 border-transparent'}`}
-      onClick={() => {
-        // Optional: handle row click for selection
-        if (onToggleSelect) {
-          onToggleSelect();
-        }
-      }}
+      // Removed onClick handler to prevent row selection when clicking anywhere on the row
     >
       {showSelectionColumn && (
         <td className="w-12 px-4 py-3 whitespace-nowrap border-r border-gray-200">

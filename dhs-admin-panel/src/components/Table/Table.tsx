@@ -295,7 +295,9 @@ export default function Table<T>({
     }
   }, [data, visibleColumns, autoResizeColumns, tableId, minColumnWidth, maxColumnWidth, columnPadding]);
 
-  // Show bulk edit bar when items are selected
+  // Remove automatic BulkEditBar display when items are selected
+  // The useEffect below is removed/commented out since we only want to show BulkEditBar when Update button is clicked
+  /*
   useEffect(() => {
     // Only show bulk edit bar if we have editable columns and selected items
     if (editableColumns.length > 0 && selectedItems.length > 0) {
@@ -306,6 +308,7 @@ export default function Table<T>({
       setShowBulkEditBar(false);
     }
   }, [selectedItems.length, editableColumns.length]);
+  */
 
   // Handle outside clicks to close drop-down menus
   useEffect(() => {
@@ -361,7 +364,7 @@ export default function Table<T>({
                     className="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white text-sm rounded-md shadow transition-colors flex items-center"
                   >
                     <PencilIcon size={14} className="mr-1.5" />
-                    Bulk Update
+                    Update
                   </button>
                 )}
                 
