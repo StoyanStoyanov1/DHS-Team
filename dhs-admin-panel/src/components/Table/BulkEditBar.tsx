@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Check, X, AlertTriangle, Loader2, ToggleLeft, ToggleRight } from 'lucide-react';
 
 export interface EditableColumn<T> {
@@ -143,6 +143,32 @@ function BulkEditBar<T>({
     }
   };
   
+  // Handle ESC key to close the modal
+  const handleEscKey = useCallback((e: KeyboardEvent) => {
+    if (e.key === 'Escape' && !isSubmitting) {
+      onCancel();
+    } else if (e.key === 'Enter' && hasChanges() && !isSubmitting) {
+      // Only trigger form submission with Enter if there are changes and not already submitting
+      // This prevents accidental submission when using Enter in text inputs
+      if (document.activeElement?.tagName !== 'INPUT' && 
+          document.activeElement?.tagName !== 'SELECT' && 
+          document.activeElement?.tagName !== 'TEXTAREA') {
+        const form = document.getElementById('bulk-edit-form');
+        if (form) {
+          form.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
+        }
+      }
+    }
+  }, [onCancel, hasChanges, isSubmitting]);
+
+  // Add event listener for ESC key
+  useEffect(() => {
+    document.addEventListener('keydown', handleEscKey);
+    return () => {
+      document.removeEventListener('keydown', handleEscKey);
+    };
+  }, [handleEscKey]);
+  
   // Render input control based on column type
   const renderInputControl = (column: EditableColumn<T>) => {
     const { columnKey, type, options, minValue, maxValue, step = 1 } = column;
@@ -283,6 +309,7 @@ function BulkEditBar<T>({
               type="button"
               className="p-1 rounded-full text-gray-600 hover:text-gray-800 hover:bg-gray-100 focus:outline-none"
               onClick={onCancel}
+              aria-label="Close"
             >
               <X className="h-6 w-6" />
             </button>
@@ -294,7 +321,7 @@ function BulkEditBar<T>({
             </p>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form id="bulk-edit-form" onSubmit={handleSubmit} className="space-y-6">
             {/* Fields to edit */}
             <div className="space-y-4">
               {editableColumns.map((column) => (

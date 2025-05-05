@@ -35,7 +35,7 @@ export function useTableSelection<T>({
     new Set(initialSelectedItems.map(item => keyExtractor(item)))
   );
 
-  // Calculate current page items for "select all on current page" functionality
+  // Calculate current page items for page-specific selection
   const getCurrentPageItems = useCallback(() => {
     if (!currentPage || !itemsPerPage) return data;
     
@@ -75,6 +75,7 @@ export function useTableSelection<T>({
     onSelectionChange?.(selectedItems);
   }, [selectedItems, onSelectionChange]);
 
+  // Toggle selection for all items on the current page only
   const toggleSelectAll = useCallback(() => {
     if (isAllSelected) {
       // If all items on current page are selected, unselect them

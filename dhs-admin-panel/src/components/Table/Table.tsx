@@ -9,6 +9,7 @@ import TablePagination from './TablePagination';
 import PageSizeControl from './PageSizeControl';
 import TableContextMenu from './TableContextMenu';
 import BulkEditBar from './BulkEditBar';
+import DeleteConfirmationDialog from './DeleteConfirmationDialog';
 import { Eye, FilterIcon, Hash, RotateCcw, GripVertical, X, PencilIcon, Trash2 } from 'lucide-react';
 import { useTableFilters } from './hooks/useTableFilters';
 import { useTableSort } from './hooks/useTableSort';
@@ -50,6 +51,7 @@ export default function Table<T>({
   const [showColumnFilterSummary, setShowColumnFilterSummary] = useState(false);
   const [contextMenuPosition, setContextMenuPosition] = useState<{ x: number; y: number } | null>(null);
   const [showBulkEditBar, setShowBulkEditBar] = useState(false);
+  const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
 
   const currentPage = externalCurrentPage ?? internalCurrentPage;
   const setCurrentPage = externalSetCurrentPage ?? setInternalCurrentPage;
@@ -176,6 +178,8 @@ export default function Table<T>({
     keyExtractor,
     onSelectionChange: externalOnSelectionChange,
     initialSelectedItems: externalSelectedItems,
+    currentPage,
+    itemsPerPage,
   });
 
   // Calculate pagination
@@ -368,17 +372,14 @@ export default function Table<T>({
                   </button>
                 )}
                 
-                {/* Delete button for selected items - if onBulkEdit is provided */}
+                {/* Delete button */}
                 {onBulkEdit && (
                   <button
-                    onClick={() => {
-                      clearSelection();
-                      setShowBulkEditBar(false);
-                    }}
+                    onClick={() => setShowDeleteConfirmation(true)}
                     className="px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white text-sm rounded-md shadow transition-colors flex items-center"
                   >
                     <Trash2 size={14} className="mr-1.5" />
-                    Delete Selected
+                    Delete
                   </button>
                 )}
               </div>
@@ -539,8 +540,35 @@ export default function Table<T>({
           editableColumns={editableColumns}
           onBulkEdit={handleBulkEdit}
           onCancel={() => {
-            clearSelection();
+            // Only hide the bulk edit bar without clearing selection
             setShowBulkEditBar(false);
+          }}
+          pageTitle={typeof data[0] === 'object' ? Object.keys(data[0])[0]?.charAt(0).toUpperCase() + Object.keys(data[0])[0]?.slice(1) : 'Items'}
+        />
+      )}
+
+      {/* Delete Confirmation Dialog */}
+      {showDeleteConfirmation && (
+        <DeleteConfirmationDialog
+          isOpen={showDeleteConfirmation}
+          itemCount={selectedItems.length}
+          itemType={typeof data[0] === 'object' ? Object.keys(data[0])[0]?.charAt(0).toUpperCase() + Object.keys(data[0])[0]?.slice(1) : 'item'}
+          onConfirm={() => {
+            // Handle the deletion of selected items
+            if (onBulkEdit && selectedItems.length > 0) {
+              // Pass a special action to indicate deletion
+              onBulkEdit(selectedItems, '_delete', true)
+                .then(() => {
+                  clearSelection();
+                  setShowDeleteConfirmation(false);
+                })
+                .catch((error) => {
+                  console.error('Failed to delete items:', error);
+                });
+            }
+          }}
+          onCancel={() => {
+            setShowDeleteConfirmation(false);
           }}
         />
       )}
