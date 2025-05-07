@@ -41,10 +41,10 @@ const DeleteConfirmationDialog: React.FC<DeleteConfirmationDialogProps> = ({
 
   if (!isOpen) return null;
 
-  // Determine the correct singular or plural form
-  const displayItemType = itemCount === 1
-    ? itemType.endsWith('s') ? itemType.slice(0, -1) : itemType
-    : itemType.endsWith('s') ? itemType : `${itemType}s`;
+  // Handle singular/plural forms
+  const displayItemType = itemCount === 1 && itemType.endsWith('s') 
+    ? itemType.slice(0, -1) // Remove 's' for singular (users -> user)
+    : itemType;
 
   return (
     <div className="fixed inset-0 overflow-y-auto z-50">

@@ -43,6 +43,7 @@ export default function Table<T>({
   showSelectionColumn = false,
   editableColumns = [],
   onBulkEdit,
+  itemType = 'items',
 }: ITableProps<T>) {
   const tableService = useMemo(() => new TableService<T>(), []);
   const [internalCurrentPage, setInternalCurrentPage] = useState(1);
@@ -356,7 +357,7 @@ export default function Table<T>({
                   ({selectedItems.length} selected)
                 </span>
               )}
-            </h2>
+</h2>
 
             {/* Action buttons */}
             {selectedItems.length > 0 && (
@@ -393,7 +394,6 @@ export default function Table<T>({
                   onClick={() => setShowSortCriteriaSummary(!showSortCriteriaSummary)}
                 >
                   <Hash size={14} className="mr-1.5" />
-                  {sortCriteria.length} {sortCriteria.length === 1 ? 'sort' : 'sorts'}
                 </button>
 
                 {/* Sort criteria popup menu with light theme styling */}
@@ -552,7 +552,7 @@ export default function Table<T>({
         <DeleteConfirmationDialog
           isOpen={showDeleteConfirmation}
           itemCount={selectedItems.length}
-          itemType={typeof data[0] === 'object' ? Object.keys(data[0])[0]?.charAt(0).toUpperCase() + Object.keys(data[0])[0]?.slice(1) : 'item'}
+          itemType={itemType}
           onConfirm={() => {
             // Handle the deletion of selected items
             if (onBulkEdit && selectedItems.length > 0) {

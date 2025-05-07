@@ -78,24 +78,16 @@ export interface ITableProps<T> {
   rowClassName?: string | ((item: T) => string);
   pagination?: boolean;
   itemsPerPage?: number;
-  setItemsPerPage?: (itemsPerPage: number) => void;
+  setItemsPerPage?: (size: number) => void;
+  rowsPerPageOptions?: number[];
+  showTableSizeControls?: boolean;
   currentPage?: number;
   setCurrentPage?: (page: number) => void;
-  rowsPerPageOptions?: number[];
   fixedTableSize?: boolean;
-  tableHeight?: number;
-  showTableSizeControls?: boolean;
   defaultSortKey?: string;
-  defaultSortDirection?: SortDirection;
-  defaultSortCriteria?: SortCriterion[];
+  defaultSortDirection?: 'asc' | 'desc' | null;
+  defaultSortCriteria?: {key: string, direction: 'asc' | 'desc'}[];
   multiSort?: boolean;
-  
-  filterGroups?: FilterGroup[];
-  initialFilterValues?: SelectedFilters;
-  onFilterChange?: (selectedFilters: SelectedFilters) => void;
-  showFilter?: boolean;
-  filterTitle?: string;
-  
   autoResizeColumns?: boolean;
   minColumnWidth?: number;
   maxColumnWidth?: number;
@@ -110,6 +102,9 @@ export interface ITableProps<T> {
   // Bulk edit props
   editableColumns?: EditableColumn<T>[];
   onBulkEdit?: (selectedItems: T[], columnKey: string, newValue: any) => Promise<void>;
+  
+  // Item type for delete confirmation dialog
+  itemType?: string;
 }
 
 export interface TableContextMenuProps<T> {
