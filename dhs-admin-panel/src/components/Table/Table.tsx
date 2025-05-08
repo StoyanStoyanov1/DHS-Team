@@ -10,11 +10,12 @@ import PageSizeControl from './PageSizeControl';
 import TableContextMenu from './TableContextMenu';
 import BulkEditBar from './BulkEditBar';
 import DeleteConfirmationDialog from './DeleteConfirmationDialog';
-import { Eye, FilterIcon, Hash, RotateCcw, GripVertical, X, PencilIcon, Trash2 } from 'lucide-react';
+import { Eye, PencilIcon, Trash2 } from 'lucide-react';
 import { useTableFilters } from './hooks/useTableFilters';
 import { useTableSort } from './hooks/useTableSort';
 import { useTableSelection } from './hooks/useTableSelection';
 import { addTableStyles, isSortableColumn } from './utils';
+import { ActiveFiltersDisplay, ActiveFilterItem } from '../Filter';
 
 export default function Table<T>({
   columns: initialColumns,
@@ -386,44 +387,34 @@ export default function Table<T>({
               </div>
             )}
 
-            {/* Multi-sort criteria indicator */}
-            {multiSort && sortCriteria.length > 0 && (
-              <div className="relative" ref={sortCriteriaRef}>
-                <button 
-                  className="flex items-center text-sm text-indigo-600 hover:text-indigo-700 font-medium"
-                  onClick={() => setShowSortCriteriaSummary(!showSortCriteriaSummary)}
-                >
-                  <Hash size={14} className="mr-1.5" />
-                </button>
-
-                {/* Sort criteria popup menu with light theme styling */}
-                {showSortCriteriaSummary && (
-                  <div className="absolute left-0 top-full mt-1 z-50 w-72 bg-white rounded-md shadow-lg border border-gray-200 p-3">
-                    {/* ...existing code for sort criteria... */}
-                  </div>
-                )}
-              </div>
-            )}
-
-            {/* Filters indicator with light theme styling */}
-            {activeColumnFilterCount > 0 && (
-              <div className="relative" ref={filterSummaryRef}>
-                <button 
-                  className="flex items-center text-sm text-indigo-600 hover:text-indigo-700 font-medium"
-                  onClick={() => setShowColumnFilterSummary(!showColumnFilterSummary)}
-                >
-                  <FilterIcon size={14} className="mr-1.5" />
-                  {activeColumnFilterCount} {activeColumnFilterCount === 1 ? 'filter' : 'filters'}
-                </button>
-
-                {/* Filter summary popup menu with light theme styling */}
-                {showColumnFilterSummary && (
-                  <div className="absolute left-0 top-full mt-1 z-50 w-64 bg-white rounded-md shadow-lg border border-gray-200 p-3">
-                    {/* ...existing code for filter summary... */}
-                  </div>
-                )}
-              </div>
-            )}
+            {/* Active filters and sorting display */}
+            {(multiSort && sortCriteria.length > 0) || activeColumnFilterCount > 0 ? (
+              <ActiveFiltersDisplay
+                sortCriteria={sortCriteria}
+                activeFilters={Object.keys(columnFilters)
+                  .filter(key => columnFilters[key] !== undefined && columnFilters[key] !== null)
+                  .map(key => ({
+                    id: key,
+                    column: key,
+                    displayValue: formatFilterDisplayValue(columnFilters[key], key),
+                    value: columnFilters[key]
+                  }))}
+                columns={columns}
+                onRemoveSortCriterion={handleRemoveSortCriterion}
+                onMoveSortCriterion={(sourceIndex, destinationIndex) => {
+                  const newCriteria = [...sortCriteria];
+                  const [removed] = newCriteria.splice(sourceIndex, 1);
+                  newCriteria.splice(destinationIndex, 0, removed);
+                  setSortCriteria(newCriteria);
+                }}
+                onRemoveFilter={(filterId) => {
+                  handleColumnFilterChange(filterId, null);
+                }}
+                onClearAllFilters={resetColumnFilters}
+                onClearAllSorting={handleClearAllSorting}
+                className="ml-2"
+              />
+            ) : null}
           </div>
 
           {/* Add page size control to the top toolbar */}
