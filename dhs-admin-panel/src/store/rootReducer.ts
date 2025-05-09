@@ -1,7 +1,7 @@
 import { combineReducers } from '@reduxjs/toolkit';
 // Import feature reducers
 import authReducer from '../features/auth/authSlice';
-// Example: import usersReducer from '../features/users/usersSlice';
+import usersReducer from '../features/users/usersSlice';
 
 /**
  * Root reducer that combines all feature slices
@@ -9,7 +9,7 @@ import authReducer from '../features/auth/authSlice';
  */
 const rootReducer = combineReducers({
   auth: authReducer,
-  // users: usersReducer,
+  users: usersReducer,
   // Add additional reducers here
 });
 

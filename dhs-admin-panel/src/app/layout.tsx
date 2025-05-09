@@ -3,7 +3,8 @@ import { Inter } from 'next/font/google';
 import './globals.css';
 import DashboardLayout from '../components/Layout';
 import { AuthProvider } from '@/src/hooks/useAuth';
-import ReduxProvider from '@/src/components/providers/ReduxProvider';
+// Импортът на ReduxProvider е коментиран, тъй като още няма да го използваме
+// import ReduxProvider from '@/src/components/providers/ReduxProvider';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -20,11 +21,10 @@ export default function RootLayout({
     return (
         <html lang="en">
         <body className={inter.className}>
-            <ReduxProvider>
-                <AuthProvider>
-                    {children}
-                </AuthProvider>
-            </ReduxProvider>
+            {/* ReduxProvider е премахнат временно, тъй като още няма да се използва */}
+            <AuthProvider>
+                {children}
+            </AuthProvider>
         </body>
         </html>
     );
