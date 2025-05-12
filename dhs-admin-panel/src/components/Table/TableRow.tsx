@@ -24,10 +24,11 @@ function TableRow<T>({
   onContextMenu,
   rowIndex,
 }: TableRowProps<T>) {
-  // Apply alternating row background colors - improving dark mode with more appropriate colors
+  // Apply more contrasting alternating row background colors
   const alternatingRowClass = rowIndex % 2 === 0 
-    ? 'bg-white dark:bg-gray-800' 
-    : 'bg-gray-50/70 dark:bg-gray-800/70';
+  ? 'bg-white dark:bg-gray-900' 
+  : 'bg-gray-100 dark:bg-gray-850';
+
   
   // Calculate dynamic row class name
   const dynamicRowClass = typeof rowClassName === 'function' 

@@ -44,7 +44,7 @@ function TableBody<T>({
               key={`filler-row-${index}`} 
               className={`h-14 border-b border-gray-200 dark:border-gray-700 ${
                 index % 2 !== 0 
-                  ? 'bg-gray-50 dark:bg-gray-850' 
+                  ? 'bg-gray-100 dark:bg-gray-900' 
                   : 'bg-white dark:bg-gray-800'
               }`}
             >
@@ -83,11 +83,7 @@ function TableBody<T>({
             Array.from({ length: emptyRows }, (_, index) => (
               <tr 
                 key={`filler-row-${index}`} 
-                className={`h-14 border-b border-gray-200 dark:border-gray-700 ${
-                  index % 2 !== 0 
-                    ? 'bg-gray-50 dark:bg-gray-850' 
-                    : 'bg-white dark:bg-gray-800'
-                }`}
+                className={`h-14 border-b border-gray-200 dark:border-gray-700 'bg-white dark:bg-gray-800'`}
               >
                 {showSelectionColumn && (
                   <td className="w-10 px-4 py-3 whitespace-nowrap border-r border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800"></td>

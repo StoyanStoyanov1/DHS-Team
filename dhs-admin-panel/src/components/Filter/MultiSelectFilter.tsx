@@ -132,17 +132,17 @@ const MultiSelectFilter: React.FC<MultiSelectFilterProps> = ({
   const showSearch = sortedOptions.length > 5;
 
   return (
-    <div className="bg-white rounded-lg shadow-md border border-gray-200 w-72 overflow-hidden">
+    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md border border-gray-200 dark:border-gray-700 w-72 overflow-hidden">
       {/* Header */}
-      <div className="px-3 py-2 bg-gray-50 border-b border-gray-200 flex items-center justify-between">
+      <div className="px-3 py-2 bg-gray-50 dark:bg-gray-750 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
         <div className="flex items-center">
-          <Filter size={14} className="text-indigo-500 mr-1.5" />
-          <h3 className="text-xs font-medium text-gray-700">Filter</h3>
+          <Filter size={14} className="text-indigo-500 dark:text-indigo-400 mr-1.5" />
+          <h3 className="text-xs font-medium text-gray-700 dark:text-gray-300">Filter</h3>
         </div>
         <button
           type="button"
           onClick={handleToggleAll}
-          className="text-xs rounded px-2 py-0.5 bg-white border border-gray-200 hover:bg-gray-50 text-gray-600"
+          className="text-xs rounded px-2 py-0.5 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-650 text-gray-600 dark:text-gray-300"
         >
           {allSelected ? 'Deselect All' : 'Select All'}
         </button>
@@ -150,23 +150,26 @@ const MultiSelectFilter: React.FC<MultiSelectFilterProps> = ({
       
       {/* Search input */}
       {showSearch && (
-        <div className="px-3 py-2 border-b border-gray-200">
+        <div className="px-3 py-2 border-b border-gray-200 dark:border-gray-700">
           <div className="relative">
             <div className="absolute inset-y-0 left-0 pl-2 flex items-center pointer-events-none">
-              <Search size={12} className="text-gray-400" />
+              <Search size={12} className="text-gray-400 dark:text-gray-500" />
             </div>
             <input
               type="text"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               placeholder="Search..."
-              className="w-full pl-7 pr-7 py-1 border border-gray-300 rounded text-xs focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500"
+              className="w-full pl-7 pr-7 py-1 border border-gray-300 dark:border-gray-600 rounded text-xs 
+                bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200 placeholder-gray-400 dark:placeholder-gray-500
+                focus:outline-none focus:ring-1 focus:ring-indigo-500 dark:focus:ring-indigo-400 
+                focus:border-indigo-500 dark:focus:border-indigo-400"
             />
             {searchTerm && (
               <div className="absolute inset-y-0 right-0 pr-2 flex items-center">
                 <button 
                   onClick={() => setSearchTerm('')}
-                  className="text-gray-400 hover:text-gray-600 p-0.5 rounded-full hover:bg-gray-100"
+                  className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-400 p-0.5 rounded-full hover:bg-gray-100 dark:hover:bg-gray-600"
                 >
                   <X size={10} />
                 </button>
@@ -179,7 +182,7 @@ const MultiSelectFilter: React.FC<MultiSelectFilterProps> = ({
       {/* Options list */}
       <div className="max-h-48 overflow-y-auto py-1">
         {filteredOptions.length === 0 ? (
-          <div className="p-3 text-center text-gray-500 text-xs">
+          <div className="p-3 text-center text-gray-500 dark:text-gray-400 text-xs">
             No matching options
           </div>
         ) : (
@@ -188,13 +191,22 @@ const MultiSelectFilter: React.FC<MultiSelectFilterProps> = ({
             return (
               <div 
                 key={option.id} 
-                className={`flex items-center px-3 py-1.5 hover:bg-gray-50 cursor-pointer ${isSelected ? 'bg-indigo-50' : ''}`}
+                className={`flex items-center px-3 py-1.5 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer 
+                  ${isSelected ? 'bg-indigo-50 dark:bg-indigo-900/30' : ''}`}
                 onClick={() => handleOptionToggle(option)}
               >
-                <div className={`w-4 h-4 rounded flex items-center justify-center mr-2 border ${isSelected ? 'bg-indigo-500 border-indigo-500' : 'border-gray-300'}`}>
+                <div className={`w-4 h-4 rounded flex items-center justify-center mr-2 border 
+                  ${isSelected 
+                    ? 'bg-indigo-500 dark:bg-indigo-600 border-indigo-500 dark:border-indigo-600' 
+                    : 'border-gray-300 dark:border-gray-600'}`}
+                >
                   {isSelected && <Check size={10} className="text-white" strokeWidth={3} />}
                 </div>
-                <span className={`text-xs truncate ${isSelected ? 'font-medium text-indigo-700' : 'text-gray-700'}`}>
+                <span className={`text-xs truncate 
+                  ${isSelected 
+                    ? 'font-medium text-indigo-700 dark:text-indigo-300' 
+                    : 'text-gray-700 dark:text-gray-300'}`}
+                >
                   {option.label}
                 </span>
               </div>
@@ -204,11 +216,11 @@ const MultiSelectFilter: React.FC<MultiSelectFilterProps> = ({
       </div>
       
       {/* Footer */}
-      <div className="px-3 py-2 bg-gray-50 border-t border-gray-200 flex justify-end space-x-2">
+      <div className="px-3 py-2 bg-gray-50 dark:bg-gray-750 border-t border-gray-200 dark:border-gray-700 flex justify-end space-x-2">
         <button
           type="button"
           onClick={handleCancel}
-          className="px-3 py-1 text-xs text-gray-600 bg-white border border-gray-300 rounded shadow-sm hover:bg-gray-50"
+          className="px-3 py-1 text-xs text-gray-600 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded shadow-sm hover:bg-gray-50 dark:hover:bg-gray-650"
         >
           Cancel
         </button>
@@ -218,8 +230,8 @@ const MultiSelectFilter: React.FC<MultiSelectFilterProps> = ({
           disabled={isApplyDisabled}
           className={`px-3 py-1 text-xs text-white border border-transparent rounded shadow-sm
             ${isApplyDisabled 
-              ? 'bg-gray-300 cursor-not-allowed' 
-              : 'bg-indigo-500 hover:bg-indigo-600'}`}
+              ? 'bg-gray-300 dark:bg-gray-600 cursor-not-allowed' 
+              : 'bg-indigo-500 dark:bg-indigo-600 hover:bg-indigo-600 dark:hover:bg-indigo-500'}`}
         >
           Apply
         </button>

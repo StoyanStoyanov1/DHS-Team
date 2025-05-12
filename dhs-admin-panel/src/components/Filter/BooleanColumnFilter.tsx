@@ -76,67 +76,73 @@ const BooleanColumnFilter: React.FC<BooleanColumnFilterProps> = ({
   };
 
   return (
-    <div className="bg-white rounded-md shadow-sm border border-gray-200 overflow-hidden w-56">
+    <div className="bg-white dark:bg-gray-800 rounded-md shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden w-56">
       <div className="p-2">
         <div className="space-y-1.5 mb-2">
           {/* All option */}
           <div 
             className={`flex items-center p-1.5 rounded cursor-pointer transition-colors
-              ${selectedValue === null ? 'bg-blue-50 text-blue-700' : 'hover:bg-gray-50'}`}
+              ${selectedValue === null 
+                ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300' 
+                : 'hover:bg-gray-50 dark:hover:bg-gray-700'}`}
             onClick={() => handleSelect(null)}
           >
             <div className={`w-4 h-4 border-2 rounded-full mr-2 flex items-center justify-center
-              ${selectedValue === null ? 'border-blue-500' : 'border-gray-300'}`}>
+              ${selectedValue === null ? 'border-blue-500 dark:border-blue-400' : 'border-gray-300 dark:border-gray-600'}`}>
               {selectedValue === null && (
-                <CircleDot size={12} className="text-blue-500" />
+                <CircleDot size={12} className="text-blue-500 dark:text-blue-400" />
               )}
             </div>
-            <span className={`text-xs ${selectedValue === null ? 'font-medium' : ''}`}>{labelAll}</span>
+            <span className={`text-xs ${selectedValue === null ? 'font-medium' : ''} dark:text-gray-200`}>{labelAll}</span>
           </div>
 
           {/* True option */}
           <div 
             className={`flex items-center p-1.5 rounded cursor-pointer transition-colors
-              ${selectedValue === true ? 'bg-green-50 text-green-700' : 'hover:bg-gray-50'}`}
+              ${selectedValue === true 
+                ? 'bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300' 
+                : 'hover:bg-gray-50 dark:hover:bg-gray-700'}`}
             onClick={() => handleSelect(true)}
           >
             <div className={`flex-shrink-0 w-4 h-4 rounded-full mr-2 flex items-center justify-center
-              ${selectedValue === true ? 'bg-green-500' : 'bg-green-100'}`}>
+              ${selectedValue === true ? 'bg-green-500 dark:bg-green-600' : 'bg-green-100 dark:bg-green-800/30'}`}>
               {selectedValue === true && (
                 <Check size={10} className="text-white" />
               )}
             </div>
-            <span className={`text-xs ${selectedValue === true ? 'font-medium' : ''}`}>{labelTrue}</span>
+            <span className={`text-xs ${selectedValue === true ? 'font-medium' : ''} dark:text-gray-200`}>{labelTrue}</span>
           </div>
 
           {/* False option */}
           <div 
             className={`flex items-center p-1.5 rounded cursor-pointer transition-colors
-              ${selectedValue === false ? 'bg-red-50 text-red-700' : 'hover:bg-gray-50'}`}
+              ${selectedValue === false 
+                ? 'bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-300' 
+                : 'hover:bg-gray-50 dark:hover:bg-gray-700'}`}
             onClick={() => handleSelect(false)}
           >
             <div className={`flex-shrink-0 w-4 h-4 rounded-full mr-2 flex items-center justify-center
-              ${selectedValue === false ? 'bg-red-500' : 'bg-red-100'}`}>
+              ${selectedValue === false ? 'bg-red-500 dark:bg-red-600' : 'bg-red-100 dark:bg-red-800/30'}`}>
               {selectedValue === false && (
                 <X size={10} className="text-white" />
               )}
             </div>
-            <span className={`text-xs ${selectedValue === false ? 'font-medium' : ''}`}>{labelFalse}</span>
+            <span className={`text-xs ${selectedValue === false ? 'font-medium' : ''} dark:text-gray-200`}>{labelFalse}</span>
           </div>
         </div>
 
-        <div className="flex justify-end space-x-2 pt-2 border-t border-gray-100">
+        <div className="flex justify-end space-x-2 pt-2 border-t border-gray-100 dark:border-gray-700">
           <button
             type="button"
             onClick={handleCancel}
-            className="px-2 py-1 text-xs text-gray-600 bg-gray-100 hover:bg-gray-200 rounded transition-colors"
+            className="px-2 py-1 text-xs text-gray-600 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded transition-colors"
           >
             Cancel
           </button>
           <button
             type="button"
             onClick={handleApply}
-            className="px-2 py-1 text-xs text-white bg-blue-600 hover:bg-blue-700 rounded transition-colors"
+            className="px-2 py-1 text-xs text-white bg-blue-600 dark:bg-blue-700 hover:bg-blue-700 dark:hover:bg-blue-600 rounded transition-colors"
           >
             Apply
           </button>
