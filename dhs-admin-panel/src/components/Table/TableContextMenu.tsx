@@ -255,7 +255,7 @@ export default function TableContextMenu<T>({
   return (
     <div 
       ref={menuRef}
-      className="fixed bg-white rounded-md shadow-lg border border-gray-200 z-50 min-w-[200px] max-w-md"
+      className="fixed bg-white dark:bg-gray-800 rounded-md shadow-lg border border-gray-200 dark:border-gray-700 z-50 min-w-[200px] max-w-md"
       style={{
         top: `${adjustedPosition?.y || position.y}px`,
         left: `${adjustedPosition?.x || position.x}px`,
@@ -265,10 +265,10 @@ export default function TableContextMenu<T>({
       {/* Column Header Context Menu */}
       {headerColumn && !activeSubmenu && (
         <>
-          <div className="px-3 py-2 border-b border-gray-100 flex justify-between items-center">
-            <h3 className="font-medium text-sm text-gray-800">{headerColumn.header}</h3>
+          <div className="px-3 py-2 border-b border-gray-100 dark:border-gray-700 flex justify-between items-center">
+            <h3 className="font-medium text-sm text-gray-800 dark:text-white">{headerColumn.header}</h3>
             <button
-              className="text-gray-500 hover:text-gray-700"
+              className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-white"
               onClick={onClose}
             >
               <X size={16} />
@@ -278,36 +278,36 @@ export default function TableContextMenu<T>({
             {/* Sort Option */}
             {isSortableColumn(headerColumn) && (
               <button
-                className="w-full text-left px-3 py-2 text-sm hover:bg-gray-50 flex items-center justify-between"
+                className="w-full text-left px-3 py-2 text-sm hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center justify-between"
                 onClick={handleOpenSortSubmenu}
               >
                 <div className="flex items-center">
-                  <ArrowUpAZ size={16} className="mr-2 text-gray-500" />
-                  <span>Sort</span>
+                  <ArrowUpAZ size={16} className="mr-2 text-gray-500 dark:text-gray-400" />
+                  <span className="dark:text-white">Sort</span>
                 </div>
-                <ChevronRight size={16} className="text-gray-500" />
+                <ChevronRight size={16} className="text-gray-500 dark:text-gray-400" />
               </button>
             )}
 
             {/* Filter Option */}
             {headerColumn.filterable && (
               <button
-                className={`w-full text-left px-3 py-2 text-sm hover:bg-gray-50 flex items-center justify-between ${
-                  activeFilters[headerColumn.key] ? 'text-indigo-600 font-medium' : 'text-gray-800'
+                className={`w-full text-left px-3 py-2 text-sm hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center justify-between ${
+                  activeFilters[headerColumn.key] ? 'text-indigo-600 dark:text-indigo-400 font-medium' : 'text-gray-800 dark:text-white'
                 }`}
                 onClick={handleOpenFilterSubmenu}
               >
                 <div className="flex items-center">
-                  <FilterIcon size={16} className={`mr-2 ${activeFilters[headerColumn.key] ? 'text-indigo-600' : 'text-gray-500'}`} />
+                  <FilterIcon size={16} className={`mr-2 ${activeFilters[headerColumn.key] ? 'text-indigo-600 dark:text-indigo-400' : 'text-gray-500 dark:text-gray-400'}`} />
                   <span>Filter</span>
                 </div>
-                <ChevronRight size={16} className="text-gray-500" />
+                <ChevronRight size={16} className="text-gray-500 dark:text-gray-400" />
               </button>
             )}
 
             {/* GroupBy Option - Placeholder for future implementation */}
             <button
-              className="w-full text-left px-3 py-2 text-sm hover:bg-gray-50 flex items-center text-gray-400"
+              className="w-full text-left px-3 py-2 text-sm hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center text-gray-400 dark:text-gray-500"
               disabled
             >
               <ListFilter size={16} className="mr-2" />
@@ -317,33 +317,33 @@ export default function TableContextMenu<T>({
             {/* Hide Column Option */}
             {onToggleVisibility && (
               <button
-                className="w-full text-left px-3 py-2 text-sm hover:bg-gray-50 flex items-center"
+                className="w-full text-left px-3 py-2 text-sm hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center"
                 onClick={handleHideColumn}
               >
-                <EyeOff size={16} className="mr-2 text-gray-500" />
-                <span>Hide Column</span>
+                <EyeOff size={16} className="mr-2 text-gray-500 dark:text-gray-400" />
+                <span className="dark:text-white">Hide Column</span>
               </button>
             )}
 
             {/* Reset Column Option */}
             {onResetColumnFilter && activeFilters[headerColumn.key] && (
               <button
-                className="w-full text-left px-3 py-2 text-sm hover:bg-gray-50 flex items-center"
+                className="w-full text-left px-3 py-2 text-sm hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center"
                 onClick={handleResetColumn}
               >
-                <RotateCcw size={16} className="mr-2 text-gray-500" />
-                <span>Reset Column</span>
+                <RotateCcw size={16} className="mr-2 text-gray-500 dark:text-gray-400" />
+                <span className="dark:text-white">Reset Column</span>
               </button>
             )}
 
             {/* Reset All Filters Option */}
             {onResetAllFilters && Object.keys(activeFilters).length > 0 && (
               <button
-                className="w-full text-left px-3 py-2 text-sm hover:bg-gray-50 flex items-center"
+                className="w-full text-left px-3 py-2 text-sm hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center"
                 onClick={handleResetAllFilters}
               >
-                <RotateCcw size={16} className="mr-2 text-gray-500" />
-                <span>Reset All Filters</span>
+                <RotateCcw size={16} className="mr-2 text-gray-500 dark:text-gray-400" />
+                <span className="dark:text-white">Reset All Filters</span>
               </button>
             )}
           </div>
@@ -353,20 +353,20 @@ export default function TableContextMenu<T>({
       {/* Sort Submenu */}
       {headerColumn && activeSubmenu === 'sort' && (
         <>
-          <div className="px-3 py-2 border-b border-gray-100 flex justify-between items-center">
+          <div className="px-3 py-2 border-b border-gray-100 dark:border-gray-700 flex justify-between items-center">
             <div className="flex items-center">
               <button 
-                className="mr-2 text-gray-500 hover:text-gray-700"
+                className="mr-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-white"
                 onClick={handleBackFromSubmenu}
               >
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M15 18l-6-6 6-6" />
                 </svg>
               </button>
-              <h3 className="font-medium text-sm text-gray-800">Sort</h3>
+              <h3 className="font-medium text-sm text-gray-800 dark:text-white">Sort</h3>
             </div>
             <button
-              className="text-gray-500 hover:text-gray-700"
+              className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-white"
               onClick={onClose}
             >
               <X size={16} />
@@ -374,24 +374,24 @@ export default function TableContextMenu<T>({
           </div>
           <div className="py-1">
             <button
-              className={`w-full text-left px-3 py-2 text-sm hover:bg-gray-50 flex items-center ${
-                currentSortKey === headerColumn.key && currentSortDirection === 'asc' ? 'text-indigo-600 font-medium' : 'text-gray-800'
+              className={`w-full text-left px-3 py-2 text-sm hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center ${
+                currentSortKey === headerColumn.key && currentSortDirection === 'asc' ? 'text-indigo-600 dark:text-indigo-400 font-medium' : 'text-gray-800 dark:text-white'
               }`}
               onClick={handleSortAscending}
             >
               <ArrowUp size={16} className={`mr-2 ${
-                currentSortKey === headerColumn.key && currentSortDirection === 'asc' ? 'text-indigo-600' : 'text-gray-500'
+                currentSortKey === headerColumn.key && currentSortDirection === 'asc' ? 'text-indigo-600 dark:text-indigo-400' : 'text-gray-500 dark:text-gray-400'
               }`} />
               <span>Ascending</span>
             </button>
             <button
-              className={`w-full text-left px-3 py-2 text-sm hover:bg-gray-50 flex items-center ${
-                currentSortKey === headerColumn.key && currentSortDirection === 'desc' ? 'text-indigo-600 font-medium' : 'text-gray-800'
+              className={`w-full text-left px-3 py-2 text-sm hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center ${
+                currentSortKey === headerColumn.key && currentSortDirection === 'desc' ? 'text-indigo-600 dark:text-indigo-400 font-medium' : 'text-gray-800 dark:text-white'
               }`}
               onClick={handleSortDescending}
             >
               <ArrowDown size={16} className={`mr-2 ${
-                currentSortKey === headerColumn.key && currentSortDirection === 'desc' ? 'text-indigo-600' : 'text-gray-500'
+                currentSortKey === headerColumn.key && currentSortDirection === 'desc' ? 'text-indigo-600 dark:text-indigo-400' : 'text-gray-500 dark:text-gray-400'
               }`} />
               <span>Descending</span>
             </button>
@@ -402,20 +402,20 @@ export default function TableContextMenu<T>({
       {/* Filter Submenu */}
       {headerColumn && activeSubmenu === 'filter' && selectedColumn && (
         <>
-          <div className="px-3 py-2 border-b border-gray-100 flex justify-between items-center">
+          <div className="px-3 py-2 border-b border-gray-100 dark:border-gray-700 flex justify-between items-center">
             <div className="flex items-center">
               <button 
-                className="mr-2 text-gray-500 hover:text-gray-700"
+                className="mr-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-white"
                 onClick={handleBackFromSubmenu}
               >
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M15 18l-6-6 6-6" />
                 </svg>
               </button>
-              <h3 className="font-medium text-sm text-gray-800">Filter</h3>
+              <h3 className="font-medium text-sm text-gray-800 dark:text-white">Filter</h3>
             </div>
             <button
-              className="text-gray-500 hover:text-gray-700"
+              className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-white"
               onClick={onClose}
             >
               <X size={16} />
@@ -437,10 +437,10 @@ export default function TableContextMenu<T>({
       {/* Regular Table Context Menu (when right-clicking on the table, not a header) */}
       {!headerColumn && !selectedColumn && (
         <>
-          <div className="px-3 py-2 border-b border-gray-100 flex justify-between items-center">
-            <h3 className="font-medium text-sm text-gray-800">Options</h3>
+          <div className="px-3 py-2 border-b border-gray-100 dark:border-gray-700 flex justify-between items-center">
+            <h3 className="font-medium text-sm text-gray-800 dark:text-white">Options</h3>
             <button
-              className="text-gray-500 hover:text-gray-700"
+              className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-white"
               onClick={onClose}
             >
               <X size={16} />
@@ -449,41 +449,41 @@ export default function TableContextMenu<T>({
           
           {/* Selection specific actions */}
           {selectedItemCount > 0 && onDeleteSelected && (
-            <div className="py-1 border-b border-gray-100">
+            <div className="py-1 border-b border-gray-100 dark:border-gray-700">
               <button
-                className="w-full text-left px-3 py-2 text-sm hover:bg-red-50 hover:text-red-600 flex items-center"
+                className="w-full text-left px-3 py-2 text-sm hover:bg-red-50 dark:hover:bg-red-900/30 hover:text-red-600 dark:hover:text-red-400 flex items-center"
                 onClick={() => {
                   onDeleteSelected();
                   onClose();
                 }}
               >
-                <Trash2 size={16} className="mr-2 text-red-500" />
-                <span>Delete Selected ({selectedItemCount})</span>
+                <Trash2 size={16} className="mr-2 text-red-500 dark:text-red-400" />
+                <span className="dark:text-white">Delete Selected ({selectedItemCount})</span>
               </button>
               
               {onSelectAll && (
                 <button
-                  className="w-full text-left px-3 py-2 text-sm hover:bg-gray-50 flex items-center"
+                  className="w-full text-left px-3 py-2 text-sm hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center"
                   onClick={() => {
                     onSelectAll();
                     onClose();
                   }}
                 >
-                  <CheckSquare size={16} className="mr-2 text-gray-500" />
-                  <span>Select All on This Page</span>
+                  <CheckSquare size={16} className="mr-2 text-gray-500 dark:text-gray-400" />
+                  <span className="dark:text-white">Select All on This Page</span>
                 </button>
               )}
             </div>
           )}
           
           <div className="py-1">
-            <div className="px-3 py-2 text-sm font-medium text-gray-600">
+            <div className="px-3 py-2 text-sm font-medium text-gray-600 dark:text-gray-300">
               Filter by column
             </div>
             
             <div className="max-h-[400px] overflow-y-auto py-1">
               {filterableColumns.length === 0 && (
-                <div className="px-3 py-2 text-sm text-gray-600">
+                <div className="px-3 py-2 text-sm text-gray-600 dark:text-gray-400">
                   No filterable columns available.
                 </div>
               )}
@@ -491,8 +491,8 @@ export default function TableContextMenu<T>({
               {filterableColumns.map((column) => (
                 <button
                   key={column.key}
-                  className={`w-full text-left px-3 py-2 text-sm hover:bg-gray-50 flex items-center justify-between ${
-                    activeFilters[column.key] !== undefined ? 'text-indigo-600 font-medium' : 'text-gray-800'
+                  className={`w-full text-left px-3 py-2 text-sm hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center justify-between ${
+                    activeFilters[column.key] !== undefined ? 'text-indigo-600 dark:text-indigo-400 font-medium' : 'text-gray-800 dark:text-white'
                   }`}
                   onClick={() => handleColumnSelect(column.key)}
                 >
@@ -508,22 +508,22 @@ export default function TableContextMenu<T>({
       {/* Regular Filter Menu (when a column is selected from the table context menu) */}
       {!headerColumn && selectedColumn && (
         <>
-          <div className="px-3 py-2 border-b border-gray-100 flex justify-between items-center">
+          <div className="px-3 py-2 border-b border-gray-100 dark:border-gray-700 flex justify-between items-center">
             <div className="flex items-center">
               <button 
-                className="mr-2 text-gray-500 hover:text-gray-700"
+                className="mr-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-white"
                 onClick={() => setSelectedColumn(null)}
               >
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M15 18l-6-6 6-6" />
                 </svg>
               </button>
-              <h3 className="font-medium text-sm text-gray-800">
+              <h3 className="font-medium text-sm text-gray-800 dark:text-white">
                 {columns.find(col => col.key === selectedColumn)?.header}
               </h3>
             </div>
             <button
-              className="text-gray-500 hover:text-gray-700"
+              className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-white"
               onClick={onClose}
             >
               <X size={16} />

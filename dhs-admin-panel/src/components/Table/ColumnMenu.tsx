@@ -108,7 +108,9 @@ export default function ColumnMenu<T>({
             <button 
               onClick={toggleMenu}
               className={`p-1 rounded-md mr-1 focus:outline-none transition-colors duration-150 ${
-                hasActiveFilter ? 'text-indigo-600 bg-indigo-50' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100'
+                hasActiveFilter 
+                  ? 'text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/30' 
+                  : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700'
               }`}
               aria-label={`${hasActiveFilter ? 'Edit' : 'Add'} filter for ${column.header}`}
               title={`${hasActiveFilter ? 'Edit' : 'Add'} filter for ${column.header}`}
@@ -121,7 +123,7 @@ export default function ColumnMenu<T>({
         {column.hideable && (
           <button 
             onClick={handleToggleVisibility}
-            className="p-1 rounded-md text-gray-500 hover:text-gray-700 hover:bg-gray-100 focus:outline-none transition-colors duration-150"
+            className="p-1 rounded-md text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none transition-colors duration-150"
             aria-label={column.hidden ? "Show Column" : "Hide Column"}
             title={column.hidden ? "Show Column" : "Hide Column"}
           >
@@ -151,13 +153,13 @@ export default function ColumnMenu<T>({
 
       {isMenuOpen && column.filterType !== 'search' && (
         <div 
-          className={`absolute z-50 mt-1 right-0 transform origin-top-right bg-white rounded-md shadow-lg border border-gray-200 ${column.filterType === 'daterange' ? 'min-w-[320px]' : 'min-w-[160px]'}`}
+          className={`absolute z-50 mt-1 right-0 transform origin-top-right bg-white dark:bg-gray-800 rounded-md shadow-lg border border-gray-200 dark:border-gray-700 ${column.filterType === 'daterange' ? 'min-w-[320px]' : 'min-w-[160px]'}`}
           style={{
             animation: 'menuAppear 0.2s ease-out forwards'
           }}
         >
-          <div className="mb-2 pb-1 border-b border-gray-100 px-3 pt-2">
-            <h3 className="font-medium text-sm text-gray-800">{column.header}</h3>
+          <div className="mb-2 pb-1 border-b border-gray-100 dark:border-gray-700 px-3 pt-2">
+            <h3 className="font-medium text-sm text-gray-800 dark:text-gray-200">{column.header}</h3>
           </div>
 
           <FilterRenderer

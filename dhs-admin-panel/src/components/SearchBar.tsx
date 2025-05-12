@@ -55,7 +55,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
     return (
         <div className={`relative flex-1 max-w-md ${className}`}>
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <Search size={18} className="text-gray-400" />
+                <Search size={18} className="text-gray-400 dark:text-gray-500" />
             </div>
             <input
                 type="text"
@@ -66,10 +66,10 @@ const SearchBar: React.FC<SearchBarProps> = ({
                 onKeyDown={handleKeyDown}
                 autoFocus={autoFocus}
                 aria-label="Search"
-                className="w-full pl-10 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                className="w-full pl-10 pr-4 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent text-gray-800 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 transition-all"
             />
             <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                <span className="text-xs text-gray-400 bg-gray-100 px-1.5 py-0.5 rounded">⌘K</span>
+                <span className="text-xs text-gray-400 bg-gray-100 dark:text-gray-400 dark:bg-gray-700 px-1.5 py-0.5 rounded">⌘K</span>
             </div>
         </div>
     );

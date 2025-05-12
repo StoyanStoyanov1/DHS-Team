@@ -203,10 +203,10 @@ function TableHeader<T>({
               <div className="flex items-center">
                 {isSortableColumn(column) ? (
                   <button 
-                    className="flex items-center hover:text-gray-900 dark:hover:text-gray-100 focus:outline-none" 
+                    className="flex items-center hover:text-gray-900 dark:hover:text-white hover:font-medium transition-all duration-150 focus:outline-none" 
                     onClick={() => handleSort(column.key)}
                   >
-                    {column.header}
+                    <span className="hover:text-gray-900 dark:hover:text-white">{column.header}</span>
                     {renderSortIndicator(column.key)}
                   </button>
                 ) : (

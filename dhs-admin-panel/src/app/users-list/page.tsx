@@ -166,13 +166,13 @@ function UsersListContent() {
       render: (user) => (
         <div className="flex items-center">
           <div className="flex-shrink-0 h-10 w-10">
-            <div className="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-medium">
+            <div className="h-10 w-10 rounded-full bg-blue-100 dark:bg-blue-900 flex items-center justify-center text-blue-600 dark:text-blue-300 font-medium">
               {user.name.split(' ').map(n => n[0]).join('')}
             </div>
           </div>
           <div className="ml-4">
-            <div className="text-sm font-medium text-gray-900">{user.name}</div>
-            <div className="text-sm text-gray-500">{user.email}</div>
+            <div className="text-sm font-medium text-gray-900 dark:text-white">{user.name}</div>
+            <div className="text-sm text-gray-500 dark:text-gray-300">{user.email}</div>
           </div>
         </div>
       ),
@@ -227,7 +227,7 @@ function UsersListContent() {
       header: 'Last Login',
       key: 'lastLogin',
       render: (user) => (
-        <span className="text-sm text-gray-500">{user.lastLogin}</span>
+        <span className="text-sm text-gray-500 dark:text-gray-300">{user.lastLogin}</span>
       ),
       filterable: true,
       filterType: 'daterange',

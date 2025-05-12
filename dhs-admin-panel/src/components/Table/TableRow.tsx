@@ -25,7 +25,9 @@ function TableRow<T>({
   rowIndex,
 }: TableRowProps<T>) {
   // Apply alternating row background colors - improving dark mode with more appropriate colors
-  const alternatingRowClass = rowIndex % 2 === 0 ? 'bg-white dark:bg-gray-800' : 'bg-gray-50/70 dark:bg-gray-850';
+  const alternatingRowClass = rowIndex % 2 === 0 
+    ? 'bg-white dark:bg-gray-800' 
+    : 'bg-gray-50/70 dark:bg-gray-800/70';
   
   // Calculate dynamic row class name
   const dynamicRowClass = typeof rowClassName === 'function' 
@@ -33,11 +35,17 @@ function TableRow<T>({
     : rowClassName;
 
   // Determine if the row is selected
-  const selectedRowClass = isSelected ? 'bg-indigo-50 dark:bg-indigo-900/30 border-l-4 border-indigo-500 dark:border-indigo-400 shadow-sm' : '';
+  const selectedRowClass = isSelected 
+    ? 'bg-indigo-50 dark:bg-indigo-900/30 border-l-4 border-indigo-500 dark:border-indigo-400 shadow-sm' 
+    : '';
 
   return (
     <tr 
-      className={`group h-14 transition-all duration-150 hover:bg-indigo-50/60 dark:hover:bg-indigo-900/30 ${dynamicRowClass} ${alternatingRowClass} ${selectedRowClass} ${isSelected ? '' : 'border-l-4 border-transparent'}`}
+      className={`group transition-colors hover:bg-gray-100 dark:hover:bg-gray-700/50 ${alternatingRowClass} ${dynamicRowClass} ${selectedRowClass}`}
+      onClick={(e) => {
+        // Handle row click logic if needed
+      }}
+      onContextMenu={onContextMenu}
     >
       {showSelectionColumn && (
         <td className="w-12 px-4 py-3 whitespace-nowrap border-r border-gray-200 dark:border-gray-700">
@@ -70,7 +78,7 @@ function TableRow<T>({
           className={`px-6 py-4 whitespace-nowrap transition-colors ${column.className || ''} ${
             isSelected 
               ? 'text-indigo-900 dark:text-indigo-100 font-medium' 
-              : 'text-gray-700 dark:text-gray-100'
+              : 'text-gray-700 dark:text-white'
           } group-hover:text-gray-900 dark:group-hover:text-white`}
           onContextMenu={(e) => {
             e.preventDefault();

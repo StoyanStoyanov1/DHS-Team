@@ -80,15 +80,15 @@ const PageSizeControl: React.FC<PageSizeControlProps> = ({
   const buttonClasses = `
     inline-flex items-center justify-between gap-2 rounded-md
     ${compact ? 'px-2 py-1 text-xs' : 'px-3 py-2 text-sm'}
-    font-medium text-gray-700 hover:bg-gray-50 focus:outline-none
-    focus:ring-2 focus:ring-blue-500 focus:ring-offset-1
+    font-medium text-gray-700 dark:text-white hover:bg-gray-50 dark:hover:bg-gray-700
+    focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:ring-offset-1 dark:focus:ring-offset-gray-800
     transition-all duration-200 ease-in-out
-    bg-white border border-gray-200 shadow-sm
+    bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm
     ${buttonClassName}
   `;
 
   const labelClasses = `
-    ${compact ? 'text-xs' : 'text-sm'} font-medium text-gray-700
+    ${compact ? 'text-xs' : 'text-sm'} font-medium text-gray-700 dark:text-gray-300
     ${labelPosition === 'left' ? 'mr-2' : 'mb-1'}
   `;
 
@@ -122,7 +122,7 @@ const PageSizeControl: React.FC<PageSizeControlProps> = ({
           <div 
             className={`
               absolute right-0 z-50 mt-1 w-auto min-w-[80px] origin-top-right
-              rounded-md bg-white shadow-lg ring-1 ring-black/5
+              rounded-md bg-white dark:bg-gray-800 shadow-lg dark:shadow-gray-900 ring-1 ring-black/5 dark:ring-white/10
               focus:outline-none overflow-hidden
               transition-all duration-200 ease-in-out
               transform scale-100 opacity-100
@@ -144,8 +144,8 @@ const PageSizeControl: React.FC<PageSizeControlProps> = ({
                       ${compact ? 'text-xs' : 'text-sm'}
                       transition-colors duration-150
                       ${itemsPerPage === option.size
-                        ? 'bg-blue-500 text-white font-medium'
-                        : 'text-gray-700 hover:bg-gray-50 cursor-pointer'
+                        ? 'bg-blue-500 dark:bg-blue-600 text-white font-medium'
+                        : 'text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer'
                       }
                     `}
                     role="menuitem"
@@ -159,7 +159,7 @@ const PageSizeControl: React.FC<PageSizeControlProps> = ({
                     className={`
                       w-full text-left px-4 py-2 
                       ${compact ? 'text-xs' : 'text-sm'} 
-                      bg-gray-100 text-gray-500
+                      bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400
                     `}
                     aria-disabled="true"
                   >
