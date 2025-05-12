@@ -28,26 +28,33 @@ function TableBody<T>({
   onContextMenu,
 }: TableBodyProps<T>) {
   return (
-    <tbody className="bg-white divide-y divide-gray-200">
+    <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
       {data.length === 0 ? (
         <>
-          <tr>
+          <tr className="bg-white dark:bg-gray-800">
             <td 
               colSpan={visibleColumns.length + (showSelectionColumn ? 1 : 0)} 
-              className="px-6 py-4 text-center text-gray-500 border-b border-gray-200 h-14"
+              className="px-6 py-4 text-center text-gray-500 dark:text-gray-300 border-b border-gray-200 dark:border-gray-700 h-14"
             >
               {emptyMessage}
             </td>
           </tr>
           {Array.from({ length: Math.max(0, emptyRows - 1) }, (_, index) => (
-            <tr key={`filler-row-${index}`} className="h-14 border-b border-gray-200">
+            <tr 
+              key={`filler-row-${index}`} 
+              className={`h-14 border-b border-gray-200 dark:border-gray-700 ${
+                index % 2 !== 0 
+                  ? 'bg-gray-50 dark:bg-gray-850' 
+                  : 'bg-white dark:bg-gray-800'
+              }`}
+            >
               {showSelectionColumn && (
-                <td className="w-10 px-4 py-3 whitespace-nowrap border-r border-gray-200"></td>
+                <td className="w-10 px-4 py-3 whitespace-nowrap border-r border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800"></td>
               )}
               {visibleColumns.map((column) => (
                 <td 
                   key={`filler-${index}-${column.key}`} 
-                  className="px-6 py-4 h-14 border-b border-gray-200"
+                  className="px-6 py-4 h-14 border-b border-gray-200 dark:border-gray-700"
                 >
                   &nbsp;
                 </td>
@@ -74,14 +81,21 @@ function TableBody<T>({
 
           {emptyRows > 0 && 
             Array.from({ length: emptyRows }, (_, index) => (
-              <tr key={`filler-row-${index}`} className={`h-14 border-b border-gray-200 ${index % 2 !== 0 ? 'bg-gray-50' : ''}`}>
+              <tr 
+                key={`filler-row-${index}`} 
+                className={`h-14 border-b border-gray-200 dark:border-gray-700 ${
+                  index % 2 !== 0 
+                    ? 'bg-gray-50 dark:bg-gray-850' 
+                    : 'bg-white dark:bg-gray-800'
+                }`}
+              >
                 {showSelectionColumn && (
-                  <td className="w-10 px-4 py-3 whitespace-nowrap border-r border-gray-200"></td>
+                  <td className="w-10 px-4 py-3 whitespace-nowrap border-r border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800"></td>
                 )}
                 {visibleColumns.map((column) => (
                   <td 
                     key={`filler-${index}-${column.key}`} 
-                    className="px-6 py-4 h-14 border-b border-gray-200"
+                    className="px-6 py-4 h-14 border-b border-gray-200 dark:border-gray-700"
                   >
                     &nbsp;
                   </td>

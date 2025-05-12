@@ -19,6 +19,30 @@ html, body {
   padding: 0;
 }
 
+/* Custom theme toggle animations and effects */
+@keyframes slight-pulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.05);
+    opacity: 0.95;
+  }
+}
+
+.animate-slight-pulse {
+  animation: slight-pulse 2s ease-in-out infinite;
+}
+
+.shadow-glow-sm {
+  box-shadow: 0 0 4px 1px rgba(34, 197, 94, 0.5);
+}
+
+.ease-spring {
+  transition-timing-function: cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
 /* Menu animation for column menu */
 @keyframes menuAppear {
   0% {
@@ -130,6 +154,12 @@ html, body {
   box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.1), 0 2px 8px -1px rgba(0, 0, 0, 0.06);
 }
 
+/* Dark mode enhancements for bulk edit bar */
+.dark .bulk-edit-bar {
+  background: linear-gradient(to bottom, rgba(17, 24, 39, 0.98), rgba(17, 24, 39, 1));
+  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.4), 0 2px 8px -1px rgba(0, 0, 0, 0.3);
+}
+
 /* Enhanced button hover effects */
 .btn-hover-effect {
   transition: all 0.2s ease-in-out;
@@ -138,6 +168,10 @@ html, body {
 .btn-hover-effect:hover {
   transform: translateY(-1px);
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+.dark .btn-hover-effect:hover {
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.2);
 }
 
 /* Custom scrollbar styling */
@@ -160,7 +194,18 @@ html, body {
   background: #64748b;
 }
 
+/* Dark mode scrollbar */
+.dark ::-webkit-scrollbar-track {
+  background: #1f2937;
+}
 
+.dark ::-webkit-scrollbar-thumb {
+  background: #4b5563;
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: #6b7280;
+}
 
 @layer base {
   :root {
@@ -217,8 +262,6 @@ html, body {
     --chart-5: 340 75% 55%;
   }
 }
-
-
 
 @layer base {
   * {

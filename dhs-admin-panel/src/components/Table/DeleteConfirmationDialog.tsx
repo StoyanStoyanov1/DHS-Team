@@ -56,20 +56,20 @@ const DeleteConfirmationDialog: React.FC<DeleteConfirmationDialogProps> = ({
 
       {/* Dialog */}
       <div className="flex min-h-full items-center justify-center p-4 text-center">
-        <div className="relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all w-full max-w-md animate-scale-in">
+        <div className="relative transform overflow-hidden rounded-lg bg-white dark:bg-gray-800 text-left shadow-xl transition-all w-full max-w-md animate-scale-in">
           <div className="px-6 py-5">
             <div className="flex items-start justify-between mb-5">
               <div className="flex items-center">
-                <div className="flex-shrink-0 bg-red-100 rounded-full p-3">
-                  <AlertTriangle className="h-6 w-6 text-red-600" />
+                <div className="flex-shrink-0 bg-red-100 dark:bg-red-900/30 rounded-full p-3">
+                  <AlertTriangle className="h-6 w-6 text-red-600 dark:text-red-400" />
                 </div>
-                <h3 className="text-lg font-semibold text-gray-900 ml-3">
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 ml-3">
                   Delete {itemCount} {displayItemType}?
                 </h3>
               </div>
               <button 
                 type="button" 
-                className="rounded-md bg-white text-gray-400 hover:text-gray-500 focus:outline-none"
+                className="rounded-md bg-white dark:bg-gray-800 text-gray-400 dark:text-gray-500 hover:text-gray-500 dark:hover:text-gray-400 focus:outline-none"
                 onClick={onCancel}
               >
                 <X className="h-5 w-5" />
@@ -77,7 +77,7 @@ const DeleteConfirmationDialog: React.FC<DeleteConfirmationDialogProps> = ({
             </div>
             
             <div className="mt-3">
-              <p className="text-sm text-gray-600">
+              <p className="text-sm text-gray-600 dark:text-gray-300">
                 Are you sure you want to delete {itemCount === 1 ? 'this' : 'these'} {itemCount} {displayItemType}?
                 This action cannot be undone.
               </p>
@@ -86,14 +86,14 @@ const DeleteConfirmationDialog: React.FC<DeleteConfirmationDialogProps> = ({
             <div className="mt-6 flex justify-end space-x-3">
               <button
                 type="button"
-                className="inline-flex justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
+                className="inline-flex justify-center rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 shadow-sm hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500 dark:focus:ring-gray-400 focus:ring-offset-2 dark:focus:ring-offset-gray-800"
                 onClick={onCancel}
               >
                 Cancel
               </button>
               <button
                 type="button"
-                className="inline-flex justify-center rounded-md border border-transparent bg-red-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
+                className="inline-flex justify-center rounded-md border border-transparent bg-red-600 dark:bg-red-700 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-red-700 dark:hover:bg-red-800 focus:outline-none focus:ring-2 focus:ring-red-500 dark:focus:ring-red-400 focus:ring-offset-2 dark:focus:ring-offset-gray-800"
                 onClick={onConfirm}
               >
                 Delete

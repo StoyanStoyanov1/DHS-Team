@@ -62,9 +62,9 @@ function TableHeader<T>({
             className={`w-5 h-5 rounded-full flex items-center justify-center transition-all duration-200 ${
               isColumnSorted 
                 ? sortDirection === 'asc' 
-                  ? 'bg-indigo-100 text-indigo-600 rotate-0' 
-                  : 'bg-indigo-100 text-indigo-600 rotate-180' 
-                : 'bg-gray-100 text-gray-400 hover:bg-gray-200'
+                  ? 'bg-indigo-100 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-400 rotate-0' 
+                  : 'bg-indigo-100 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-400 rotate-180' 
+                : 'bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500 hover:bg-gray-200 dark:hover:bg-gray-600'
             }`}
             title={isColumnSorted 
               ? sortDirection === 'asc' 
@@ -97,7 +97,7 @@ function TableHeader<T>({
             e.currentTarget.classList.remove('dragging');
           }}
         >
-          <div className="w-5 h-5 rounded-full bg-gray-100 text-gray-400 hover:bg-gray-200 flex items-center justify-center">
+          <div className="w-5 h-5 rounded-full bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500 hover:bg-gray-200 dark:hover:bg-gray-600 flex items-center justify-center">
             <ArrowUp size={14} />
           </div>
         </div>
@@ -122,15 +122,15 @@ function TableHeader<T>({
         }}
       >
         {criterionIndex > 0 && (
-          <span className="inline-flex items-center justify-center rounded-full bg-indigo-100 text-xs px-1.5 font-medium text-indigo-700 min-w-[1.5rem] h-5">
+          <span className="inline-flex items-center justify-center rounded-full bg-indigo-100 dark:bg-indigo-900/40 text-xs px-1.5 font-medium text-indigo-700 dark:text-indigo-400 min-w-[1.5rem] h-5">
             {criterionIndex + 1}
           </span>
         )}
         <div 
           className={`w-5 h-5 rounded-full flex items-center justify-center ${
             criterion.direction === 'asc' 
-              ? 'bg-indigo-100 text-indigo-600 rotate-0' 
-              : 'bg-indigo-100 text-indigo-600 rotate-180'
+              ? 'bg-indigo-100 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-400 rotate-0' 
+              : 'bg-indigo-100 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-400 rotate-180'
           }`}
           title={criterion.direction === 'asc' 
             ? 'Сортиране във възходящ ред. Натиснете за низходящ.' 
@@ -145,16 +145,16 @@ function TableHeader<T>({
   const isSortableColumn = (column: ITableColumn<T>) => column.sortable !== false;
 
   return (
-    <thead className="bg-gray-50 border-y border-gray-200 sticky top-0 z-10">
-      <tr className="shadow-sm">
+    <thead className="bg-gray-50 dark:bg-gray-800 border-y border-gray-200 dark:border-gray-700 sticky top-0 z-10">
+      <tr className="shadow-sm dark:shadow-gray-900">
         {showSelectionColumn && (
-          <th className="w-12 px-4 py-3 border-r border-gray-200">
+          <th className="w-12 px-4 py-3 border-r border-gray-200 dark:border-gray-700">
             <div className="flex items-center justify-center">
               <div className="relative">
                 <input
                   type="checkbox"
-                  className="h-4 w-4 cursor-pointer appearance-none rounded border border-gray-300 bg-white 
-                  checked:border-indigo-500 checked:bg-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200"
+                  className="h-4 w-4 cursor-pointer appearance-none rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 
+                  checked:border-indigo-500 checked:bg-indigo-500 dark:checked:bg-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-200 dark:focus:ring-indigo-800"
                   checked={isAllSelected}
                   onChange={toggleSelectAll}
                   title={isAllSelected ? 'Премахване на селекцията' : 'Избиране на всички редове'}
@@ -176,7 +176,7 @@ function TableHeader<T>({
           <th 
             key={column.key}
             scope="col"
-            className={`px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider border-r border-gray-200 table-column-header transition-colors duration-200 shadow-sm ${column.className || ''}`}
+            className={`px-6 py-3 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider border-r border-gray-200 dark:border-gray-700 table-column-header transition-colors duration-200 shadow-sm ${column.className || ''}`}
             onContextMenu={(e) => {
               e.preventDefault();
               const rect = e.currentTarget.getBoundingClientRect();
@@ -203,7 +203,7 @@ function TableHeader<T>({
               <div className="flex items-center">
                 {isSortableColumn(column) ? (
                   <button 
-                    className="flex items-center hover:text-gray-900 focus:outline-none" 
+                    className="flex items-center hover:text-gray-900 dark:hover:text-gray-100 focus:outline-none" 
                     onClick={() => handleSort(column.key)}
                   >
                     {column.header}

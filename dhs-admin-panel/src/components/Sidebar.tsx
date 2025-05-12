@@ -93,23 +93,23 @@ const Sidebar: React.FC<SidebarProps> = ({
 
     return (
         <div
-            className={`bg-white border-r border-gray-200 transition-all duration-300 h-screen ${shouldExpand ? 'w-64' : 'w-20'} flex flex-col`}
+            className={`bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 transition-all duration-300 h-screen ${shouldExpand ? 'w-64' : 'w-20'} flex flex-col`}
             onMouseEnter={() => !isPinned && setIsHovering(true)}
             onMouseLeave={() => !isPinned && setIsHovering(false)}
         >
-            <div className="sidebar-header relative flex items-center justify-between p-5 border-b border-gray-100">
+            <div className="sidebar-header relative flex items-center justify-between p-5 border-b border-gray-100 dark:border-gray-700">
                 <div className="flex items-center">
                     <div className="h-10 w-10 rounded bg-blue-500 flex items-center justify-center">
                         <div className="w-6 h-6 bg-white transform rotate-45"></div>
                     </div>
                     {shouldExpand && (
-                        <span className="ml-3 text-xl font-bold text-gray-800">Admin Panel</span>
+                        <span className="ml-3 text-xl font-bold text-gray-800 dark:text-white">Admin Panel</span>
                     )}
                 </div>
                 {shouldExpand && (
                     <button
                         onClick={togglePin}
-                        className={`pin-btn ${isPinned ? 'active' : ''} text-gray-500 hover:text-gray-700 hover:bg-gray-100 p-1 rounded-md transition-colors`}
+                        className={`pin-btn ${isPinned ? 'active' : ''} text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 p-1 rounded-md transition-colors`}
                         title={isPinned ? "Hide the sidebar" : "Keep the sidebar open"}
                         >
                         {isPinned ? <Pin size={20} /> : <PinOff size={20} />}
@@ -148,7 +148,7 @@ const Sidebar: React.FC<SidebarProps> = ({
 
                 <div className="mb-6">
                     {shouldExpand && (
-                        <div className="text-xs font-semibold text-gray-500 tracking-wider mb-3 px-3">
+                        <div className="text-xs font-semibold text-gray-500 dark:text-gray-400 tracking-wider mb-3 px-3">
                             APPS & PAGES
                         </div>
                     )}
@@ -212,16 +212,16 @@ const Sidebar: React.FC<SidebarProps> = ({
 
                 <div className="mb-6">
                     {shouldExpand && (
-                        <div className="text-xs font-semibold text-gray-500 tracking-wider mb-3 px-3">
+                        <div className="text-xs font-semibold text-gray-500 dark:text-gray-400 tracking-wider mb-3 px-3">
                             ACCOUNT MANAGEMENT
                         </div>
                     )}
                     <div className="relative">
                         <div
-                            className={`flex items-center px-3 py-2 rounded-md cursor-pointer mb-1 ${activeSection === 'users' ? 'bg-gray-100 text-blue-600' : 'text-gray-600 hover:bg-gray-50'}`}
+                            className={`flex items-center px-3 py-2 rounded-md cursor-pointer mb-1 ${activeSection === 'users' ? 'bg-gray-100 dark:bg-gray-700 text-blue-600 dark:text-blue-400' : 'text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'}`}
                             onClick={handleUsersClick}
                         >
-                            <div className="text-gray-500"><Users size={18} /></div>
+                            <div className="text-gray-500 dark:text-gray-400"><Users size={18} /></div>
                             {shouldExpand && (
                                 <>
                                     <span className="ml-3 text-sm font-medium">Users</span>
@@ -235,7 +235,7 @@ const Sidebar: React.FC<SidebarProps> = ({
                             <div className="ml-4 mt-1 space-y-1">
                                 <button
                                     onClick={() => router.push('/users-list')}
-                                    className={`flex items-center w-full px-3 py-2 text-sm rounded-md ${pathname === '/users-list' ? 'bg-blue-50 text-blue-600' : 'text-gray-600 hover:bg-gray-50'}`}
+                                    className={`flex items-center w-full px-3 py-2 text-sm rounded-md ${pathname === '/users-list' ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400' : 'text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'}`}
                                 >
                                     <FileText size={16} className="mr-2" />
                                     List
@@ -254,7 +254,7 @@ const Sidebar: React.FC<SidebarProps> = ({
 
                 <div className="mb-6">
                     {shouldExpand && (
-                        <div className="text-xs font-semibold text-gray-500 tracking-wider mb-3 px-3">
+                        <div className="text-xs font-semibold text-gray-500 dark:text-gray-400 tracking-wider mb-3 px-3">
                             PAGES & FEATURES
                         </div>
                     )}
@@ -267,10 +267,10 @@ const Sidebar: React.FC<SidebarProps> = ({
                     />
                     <div className="relative">
                         <div
-                            className={`flex items-center px-3 py-2 rounded-md cursor-pointer mb-1 ${isAuthPath || activeSection === 'authentication' ? 'bg-gray-100 text-blue-600' : 'text-gray-600 hover:bg-gray-50'}`}
+                            className={`flex items-center px-3 py-2 rounded-md cursor-pointer mb-1 ${isAuthPath || activeSection === 'authentication' ? 'bg-gray-100 dark:bg-gray-700 text-blue-600 dark:text-blue-400' : 'text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'}`}
                             onClick={handleAuthClick}
                         >
-                            <div className="text-gray-500"><Key size={18} /></div>
+                            <div className="text-gray-500 dark:text-gray-400"><Key size={18} /></div>
                             {shouldExpand && (
                                 <>
                                     <span className="ml-3 text-sm font-medium">Authentication</span>
@@ -284,14 +284,14 @@ const Sidebar: React.FC<SidebarProps> = ({
                             <div className="ml-4 mt-1 space-y-1">
                                 <button
                                     onClick={handleLoginClick}
-                                    className={`flex items-center w-full px-3 py-2 text-sm rounded-md ${isLoginPath ? 'bg-blue-50 text-blue-600' : 'text-gray-600 hover:bg-gray-50'}`}
+                                    className={`flex items-center w-full px-3 py-2 text-sm rounded-md ${isLoginPath ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400' : 'text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'}`}
                                 >
                                     <LogIn size={16} className="mr-2" />
                                     Login
                                 </button>
                                 <button
                                     onClick={handleRegisterClick}
-                                    className={`flex items-center w-full px-3 py-2 text-sm rounded-md ${isRegisterPath ? 'bg-blue-50 text-blue-600' : 'text-gray-600 hover:bg-gray-50'}`}
+                                    className={`flex items-center w-full px-3 py-2 text-sm rounded-md ${isRegisterPath ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400' : 'text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'}`}
                                 >
                                     <UserPlus size={16} className="mr-2" />
                                     Register

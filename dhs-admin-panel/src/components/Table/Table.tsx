@@ -347,14 +347,14 @@ export default function Table<T>({
 
   return (
     <div className="space-y-4">
-      <div className={`bg-white rounded-lg shadow-sm border border-gray-200 ${className}`}>
+      <div className={`bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 ${className}`}>
         {/* Top toolbar with selections, actions and filters */}
-        <div className="px-6 py-3 flex flex-wrap items-center justify-between border-b border-gray-200 bg-gray-50 relative">
+        <div className="px-6 py-3 flex flex-wrap items-center justify-between border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 relative">
           <div className="flex items-center space-x-4">
-            <h2 className="text-sm font-medium text-gray-900">
+            <h2 className="text-sm font-medium text-gray-900 dark:text-gray-100">
               {sortedData.length} {sortedData.length === 1 ? 'item' : 'items'}
               {selectedItems.length > 0 && (
-                <span className="ml-2 text-gray-600">
+                <span className="ml-2 text-gray-600 dark:text-gray-400">
                   ({selectedItems.length} selected)
                 </span>
               )}
@@ -367,7 +367,7 @@ export default function Table<T>({
                 {editableColumns.length > 0 && (
                   <button
                     onClick={() => setShowBulkEditBar(true)}
-                    className="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white text-sm rounded-md shadow transition-colors flex items-center"
+                    className="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-700 dark:hover:bg-indigo-800 text-white text-sm rounded-md shadow dark:shadow-indigo-900/30 transition-all duration-200 flex items-center"
                   >
                     <PencilIcon size={14} className="mr-1.5" />
                     Update
@@ -378,7 +378,7 @@ export default function Table<T>({
                 {onBulkEdit && (
                   <button
                     onClick={() => setShowDeleteConfirmation(true)}
-                    className="px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white text-sm rounded-md shadow transition-colors flex items-center"
+                    className="px-3 py-1.5 bg-red-600 hover:bg-red-700 dark:bg-red-700 dark:hover:bg-red-800 text-white text-sm rounded-md shadow dark:shadow-red-900/30 transition-all duration-200 flex items-center"
                   >
                     <Trash2 size={14} className="mr-1.5" />
                     Delete
@@ -432,13 +432,13 @@ export default function Table<T>({
         </div>
 
         {columns.some(col => col.hidden) && (
-          <div className="px-6 py-2 bg-gray-100 border-b border-gray-200 flex flex-wrap items-center">
-            <span className="text-xs font-medium text-gray-700 mr-2">Hidden Columns:</span>
+          <div className="px-6 py-2 bg-gray-100 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 flex flex-wrap items-center">
+            <span className="text-xs font-medium text-gray-700 dark:text-gray-300 mr-2">Hidden Columns:</span>
             <div className="flex flex-wrap gap-2">
               {columns.filter(col => col.hidden).map(column => (
                 <button 
                   key={column.key}
-                  className="text-xs px-2 py-1 bg-gray-200 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-300 flex items-center"
+                  className="text-xs px-2 py-1 bg-gray-200 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-300 dark:hover:bg-gray-600 flex items-center"
                   onClick={() => handleToggleColumnVisibility(column.key)}
                 >
                   <Eye size={12} className="mr-1" />
@@ -450,10 +450,10 @@ export default function Table<T>({
         )}
 
         <div 
-          className="overflow-x-auto bg-white"
+          className="overflow-x-auto bg-white dark:bg-gray-800"
           onContextMenu={handleTableRightClick}
         >
-          <table id={tableId} className="min-w-full divide-y divide-gray-200">
+          <table id={tableId} className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
             <TableHeader 
               columns={columns}
               visibleColumns={visibleColumns}
@@ -487,8 +487,8 @@ export default function Table<T>({
           </table>
         </div>
 
-        {/* Pagination at the bottom with light theme styling */}
-        <div className="px-6 py-3 flex items-center justify-end border-t border-gray-200 bg-gray-50">
+        {/* Pagination at the bottom with styling */}
+        <div className="px-6 py-3 flex items-center justify-end border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900">
           <TablePagination
             currentPage={currentPage}
             totalPages={totalPages}
