@@ -214,12 +214,12 @@ export default function ColumnSearchFilter({
   }, [initialValue, searchFields]);
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md border border-gray-200 dark:border-gray-700 w-64 overflow-hidden">
-      {/* Header */}
-      <div className="px-3 py-2 bg-gray-50 dark:bg-gray-750 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
+    <div className="w-64 bg-white dark:bg-gray-800 rounded shadow-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
+      {/* Header with close button */}
+      <div className="px-3 py-2 bg-gray-50 dark:bg-gray-850 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
         <div className="flex items-center">
           {getDataTypeIcon()}
-          <span className="ml-1.5 text-xs font-medium text-gray-700 dark:text-gray-300">{columnHeader}</span>
+          <span className="ml-1.5 text-xs font-medium text-gray-700 dark:text-gray-200">{columnHeader}</span>
         </div>
         {onClose && (
           <button 
@@ -233,59 +233,39 @@ export default function ColumnSearchFilter({
       </div>
       
       {/* Main content */}
-      <div className="p-3 space-y-2.5">
+      <div className="p-3 space-y-2.5 dark:bg-gray-800">
         {/* Search input at the top */}
         {needsInputField && (
           <div className="relative">
-            <div className="relative">
-              <div className="absolute inset-y-0 left-0 pl-2.5 flex items-center pointer-events-none">
-                <Search size={15} className="text-blue-500 dark:text-blue-400" />
-              </div>
-              <input
-                ref={searchInputRef}
-                type="text"
-                className="block w-full pl-8 pr-8 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm 
-                  placeholder-gray-400 dark:placeholder-gray-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100
-                  focus:outline-none focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 dark:focus:border-blue-400 transition-colors"
-                placeholder={`Search ${selectedFieldLabel}...`}
-                value={searchTerm ?? ''}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                onKeyDown={handleKeyDown}
-                onClick={() => { if (showRecentSearches) setShowRecentSearches(false); }}
-                autoFocus
-              />
-              <div className="absolute inset-y-0 right-0 pr-2 flex items-center">
-                {searchTerm && (
-                  <button
-                    className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 mr-1 p-0.5 rounded-full hover:bg-gray-100 dark:hover:bg-gray-600"
-                    onClick={() => setSearchTerm('')}
-                    title="Clear search"
-                  >
-                    <X size={14} />
-                  </button>
-                )}
-                {limitedRecentSearches.length > 0 && (
-                  <button 
-                    className={`text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 p-0.5 rounded-full hover:bg-gray-100 dark:hover:bg-gray-600
-                      ${showRecentSearches ? 'text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30' : ''}`}
-                    onClick={() => setShowRecentSearches(!showRecentSearches)}
-                    title="Recent searches"
-                  >
-                    <History size={14} />
-                  </button>
-                )}
-              </div>
+            <div className="absolute inset-y-0 left-0 flex items-center pl-2.5 pointer-events-none">
+              <Search size={14} className="text-gray-400 dark:text-gray-500" />
             </div>
-
-            {showRecentSearches && limitedRecentSearches.length > 0 && (
-              <div 
-                ref={recentSearchesRef}
-                className="absolute z-10 mt-1 w-full bg-white dark:bg-gray-800 rounded-md shadow-md border border-gray-200 dark:border-gray-700 max-h-48 overflow-auto"
-              >
-                <div className="flex justify-between items-center px-2 py-1 bg-gray-50 dark:bg-gray-750 border-b border-gray-200 dark:border-gray-700">
-                  <span className="text-xs font-medium text-gray-600 dark:text-gray-300">Recent searches</span>
-                  <button
-                    className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 p-0.5 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700"
+            <input
+              ref={searchInputRef}
+              type="text"
+              placeholder={`Search in ${selectedField ? searchFields.find(f => f.path === selectedField)?.label || selectedField : columnHeader}...`}
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full pl-8 pr-8 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-200 dark:focus:ring-blue-400 dark:focus:border-blue-400"
+            />
+            {searchTerm && (
+              <div className="absolute inset-y-0 right-0 flex items-center pr-2">
+                <button
+                  onClick={() => setSearchTerm('')}
+                  className="p-1 rounded-full text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600"
+                >
+                  <X size={12} />
+                </button>
+              </div>
+            )}
+            
+            {/* Recent searches dropdown */}
+            {showRecentSearches && recentSearches.length > 0 && (
+              <div className="absolute w-full mt-1 bg-white dark:bg-gray-700 rounded-md border border-gray-200 dark:border-gray-600 shadow-md z-10">
+                <div className="flex items-center justify-between px-2.5 py-1.5 border-b border-gray-100 dark:border-gray-600">
+                  <span className="text-xs text-gray-500 dark:text-gray-400">Recent searches</span>
+                  <button 
+                    className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 p-0.5 rounded-full hover:bg-gray-100 dark:hover:bg-gray-600"
                     onClick={() => setShowRecentSearches(false)}
                   >
                     <X size={12} />
@@ -295,7 +275,7 @@ export default function ColumnSearchFilter({
                   {limitedRecentSearches.map((term, index) => (
                     <button
                       key={index}
-                      className="flex items-center w-full px-2.5 py-1.5 text-xs text-left hover:bg-gray-50 dark:hover:bg-gray-700 dark:text-gray-200"
+                      className="flex items-center w-full px-2.5 py-1.5 text-xs text-left hover:bg-gray-50 dark:hover:bg-gray-600 dark:text-gray-200"
                       onClick={() => handleRecentSearchSelect(term)}
                     >
                       <Clock size={12} className="text-gray-400 dark:text-gray-500 mr-1.5 flex-shrink-0" />
@@ -317,13 +297,13 @@ export default function ColumnSearchFilter({
             <div className="relative">
               <select
                 id="search-field"
-                className="block w-full pl-2.5 pr-7 py-1.5 text-xs border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 
-                  rounded-md text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 dark:focus:border-blue-400 appearance-none"
+                className="block w-full pl-2.5 pr-7 py-1.5 text-xs border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 dark:text-gray-200 rounded-md 
+                  focus:outline-none focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 dark:focus:border-blue-400 appearance-none"
                 value={selectedField}
                 onChange={(e) => setSelectedField(e.target.value)}
               >
                 {searchFields.map((field) => (
-                  <option key={field.key} value={field.path || field.key} className="dark:bg-gray-700">
+                  <option key={field.key} value={field.path || field.key}>
                     {field.label}
                   </option>
                 ))}
@@ -343,13 +323,13 @@ export default function ColumnSearchFilter({
           <div className="relative">
             <select
               id="search-method"
-              className="block w-full pl-2.5 pr-7 py-1.5 text-xs border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 
-                rounded-md text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 dark:focus:border-blue-400 appearance-none"
+              className="block w-full pl-2.5 pr-7 py-1.5 text-xs border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 dark:text-gray-200 rounded-md 
+                focus:outline-none focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 dark:focus:border-blue-400 appearance-none"
               value={searchMethod}
               onChange={(e) => setSearchMethod(e.target.value as EnhancedSearchMethod)}
             >
               {methodOptions.map((option) => (
-                <option key={option.value} value={option.value} className="dark:bg-gray-700">
+                <option key={option.value} value={option.value}>
                   {option.label}
                 </option>
               ))}
@@ -377,8 +357,7 @@ export default function ColumnSearchFilter({
               <input
                 id="case-sensitive"
                 type="checkbox"
-                className="h-3.5 w-3.5 text-blue-600 dark:text-blue-500 border-gray-300 dark:border-gray-600 rounded 
-                  focus:ring-blue-500 dark:focus:ring-blue-400 bg-white dark:bg-gray-600"
+                className="h-3.5 w-3.5 text-blue-600 dark:text-blue-500 border-gray-300 dark:border-gray-600 rounded focus:ring-blue-500 dark:focus:ring-blue-400"
                 checked={caseSensitive}
                 onChange={(e) => setCaseSensitive(e.target.checked)}
               />
@@ -391,7 +370,7 @@ export default function ColumnSearchFilter({
       </div>
       
       {/* Action buttons */}
-      <div className="px-3 py-2 bg-gray-50 dark:bg-gray-750 border-t border-gray-200 dark:border-gray-700 flex justify-end space-x-2">
+      <div className="px-3 py-2 bg-gray-50 dark:bg-gray-850 border-t border-gray-200 dark:border-gray-700 flex justify-end space-x-2">
         <button
           type="button"
           className="px-2.5 py-1 text-xs font-medium text-gray-600 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md 
@@ -402,7 +381,7 @@ export default function ColumnSearchFilter({
         </button>
         <button
           type="button"
-          className="px-2.5 py-1 text-xs font-medium text-white bg-blue-600 dark:bg-blue-500 border border-transparent rounded-md 
+          className="px-2.5 py-1 text-xs font-medium text-white bg-blue-600 dark:bg-blue-700 border border-blue-600 dark:border-blue-700 rounded-md 
             hover:bg-blue-700 dark:hover:bg-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400"
           onClick={handleSearch}
         >

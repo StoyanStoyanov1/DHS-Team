@@ -443,7 +443,9 @@ const DateRangeFilter: React.FC<DateRangeFilterProps> = ({
                       <div
                         key={month}
                         className={`px-4 py-2 text-sm cursor-pointer hover:bg-blue-50 dark:hover:bg-blue-900/30 transition-colors
-                          ${index === currentMonth.getMonth() ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 font-medium' : 'dark:text-gray-300'}`}
+                          ${index === currentMonth.getMonth() 
+                            ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 font-medium' 
+                            : 'text-gray-700 dark:text-gray-200'}`}
                         onClick={(e) => {
                           e.stopPropagation();
                           handleMonthChange(index);
@@ -476,7 +478,9 @@ const DateRangeFilter: React.FC<DateRangeFilterProps> = ({
                       <div
                         key={year}
                         className={`px-4 py-2 text-sm cursor-pointer hover:bg-blue-50 dark:hover:bg-blue-900/30 transition-colors
-                          ${year === currentMonth.getFullYear() ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 font-medium' : 'dark:text-gray-300'}`}
+                          ${year === currentMonth.getFullYear() 
+                            ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 font-medium' 
+                            : 'text-gray-700 dark:text-gray-200'}`}
                         onClick={(e) => {
                           e.stopPropagation();
                           handleYearChange(year);

@@ -24,7 +24,7 @@ function TableRow<T>({
   onContextMenu,
   rowIndex,
 }: TableRowProps<T>) {
-  // Apply more contrasting alternating row background colors
+  // Apply alternating row background colors - improving dark mode with more appropriate colors
   const alternatingRowClass = rowIndex % 2 === 0 
   ? 'bg-white dark:bg-gray-900' 
   : 'bg-gray-100 dark:bg-gray-850';
