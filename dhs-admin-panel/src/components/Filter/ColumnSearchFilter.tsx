@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { SearchMethod, SearchField } from '../Table/interfaces';
 import { 
   Search, ChevronDown, X, Check, Clock, 
-  SlidersHorizontal, History, PlusCircle, Hash, Calendar
+  SlidersHorizontal, PlusCircle, Hash, Calendar
 } from 'lucide-react';
 
 export type EnhancedSearchMethod = 
