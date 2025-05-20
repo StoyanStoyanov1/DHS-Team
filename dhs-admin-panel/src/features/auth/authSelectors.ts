@@ -26,10 +26,6 @@ export const selectAuthError = (state: RootState) => (state as any).auth.error;
  */
 export const selectAuthValidationErrors = (state: RootState) => (state as any).auth.validationErrors;
 
-/**
- * Select debug mode status
- */
-export const selectIsDebugMode = (state: RootState) => (state as any).auth.isDebugMode;
 
 /**
  * Select redirect path after login

@@ -6,21 +6,6 @@ import { TokenPayload, ValidationErrors, LoginCredentials, RegisterCredentials }
 import authService from '@/src/services/auth.service';
 import AuthContext from './AuthContext';
 
-// Debug mode configuration
-const DEBUG_MODE = process.env.NODE_ENV === 'development' ? 
-    (process.env.NEXT_PUBLIC_DEBUG_AUTH !== 'false') : 
-    (process.env.NEXT_PUBLIC_DEBUG_AUTH === 'true');
-
-// Debug user for development
-const DEBUG_USER: TokenPayload = {
-    sub: 'debug-user-id',
-    email: 'debug@example.com',
-    roles: ['admin'],
-    iat: Math.floor(Date.now() / 1000),
-    exp: Math.floor(Date.now() / 1000) + 3600,
-    iss: 'debug-issuer', 
-    jti: 'debug-token-id'
-};
 
 interface AuthProviderProps {
     children: ReactNode;
@@ -34,7 +19,6 @@ export const AuthProviderContent: React.FC<AuthProviderProps> = ({ children }) =
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
     const [validationErrors, setValidationErrors] = useState<ValidationErrors | null>(null);
-    const [isDebugMode] = useState<boolean>(DEBUG_MODE);
     const router = useRouter();
     const searchParams = useSearchParams();
 
@@ -42,19 +26,14 @@ export const AuthProviderContent: React.FC<AuthProviderProps> = ({ children }) =
         const initAuth = async () => {
             setLoading(true);
             try {
-                if (isDebugMode) {
-                    setUser(DEBUG_USER);
-                    console.info('Debug Mode Activated!');
-                } else {
-                    const currentUser = authService.getCurrentUser();
-                    setUser(currentUser);
-                    
-                    if (currentUser) {
-                        const redirectParam = searchParams.get('redirect');
-                        if (redirectParam) {
-                            const decodedRedirect = decodeURIComponent(redirectParam);
-                            router.push(decodedRedirect);
-                        }
+                const currentUser = authService.getCurrentUser();
+                setUser(currentUser);
+
+                if (currentUser) {
+                    const redirectParam = searchParams.get('redirect');
+                    if (redirectParam) {
+                        const decodedRedirect = decodeURIComponent(redirectParam);
+                        router.push(decodedRedirect);
                     }
                 }
             } catch (error) {
@@ -65,7 +44,7 @@ export const AuthProviderContent: React.FC<AuthProviderProps> = ({ children }) =
         };
 
         initAuth();
-    }, [router, searchParams, isDebugMode]);
+    }, [router, searchParams]);
 
     /**
      * Handle login with credentials
@@ -74,13 +53,6 @@ export const AuthProviderContent: React.FC<AuthProviderProps> = ({ children }) =
         setLoading(true);
         setError(null);
         setValidationErrors(null);
-
-        if (isDebugMode) {
-            setUser(DEBUG_USER);
-            setLoading(false);
-            router.push(redirectPath);
-            return;
-        }
 
         try {
             const user = await authService.login(credentials);
@@ -103,13 +75,6 @@ export const AuthProviderContent: React.FC<AuthProviderProps> = ({ children }) =
         setError(null);
         setValidationErrors(null);
 
-        if (isDebugMode) {
-            setUser(DEBUG_USER);
-            setLoading(false);
-            router.push(redirectPath);
-            return;
-        }
-
         try {
             const user = await authService.register(userData);
             setUser(user);
@@ -126,13 +91,6 @@ export const AuthProviderContent: React.FC<AuthProviderProps> = ({ children }) =
      */
     const logout = async () => {
         setLoading(true);
-        
-        if (isDebugMode) {
-            setUser(null);
-            router.push('/auth/login');
-            setLoading(false);
-            return;
-        }
 
         try {
             await authService.logout();
@@ -151,13 +109,13 @@ export const AuthProviderContent: React.FC<AuthProviderProps> = ({ children }) =
     const handleAuthError = (err: any) => {
         if (err.response) {
             const { data, status } = err.response;
-            
+
             if (data && data.detail && typeof data.detail === 'string' && 
                 data.detail.includes('Account with this email already exists')) {
                 setError('Account with this email already exists');
                 return;
             }
-            
+
             if (status === 422 && data.errors) {
                 setValidationErrors(data.errors);
             } else if (data.message) {
@@ -196,8 +154,7 @@ export const AuthProviderContent: React.FC<AuthProviderProps> = ({ children }) =
         login,
         register,
         logout,
-        clearErrors,
-        isDebugMode
+        clearErrors
     };
 
     return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

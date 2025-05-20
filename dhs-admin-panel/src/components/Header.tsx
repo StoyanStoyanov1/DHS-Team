@@ -1,25 +1,25 @@
 'use client';
 
 import React, { useState, useRef, useEffect } from 'react';
-import { LayoutGrid, Bell, Settings, LogOut, User, Bug } from 'lucide-react';
+import { LayoutGrid, Bell, Settings, LogOut, User } from 'lucide-react';
 import { useRouter, usePathname } from 'next/navigation';
 import SearchBar from './SearchBar';
 import { useAuth } from '@/src/hooks/useAuth';
 import { ThemeToggle } from './ThemeToggle';
 
 const Header: React.FC = () => {
-    const { user, logout, isDebugMode } = useAuth();
+    const { user, logout } = useAuth();
     const router = useRouter();
     const pathname = usePathname();
     const [dropdownOpen, setDropdownOpen] = useState(false);
     const dropdownRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
-        if (!user && !isDebugMode) {
+        if (!user) {
             const redirectPath = encodeURIComponent(pathname || '/');
             router.push(`/auth/login?redirect=${redirectPath}`);
         }
-    }, [user, router, pathname, isDebugMode]);
+    }, [user, router, pathname]);
 
     useEffect(() => {
         function handleClickOutside(event: MouseEvent) {
@@ -45,7 +45,7 @@ const Header: React.FC = () => {
         return user.email.charAt(0).toUpperCase();
     };
 
-    if (!user && !isDebugMode) {
+    if (!user) {
         return null;
     }
 
@@ -55,15 +55,8 @@ const Header: React.FC = () => {
                 <SearchBar />
 
                 <div className="flex items-center space-x-4">
-                    {process.env.NODE_ENV === 'development' && isDebugMode && (
-                        <div className="flex items-center text-green-700 bg-green-100 px-2 py-1 rounded text-xs font-medium">
-                            <Bug size={14} className="mr-1" />
-                            <span>Debug Mode</span>
-                        </div>
-                    )}
-                    
                     <ThemeToggle />
-                    
+
                     <button className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 p-2 rounded-full transition-colors">
                         <LayoutGrid size={20} />
                     </button>
@@ -76,7 +69,7 @@ const Header: React.FC = () => {
                     <button className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 p-2 rounded-full transition-colors">
                         <Settings size={20} />
                     </button>
-                    
+
                     <div className="relative" ref={dropdownRef}>
                         <button 
                             onClick={() => setDropdownOpen(!dropdownOpen)}
@@ -84,25 +77,20 @@ const Header: React.FC = () => {
                         >
                             {getInitials()}
                         </button>
-                        
+
                         {dropdownOpen && (
                             <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-md shadow-lg py-1 z-10 border border-gray-200 dark:border-gray-700 transition-colors duration-200">
                                 <div className="px-4 py-2 text-sm text-gray-700 dark:text-gray-300 border-b border-gray-200 dark:border-gray-700">
-                                    {isDebugMode ? 'Debug User' : (user?.email || 'User')}
-                                    {isDebugMode && (
-                                        <span className="ml-1 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">
-                                            Debug
-                                        </span>
-                                    )}
+                                    {user?.email || 'User'}
                                 </div>
-                                
+
                                 <a href="/profile" className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
                                     <div className="flex items-center">
                                         <User size={16} className="mr-2" />
                                         Profile
                                     </div>
                                 </a>
-                                
+
                                 <button 
                                     onClick={handleLogout}
                                     className="block w-full text-left px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"

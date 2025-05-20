@@ -9,7 +9,6 @@ export interface AuthState {
   isAuthenticated: boolean;
   error: string | null;
   validationErrors: ValidationErrors | null;
-  isDebugMode: boolean;
   redirectAfterLogin: string | null;
 }
 

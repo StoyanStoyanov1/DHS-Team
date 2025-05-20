@@ -46,5 +46,4 @@ export interface AuthContextType {
     register: (userData: RegisterCredentials, redirectPath?: string) => Promise<void>;
     logout: () => Promise<void>;
     clearErrors: () => void;
-    isDebugMode: boolean;
 }

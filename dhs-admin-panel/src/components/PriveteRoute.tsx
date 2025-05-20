@@ -11,7 +11,7 @@ interface PrivateRouteProps {
 const publicRoutes = ['/users-list', '/public-dashboard', '/about', '/contact'];
 
 const PrivateRoute: React.FC<PrivateRouteProps> = ({ children }) => {
-    const { user, loading, isDebugMode } = useAuth();
+    const { user, loading } = useAuth();
     const router = useRouter();
     const pathname = usePathname();
 
@@ -20,13 +20,13 @@ const PrivateRoute: React.FC<PrivateRouteProps> = ({ children }) => {
         : false;
 
     useEffect(() => {
-        if (isPublicRoute || isDebugMode) return;
-        
+        if (isPublicRoute) return;
+
         if (!loading && !user) {
             const redirectPath = encodeURIComponent(pathname || '/');
             router.push(`/auth/login?redirect=${redirectPath}`);
         }
-    }, [user, loading, router, pathname, isPublicRoute, isDebugMode]);
+    }, [user, loading, router, pathname, isPublicRoute]);
 
     if (loading && !isPublicRoute) {
         return (
@@ -36,7 +36,7 @@ const PrivateRoute: React.FC<PrivateRouteProps> = ({ children }) => {
         );
     }
 
-    if (isPublicRoute || isDebugMode || user) {
+    if (isPublicRoute || user) {
         return <>{children}</>;
     }
 

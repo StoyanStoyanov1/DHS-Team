@@ -2,10 +2,6 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { AuthState } from './types';
 import { loginUser, registerUser, logoutUser, getCurrentUser } from './authThunks';
 
-// Debug mode detection
-const DEBUG_MODE = process.env.NODE_ENV === 'development' ? 
-    (process.env.NEXT_PUBLIC_DEBUG_AUTH !== 'false') : 
-    (process.env.NEXT_PUBLIC_DEBUG_AUTH === 'true');
 
 // Initial state
 const initialState: AuthState = {
@@ -14,7 +10,6 @@ const initialState: AuthState = {
   isAuthenticated: false,
   error: null,
   validationErrors: null,
-  isDebugMode: DEBUG_MODE,
   redirectAfterLogin: null
 };
 
@@ -27,12 +22,12 @@ const authSlice = createSlice({
       state.error = null;
       state.validationErrors = null;
     },
-    
+
     // Set the redirect path after login
     setRedirectPath: (state, action: PayloadAction<string | null>) => {
       state.redirectAfterLogin = action.payload;
     },
-    
+
     // Reset state (used on logout)
     resetState: () => initialState
   },
@@ -55,7 +50,7 @@ const authSlice = createSlice({
         state.error = action.payload?.error || 'Authentication failed';
         state.validationErrors = action.payload?.validationErrors || null;
       })
-      
+
       // Registration cases
       .addCase(registerUser.pending, (state) => {
         state.loading = true;
@@ -72,7 +67,7 @@ const authSlice = createSlice({
         state.error = action.payload?.error || 'Registration failed';
         state.validationErrors = action.payload?.validationErrors || null;
       })
-      
+
       // Logout cases
       .addCase(logoutUser.pending, (state) => {
         state.loading = true;
@@ -85,7 +80,7 @@ const authSlice = createSlice({
         state.loading = false;
         state.error = action.payload?.error || 'Logout failed';
       })
-      
+
       // Get current user cases
       .addCase(getCurrentUser.pending, (state) => {
         state.loading = true;

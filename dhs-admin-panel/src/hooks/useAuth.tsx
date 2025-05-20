@@ -9,20 +9,6 @@ import {
     ValidationErrors
 } from '../types/auth.types';
 
-const DEBUG_MODE = process.env.NODE_ENV === 'development' ? 
-    (process.env.NEXT_PUBLIC_DEBUG_AUTH !== 'false') : 
-    (process.env.NEXT_PUBLIC_DEBUG_AUTH === 'true');
-
-const DEBUG_USER: TokenPayload = {
-    sub: 'debug-user-id',
-    email: 'debug@example.com',
-    roles: ['admin'],
-    iat: Math.floor(Date.now() / 1000),
-    exp: Math.floor(Date.now() / 1000) + 3600,
-    iss: 'debug-issuer', 
-    jti: 'debug-token-id'
-};
-
 interface AuthContextType {
     user: TokenPayload | null;
     loading: boolean;
@@ -32,7 +18,6 @@ interface AuthContextType {
     register: (userData: RegisterCredentials, redirectPath?: string) => Promise<void>;
     logout: () => Promise<void>;
     clearErrors: () => void;
-    isDebugMode: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -42,7 +27,6 @@ function AuthProviderContent({ children }: { children: ReactNode }) {
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
     const [validationErrors, setValidationErrors] = useState<ValidationErrors | null>(null);
-    const [isDebugMode] = useState<boolean>(DEBUG_MODE);
     const router = useRouter();
     const searchParams = useSearchParams();
 
@@ -50,19 +34,14 @@ function AuthProviderContent({ children }: { children: ReactNode }) {
         const initAuth = async () => {
             setLoading(true);
             try {
-                if (isDebugMode) {
-                    setUser(DEBUG_USER);
-                    console.info('Debug Mode Activated!');
-                } else {
-                    const currentUser = authService.getCurrentUser();
-                    setUser(currentUser);
+                const currentUser = authService.getCurrentUser();
+                setUser(currentUser);
 
-                    if (currentUser) {
-                        const redirectParam = searchParams.get('redirect');
-                        if (redirectParam) {
-                            const decodedRedirect = decodeURIComponent(redirectParam);
-                            router.push(decodedRedirect);
-                        }
+                if (currentUser) {
+                    const redirectParam = searchParams.get('redirect');
+                    if (redirectParam) {
+                        const decodedRedirect = decodeURIComponent(redirectParam);
+                        router.push(decodedRedirect);
                     }
                 }
             } catch (error) {
@@ -73,19 +52,12 @@ function AuthProviderContent({ children }: { children: ReactNode }) {
         };
 
         initAuth();
-    }, [router, searchParams, isDebugMode]);
+    }, [router, searchParams]);
 
     const login = async (credentials: LoginCredentials, redirectPath: string = '/') => {
         setLoading(true);
         setError(null);
         setValidationErrors(null);
-
-        if (isDebugMode) {
-            setUser(DEBUG_USER);
-            setLoading(false);
-            router.push(redirectPath);
-            return;
-        }
 
         try {
             const user = await authService.login(credentials);
@@ -105,13 +77,6 @@ function AuthProviderContent({ children }: { children: ReactNode }) {
         setError(null);
         setValidationErrors(null);
 
-        if (isDebugMode) {
-            setUser(DEBUG_USER);
-            setLoading(false);
-            router.push(redirectPath);
-            return;
-        }
-
         try {
             const user = await authService.register(userData);
             setUser(user);
@@ -125,13 +90,6 @@ function AuthProviderContent({ children }: { children: ReactNode }) {
 
     const logout = async () => {
         setLoading(true);
-
-        if (isDebugMode) {
-            setUser(null);
-            router.push('/auth/login');
-            setLoading(false);
-            return;
-        }
 
         try {
             await authService.logout();
@@ -189,8 +147,7 @@ function AuthProviderContent({ children }: { children: ReactNode }) {
         login,
         register,
         logout,
-        clearErrors,
-        isDebugMode
+        clearErrors
     };
 
     return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
