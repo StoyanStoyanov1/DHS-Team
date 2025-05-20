@@ -13,9 +13,9 @@ import ClientOnly from '@/src/components/ClientOnly';
 function UsersListContent() {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
-  
+
   const allRoles = ['Admin', 'Editor', 'Viewer', 'Support', 'Manager', 'Analyst', 'Developer'];
-  
+
   const [filters, setFilters] = useState<SelectedFilters>({
     role: allRoles
   });
@@ -60,16 +60,8 @@ function UsersListContent() {
   ];
 
   const getRoleFilterOptions = (data: User[]) => {
-    if (!data || !Array.isArray(data)) {
-      return allRoles.map(role => ({
-        id: role.toLowerCase(),
-        label: role,
-        value: role
-      }));
-    }
-
-    const uniqueRoles = Array.from(new Set(data.map(user => user.role)));
-    return uniqueRoles.map(role => ({
+    // Always return the predefined roles to ensure the filter has options
+    return allRoles.map(role => ({
       id: role.toLowerCase(),
       label: role,
       value: role
@@ -94,7 +86,7 @@ function UsersListContent() {
 
   useEffect(() => {
     let result = [...mockUsers];
-    
+
     if (filters.search) {
       const searchTerm = filters.search.toLowerCase();
       result = result.filter(
@@ -102,17 +94,17 @@ function UsersListContent() {
                 user.email.toLowerCase().includes(searchTerm)
       );
     }
-    
+
     if (filters.role && Array.isArray(filters.role)) {
       if (filters.role.length > 0) {
         result = result.filter(user => filters.role.includes(user.role));
       }
     }
-    
+
     if (filters.isActive !== undefined) {
       result = result.filter(user => user.isActive === filters.isActive);
     }
-    
+
     setFilteredUsers(result);
   }, [filters]);
 
@@ -123,7 +115,7 @@ function UsersListContent() {
   const sortLastLogin = (a: User, b: User, direction: 'asc' | 'desc' | null) => {
     const dateA = new Date(a.lastLogin);
     const dateB = new Date(b.lastLogin);
-    
+
     if (direction === 'asc') {
       return dateA.getTime() - dateB.getTime();
     } else {

@@ -33,13 +33,9 @@ const MultiSelectFilter: React.FC<MultiSelectFilterProps> = ({
 
   // Check if this is a role filter
   const isRoleFilter = useMemo(() => {
-    if (!columnName || !columnName.toLowerCase().includes('role')) return false;
-    const roleLabels = options.map(opt => opt.label.toLowerCase());
-    return (
-      roleLabels.includes('admin') && 
-      roleLabels.includes('editor')
-    );
-  }, [options, columnName]);
+    // Only check if the column name includes 'role'
+    return columnName ? columnName.toLowerCase().includes('role') : false;
+  }, [columnName]);
 
   // Initialize selected values
   const [selectedValues, setSelectedValues] = useState<any[]>(() => {
