@@ -37,8 +37,7 @@ const MultiSelectFilter: React.FC<MultiSelectFilterProps> = ({
     const roleLabels = options.map(opt => opt.label.toLowerCase());
     return (
       roleLabels.includes('admin') && 
-      roleLabels.includes('editor') && 
-      roleLabels.length <= 3
+      roleLabels.includes('editor')
     );
   }, [options, columnName]);
 

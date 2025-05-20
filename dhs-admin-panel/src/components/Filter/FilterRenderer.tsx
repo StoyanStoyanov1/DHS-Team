@@ -151,6 +151,7 @@ export default function FilterRenderer<T>({
             }}
             onClose={onClose}
             defaultSelectAll={column.defaultSelectAll !== false}
+            columnName={column.key}
           />
       );
 
