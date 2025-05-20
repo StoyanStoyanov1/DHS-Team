@@ -44,7 +44,7 @@ function TableHeader<T>({
       const isColumnSorted = sortKey === columnKey;
       return (
         <div 
-          className={`flex items-center ml-1 cursor-grab active:cursor-grabbing ${isColumnSorted ? 'sort-active' : ''}`}
+          className={`flex items-center ml-1 cursor-pointer ${isColumnSorted ? 'sort-active' : ''}`}
           draggable={true}
           onDragStart={(e) => {
             e.dataTransfer.setData('text/plain', columnKey);
@@ -83,7 +83,7 @@ function TableHeader<T>({
     if (criterionIndex === -1) {
       return (
         <div 
-          className="flex items-center ml-1 cursor-grab active:cursor-grabbing"
+          className="flex items-center ml-1 cursor-pointer"
           draggable={true}
           onDragStart={(e) => {
             e.dataTransfer.setData('text/plain', columnKey);
@@ -107,7 +107,7 @@ function TableHeader<T>({
     const criterion = sortCriteria[criterionIndex];
     return (
       <div 
-        className="flex items-center ml-1 gap-1 cursor-grab active:cursor-grabbing"
+        className="flex items-center ml-1 gap-1 cursor-pointer"
         draggable={true}
         onDragStart={(e) => {
           e.dataTransfer.setData('text/plain', JSON.stringify({ key: columnKey, index: criterionIndex }));
