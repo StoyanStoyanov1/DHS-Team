@@ -1,41 +1,16 @@
 import { AxiosError } from 'axios';
 import api from './api';
 import { jwtDecode } from 'jwt-decode';
+import { 
+    LoginCredentials, 
+    RegisterCredentials, 
+    AuthResponse, 
+    TokenPayload, 
+    ValidationErrors, 
+    ErrorResponse 
+} from '../types/auth.types';
 
 const isBrowser = typeof window !== 'undefined';
-
-export interface LoginCredentials {
-    email: string;
-    password: string;
-}
-
-export interface RegisterCredentials extends LoginCredentials {
-    re_password: string;
-}
-
-export interface AuthResponse {
-    token: string;
-    message: string;
-}
-
-export interface TokenPayload {
-    exp: number;
-    iat: number;
-    sub: string;
-    email: string;
-    roles: string[];
-    iss: string;
-    jti: string;
-}
-
-export interface ValidationErrors {
-    [key: string]: string[];
-}
-
-export interface ErrorResponse {
-    message: string;
-    errors?: ValidationErrors;
-}
 
 class AuthService {
     private tokenKey = 'access_token';

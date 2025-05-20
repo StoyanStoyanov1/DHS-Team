@@ -244,7 +244,7 @@ export default function ColumnSearchFilter({
               ref={searchInputRef}
               type="text"
               placeholder={`Search in ${selectedField ? searchFields.find(f => f.path === selectedField)?.label || selectedField : columnHeader}...`}
-              value={searchTerm}
+              value={searchTerm || ''}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full pl-8 pr-8 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-200 dark:focus:ring-blue-400 dark:focus:border-blue-400"
             />

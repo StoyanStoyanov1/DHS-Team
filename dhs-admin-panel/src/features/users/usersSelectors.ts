@@ -4,39 +4,39 @@ import { createSelector } from '@reduxjs/toolkit';
 /**
  * Select all users from state
  */
-export const selectUsers = (state: RootState) => state.users.users;
+export const selectUsers = (state: RootState) => (state as any).users.users;
 
 /**
  * Select selected user from state
  */
-export const selectSelectedUser = (state: RootState) => state.users.selectedUser;
+export const selectSelectedUser = (state: RootState) => (state as any).users.selectedUser;
 
 /**
  * Select users loading state
  */
-export const selectUsersLoading = (state: RootState) => state.users.loading;
+export const selectUsersLoading = (state: RootState) => (state as any).users.loading;
 
 /**
  * Select users error state
  */
-export const selectUsersError = (state: RootState) => state.users.error;
+export const selectUsersError = (state: RootState) => (state as any).users.error;
 
 /**
  * Select users pagination
  */
-export const selectUsersPagination = (state: RootState) => state.users.pagination;
+export const selectUsersPagination = (state: RootState) => (state as any).users.pagination;
 
 /**
  * Select users filters
  */
-export const selectUsersFilters = (state: RootState) => state.users.filters;
+export const selectUsersFilters = (state: RootState) => (state as any).users.filters;
 
 /**
  * Select active users
  */
 export const selectActiveUsers = createSelector(
   [selectUsers],
-  (users) => users.filter(user => user.status === 'active')
+  (users) => users.filter((user: any) => user.status === 'active')
 );
 
 /**
@@ -45,5 +45,5 @@ export const selectActiveUsers = createSelector(
 export const selectUsersByRole = (role: string) => 
   createSelector(
     [selectUsers],
-    (users) => users.filter(user => user.role === role)
+    (users) => users.filter((user: any) => user.role === role)
   );

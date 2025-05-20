@@ -13,7 +13,7 @@ import Link from 'next/link';
 import { useAuth } from '@/src/hooks/useAuth';
 import { validateRegistrationForm } from '@/src/utils/validation';
 import Alert from '@/src/components/Alert';
-import { ValidationErrors } from '@/src/services/auth.service';
+import { ValidationErrors } from '@/src/types/auth.types';
 
 interface FormErrors {
     [key: string]: string;
@@ -57,7 +57,7 @@ function RegisterPageContent() {
                 [name]: ''
             });
         }
-        
+
         // Clear the logged in message if it exists
         if (alreadyLoggedInMessage) {
             setAlreadyLoggedInMessage(null);
@@ -67,7 +67,7 @@ function RegisterPageContent() {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         clearErrors();
-        
+
         // Check if user is already logged in
         if (user) {
             setAlreadyLoggedInMessage("You can go to the dashboard or log out first if you want to create another account.");
@@ -105,7 +105,7 @@ function RegisterPageContent() {
         await register({
             email: formData.email,
             password: formData.password,
-            password_confirm: formData.confirmPassword
+            re_password: formData.confirmPassword
         }, redirectPath);
     };
 
@@ -156,7 +156,7 @@ function RegisterPageContent() {
                         onClose={() => setFormErrors((prevErrors) => ({ ...prevErrors, general: '' }))}
                     />
                 )}
-                
+
                 {alreadyLoggedInMessage && (
                     <Alert
                         type="info"
@@ -164,7 +164,7 @@ function RegisterPageContent() {
                         onClose={() => setAlreadyLoggedInMessage(null)}
                     />
                 )}
-                
+
                 {user && (
                     <div className="bg-blue-50 border border-blue-200 text-blue-800 px-4 py-3 rounded relative mb-4">
                         <span className="block sm:inline">

@@ -1,12 +1,13 @@
 "use client"
 import { createContext, useContext, useState, useEffect, ReactNode, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import authService, {
+import authService from '../services/auth.service';
+import {
     LoginCredentials,
     RegisterCredentials,
     TokenPayload,
     ValidationErrors
-} from '../services/auth.service';
+} from '../types/auth.types';
 
 const DEBUG_MODE = process.env.NODE_ENV === 'development' ? 
     (process.env.NEXT_PUBLIC_DEBUG_AUTH !== 'false') : 
@@ -55,7 +56,7 @@ function AuthProviderContent({ children }: { children: ReactNode }) {
                 } else {
                     const currentUser = authService.getCurrentUser();
                     setUser(currentUser);
-                    
+
                     if (currentUser) {
                         const redirectParam = searchParams.get('redirect');
                         if (redirectParam) {
@@ -124,7 +125,7 @@ function AuthProviderContent({ children }: { children: ReactNode }) {
 
     const logout = async () => {
         setLoading(true);
-        
+
         if (isDebugMode) {
             setUser(null);
             router.push('/auth/login');
@@ -146,13 +147,13 @@ function AuthProviderContent({ children }: { children: ReactNode }) {
     const handleAuthError = (err: any) => {
         if (err.response) {
             const { data, status } = err.response;
-            
+
             if (data && data.detail && typeof data.detail === 'string' && 
                 data.detail.includes('Account with this email already exists')) {
                 setError('Account with this email already exists');
                 return;
             }
-            
+
             if (status === 422 && data.errors) {
                 setValidationErrors(data.errors);
             } else if (data.message) {

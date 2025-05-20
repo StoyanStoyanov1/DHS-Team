@@ -1,3 +1,4 @@
 export * from './AuthContext';
 export * from './AuthProvider';
-export * from './useAuth';
+// useAuth е преместен в директория src/hooks
+// export * from './useAuth';

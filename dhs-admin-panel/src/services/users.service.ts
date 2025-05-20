@@ -10,6 +10,7 @@ export class UsersService extends BaseCrudService<User> {
 
   async getActiveUsers(params?: Omit<IGetAllParams, 'endpoint'>): Promise<AxiosResponse<IPaginatedResponse<User>>> {
     return this.getAll({
+      endpoint: '/api/users', // Using direct value instead of this.baseEndpoint
       ...params,
       filters: {
         ...params?.filters,
@@ -20,6 +21,7 @@ export class UsersService extends BaseCrudService<User> {
 
   async getUsersByRole(role: string, params?: Omit<IGetAllParams, 'endpoint'>): Promise<AxiosResponse<IPaginatedResponse<User>>> {
     return this.getAll({
+      endpoint: '/api/users', // Using direct value
       ...params,
       filters: {
         ...params?.filters,
@@ -30,6 +32,7 @@ export class UsersService extends BaseCrudService<User> {
 
   async searchUsers(searchTerm: string, params?: Omit<IGetAllParams, 'endpoint'>): Promise<AxiosResponse<IPaginatedResponse<User>>> {
     return this.getAll({
+      endpoint: '/api/users', // Using direct value
       ...params,
       queryParams: {
         ...params?.queryParams,
@@ -40,6 +43,7 @@ export class UsersService extends BaseCrudService<User> {
 
   async toggleUserStatus(userId: number, isActive: boolean): Promise<AxiosResponse<User>> {
     return this.update({
+      endpoint: '/api/users', // Using direct value
       id: userId,
       data: { isActive }
     });
@@ -47,6 +51,7 @@ export class UsersService extends BaseCrudService<User> {
 
   async changeUserRole(userId: number, role: string): Promise<AxiosResponse<User>> {
     return this.update({
+      endpoint: '/api/users', // Using direct value
       id: userId,
       data: { role }
     });

@@ -23,7 +23,7 @@ interface TableControlsProps<T> {
   setShowSortCriteriaSummary: (show: boolean) => void;
   handleClearAllSorting: () => void;
   handleRemoveSortCriterion: (index: number) => void;
-  setFilterOrder: (order: string[]) => void;
+  setFilterOrder: (order: string[] | ((prevOrder: string[]) => string[])) => void;
   filterOrder: string[];
   columnFilters: Record<string, any>;
 }
@@ -168,7 +168,7 @@ function TableControls<T>({
                               const data = JSON.parse(e.dataTransfer.getData('text/plain'));
                               if (data.index !== undefined && data.index !== index) {
                                 // Move the filter from the source index to the target index
-                                setFilterOrder(prevOrder => {
+                                setFilterOrder((prevOrder: string[]) => {
                                   const newOrder = [...prevOrder];
                                   const [movedItem] = newOrder.splice(data.index, 1);
                                   newOrder.splice(index, 0, movedItem);

@@ -1,36 +1,37 @@
-import { RootState } from '@/src/store';
+import { RootState } from '../../store';
+import { AuthState } from './types';
 
 /**
  * Select the current authenticated user
  */
-export const selectUser = (state: RootState) => state.auth.user;
+export const selectUser = (state: RootState) => (state as any).auth.user;
 
 /**
  * Select if the user is authenticated
  */
-export const selectIsAuthenticated = (state: RootState) => state.auth.isAuthenticated;
+export const selectIsAuthenticated = (state: RootState) => (state as any).auth.isAuthenticated;
 
 /**
  * Select loading state for auth
  */
-export const selectAuthLoading = (state: RootState) => state.auth.loading;
+export const selectAuthLoading = (state: RootState) => (state as any).auth.loading;
 
 /**
  * Select error state
  */
-export const selectAuthError = (state: RootState) => state.auth.error;
+export const selectAuthError = (state: RootState) => (state as any).auth.error;
 
 /**
  * Select validation errors
  */
-export const selectAuthValidationErrors = (state: RootState) => state.auth.validationErrors;
+export const selectAuthValidationErrors = (state: RootState) => (state as any).auth.validationErrors;
 
 /**
  * Select debug mode status
  */
-export const selectIsDebugMode = (state: RootState) => state.auth.isDebugMode;
+export const selectIsDebugMode = (state: RootState) => (state as any).auth.isDebugMode;
 
 /**
  * Select redirect path after login
  */
-export const selectRedirectAfterLogin = (state: RootState) => state.auth.redirectAfterLogin;
+export const selectRedirectAfterLogin = (state: RootState) => (state as any).auth.redirectAfterLogin;

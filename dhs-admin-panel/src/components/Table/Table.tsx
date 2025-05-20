@@ -2,6 +2,11 @@
 
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { ITableProps } from './interfaces';
+
+// Define interface for window object extension
+interface WindowWithTableContext extends Window {
+  __currentColumnForContextMenu: any;
+}
 import { TableService } from './TableService';
 import TableHeader from './TableHeader';
 import TableBody from './TableBody';
@@ -66,7 +71,7 @@ export default function Table<T>({
   // Add missing references
   const filterSummaryRef = useRef<HTMLDivElement>(null);
   const sortCriteriaRef = useRef<HTMLDivElement>(null);
-  
+
   // Add missing handleItemsPerPageChange function
   const handleItemsPerPageChange = (newItemsPerPage: number) => {
     setItemsPerPage(newItemsPerPage);
@@ -76,10 +81,10 @@ export default function Table<T>({
   // Add formatFilterDisplayValue function
   const formatFilterDisplayValue = (value: any, columnKey: string): string => {
     if (value === null || value === undefined) return 'Not set';
-    
+
     // Get the column object to access labels
     const column = columns.find(col => col.key === columnKey);
-    
+
     if (typeof value === 'boolean') {
       // Use column specific labels if available
       if (column) {
@@ -91,12 +96,12 @@ export default function Table<T>({
       }
       return value ? 'Yes' : 'No';
     } 
-    
+
     if (typeof value === 'object') {
       if (Array.isArray(value)) {
         return `${value.length} selected`;
       }
-      
+
       if (value.term !== undefined) {
         const methodDisplay: Record<string, string> = {
           'contains': 'contains',
@@ -108,10 +113,10 @@ export default function Table<T>({
           'isNotEmpty': 'is not empty',
           'regex': 'matches regex'
         };
-        
+
         return value.method ? `${methodDisplay[value.method] || value.method} "${value.term}"` : `contains "${value.term}"`;
       }
-      
+
       if (value.start || value.end) {
         const start = value.start ? new Date(value.start).toLocaleDateString() : 'any';
         const end = value.end ? new Date(value.end).toLocaleDateString() : 'any';
@@ -123,10 +128,10 @@ export default function Table<T>({
         const max = value.max !== undefined ? value.max : 'any';
         return `${min} to ${max}`;
       }
-      
+
       return JSON.stringify(value);
     }
-    
+
     return String(value);
   };
 
@@ -258,7 +263,7 @@ export default function Table<T>({
     if (!isTableCell && columns.some(col => col.filterable)) {
       setContextMenuPosition({ x: e.clientX, y: e.clientY });
       // Clear any previously set column
-      (window as any).__currentColumnForContextMenu = null;
+      ((window as unknown) as WindowWithTableContext).__currentColumnForContextMenu = null;
     }
   };
 
@@ -266,10 +271,10 @@ export default function Table<T>({
   const handleCellContextMenu = (e: React.MouseEvent, item: T, column?: typeof initialColumns[0]) => {
     e.preventDefault();
     setContextMenuPosition({ x: e.clientX, y: e.clientY });
-    
+
     // Store the current column for the context menu
     if (column) {
-      (window as any).__currentColumnForContextMenu = column;
+      ((window as unknown) as WindowWithTableContext).__currentColumnForContextMenu = column;
     }
   };
 
@@ -301,20 +306,7 @@ export default function Table<T>({
     }
   }, [data, visibleColumns, autoResizeColumns, tableId, minColumnWidth, maxColumnWidth, columnPadding]);
 
-  // Remove automatic BulkEditBar display when items are selected
-  // The useEffect below is removed/commented out since we only want to show BulkEditBar when Update button is clicked
-  /*
-  useEffect(() => {
-    // Only show bulk edit bar if we have editable columns and selected items
-    if (editableColumns.length > 0 && selectedItems.length > 0) {
-      setShowBulkEditBar(true);
-      hasShownBulkEditBarRef.current = true;
-    } else if (hasShownBulkEditBarRef.current) {
-      // If we've shown the bar before but now have no selections, hide it
-      setShowBulkEditBar(false);
-    }
-  }, [selectedItems.length, editableColumns.length]);
-  */
+  // BulkEditBar is now shown only when the Update button is clicked
 
   // Handle outside clicks to close drop-down menus
   useEffect(() => {
@@ -325,7 +317,7 @@ export default function Table<T>({
           showColumnFilterSummary) {
         setShowColumnFilterSummary(false);
       }
-      
+
       // Close sort criteria summary when clicking outside
       if (sortCriteriaRef.current && 
           !sortCriteriaRef.current.contains(event.target as Node) &&
@@ -333,12 +325,12 @@ export default function Table<T>({
         setShowSortCriteriaSummary(false);
       }
     }
-    
+
     // Add event listener when dropdown is open
     if (showColumnFilterSummary || showSortCriteriaSummary) {
       document.addEventListener('mousedown', handleClickOutside);
     }
-    
+
     // Clean up function
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
@@ -373,7 +365,7 @@ export default function Table<T>({
                     Update
                   </button>
                 )}
-                
+
                 {/* Delete button */}
                 {onBulkEdit && (
                   <button
@@ -534,7 +526,7 @@ export default function Table<T>({
             // Only hide the bulk edit bar without clearing selection
             setShowBulkEditBar(false);
           }}
-          pageTitle={typeof data[0] === 'object' ? Object.keys(data[0])[0]?.charAt(0).toUpperCase() + Object.keys(data[0])[0]?.slice(1) : 'Items'}
+          pageTitle={data.length > 0 && typeof data[0] === 'object' && data[0] !== null ? Object.keys(data[0] as object)[0]?.charAt(0).toUpperCase() + Object.keys(data[0] as object)[0]?.slice(1) : 'Items'}
         />
       )}
 

@@ -3,7 +3,7 @@ import { setupListeners } from '@reduxjs/toolkit/query';
 import rootReducer from './rootReducer';
 import { customMiddleware } from './middleware';
 
-export const store = configureStore({
+export const store: ReturnType<typeof configureStore> = configureStore({
   reducer: rootReducer,
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware().concat(customMiddleware),

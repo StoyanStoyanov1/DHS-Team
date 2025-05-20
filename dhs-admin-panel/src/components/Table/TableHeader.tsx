@@ -216,6 +216,7 @@ function TableHeader<T>({
 
               <ColumnMenu
                 column={column}
+                data={[]} // Подаваме празен масив, тъй като в този момент не използваме данните
                 onFilterChange={handleColumnFilterChange}
                 onToggleVisibility={handleToggleColumnVisibility}
                 activeFilters={activeFilters}

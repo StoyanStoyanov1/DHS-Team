@@ -6,14 +6,14 @@ import { RootState } from './index';
  */
 const loggerMiddleware: Middleware<{}, RootState> = (store) => (next) => (action) => {
   if (process.env.NODE_ENV !== 'production') {
-    console.group(`Redux Action: ${action.type}`);
+    console.group(`Redux Action: ${(action as any).type}`);
     console.info('dispatching', action);
     const result = next(action);
     console.log('next state', store.getState());
     console.groupEnd();
     return result;
   }
-  
+
   return next(action);
 };
 

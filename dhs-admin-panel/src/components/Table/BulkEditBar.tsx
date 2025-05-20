@@ -40,23 +40,23 @@ function BulkEditBar<T>({
   
   // Initialize enabledColumns and fieldValues
   useEffect(() => {
-    const initialEnabled = {};
-    const initialValues = {};
+    const initialEnabled: Record<string, boolean> = {};
+    const initialValues: Record<string, any> = {};
     
     editableColumns.forEach(column => {
-      initialEnabled[column.columnKey] = false;
+      initialEnabled[column.columnKey as string] = false;
       
       // Set default values based on type
       if (column.type === 'boolean') {
-        initialValues[column.columnKey] = null;
+        initialValues[column.columnKey as string] = null;
       } else if (column.type === 'select') {
-        initialValues[column.columnKey] = '';
+        initialValues[column.columnKey as string] = '';
       } else if (column.type === 'multiselect') {
-        initialValues[column.columnKey] = [];
+        initialValues[column.columnKey as string] = [];
       } else if (column.type === 'number') {
-        initialValues[column.columnKey] = null;
+        initialValues[column.columnKey as string] = null;
       } else {
-        initialValues[column.columnKey] = '';
+        initialValues[column.columnKey as string] = '';
       }
     });
     

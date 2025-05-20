@@ -5,7 +5,7 @@ interface MultiSelectFilterProps {
   options: Array<{ id: string | number; label: string; value: any }>;
   value: any[];
   onChange?: (value: any[]) => void;
-  onApply: (value: any[]) => void;
+  onApply: (value: any[] | null) => void;
   onClose?: () => void;
   defaultSelectAll?: boolean;
   columnName?: string;
@@ -22,15 +22,15 @@ const MultiSelectFilter: React.FC<MultiSelectFilterProps> = ({
 }) => {
   // Search state
   const [searchTerm, setSearchTerm] = useState('');
-  
+
   // Sort options alphabetically
   const sortedOptions = useMemo(() => {
     return [...options].sort((a, b) => a.label.localeCompare(b.label));
   }, [options]);
-  
+
   // Original values for cancel operation
   const [originalValues, setOriginalValues] = useState<any[]>([]);
-  
+
   // Check if this is a role filter
   const isRoleFilter = useMemo(() => {
     if (!columnName || !columnName.toLowerCase().includes('role')) return false;
@@ -41,7 +41,7 @@ const MultiSelectFilter: React.FC<MultiSelectFilterProps> = ({
       roleLabels.length <= 3
     );
   }, [options, columnName]);
-  
+
   // Initialize selected values
   const [selectedValues, setSelectedValues] = useState<any[]>(() => {
     if (Array.isArray(value) && value.length > 0) {
@@ -51,8 +51,8 @@ const MultiSelectFilter: React.FC<MultiSelectFilterProps> = ({
     }
     return [];
   });
-  
-  // Store original values when component mounts
+
+  // Store original values and initialize selected values
   useEffect(() => {
     if (Array.isArray(value) && value.length > 0) {
       setOriginalValues([...value]);
@@ -61,7 +61,7 @@ const MultiSelectFilter: React.FC<MultiSelectFilterProps> = ({
     } else {
       setOriginalValues([]);
     }
-    
+
     // Initialize selected values with original values
     if (Array.isArray(value) && value.length > 0) {
       setSelectedValues([...value]);
@@ -70,12 +70,12 @@ const MultiSelectFilter: React.FC<MultiSelectFilterProps> = ({
     } else {
       setSelectedValues([]);
     }
-  }, []);
-  
+  }, [value, isRoleFilter, defaultSelectAll, sortedOptions]);
+
   // Check if all options are selected
   const allSelected = selectedValues.length === sortedOptions.length &&
     sortedOptions.every(option => selectedValues.includes(option.value));
-  
+
   // Filter options based on search
   const filteredOptions = useMemo(() => {
     if (!searchTerm) return sortedOptions;
@@ -84,14 +84,8 @@ const MultiSelectFilter: React.FC<MultiSelectFilterProps> = ({
     );
   }, [searchTerm, sortedOptions]);
 
-  // Update local state when external value changes
-  useEffect(() => {
-    if (Array.isArray(value) && value.length > 0) {
-      setSelectedValues([...value]);
-      setOriginalValues([...value]);
-    }
-  }, [value]);
-  
+  // The first useEffect already handles updating state when value changes
+
   // Handle select/deselect all
   const handleToggleAll = () => {
     const newValues = allSelected ? [] : sortedOptions.map(option => option.value);
@@ -105,7 +99,7 @@ const MultiSelectFilter: React.FC<MultiSelectFilterProps> = ({
     let newValues = isSelected
       ? selectedValues.filter(v => v !== option.value)
       : [...selectedValues, option.value];
-    
+
     setSelectedValues(newValues);
     if (onChange) onChange(newValues);
   };
@@ -116,7 +110,7 @@ const MultiSelectFilter: React.FC<MultiSelectFilterProps> = ({
       sortedOptions.every(option => selectedValues.includes(option.value));
     onApply(isDefault ? null : selectedValues);
   };
-  
+
   // Check if Apply button should be disabled
   const isApplyDisabled = selectedValues.length === 0;
 
@@ -127,7 +121,7 @@ const MultiSelectFilter: React.FC<MultiSelectFilterProps> = ({
     // Don't call onChange here to avoid updating parent state
     if (onClose) onClose();
   };
-  
+
   // Show search only when there are more than 5 options
   const showSearch = sortedOptions.length > 5;
 
@@ -147,7 +141,7 @@ const MultiSelectFilter: React.FC<MultiSelectFilterProps> = ({
           {allSelected ? 'Deselect All' : 'Select All'}
         </button>
       </div>
-      
+
       {/* Search input */}
       {showSearch && (
         <div className="px-3 py-2 border-b border-gray-200 dark:border-gray-700">
@@ -175,7 +169,7 @@ const MultiSelectFilter: React.FC<MultiSelectFilterProps> = ({
           </div>
         </div>
       )}
-      
+
       {/* Options list */}
       <div className="max-h-48 overflow-y-auto py-1">
         {filteredOptions.length === 0 ? (
@@ -202,7 +196,7 @@ const MultiSelectFilter: React.FC<MultiSelectFilterProps> = ({
           })
         )}
       </div>
-      
+
       {/* Footer */}
       <div className="px-3 py-2 bg-gray-50 dark:bg-gray-850 border-t border-gray-200 dark:border-gray-700 flex justify-end space-x-2">
         <button

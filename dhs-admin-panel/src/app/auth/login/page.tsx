@@ -13,7 +13,7 @@ import Link from 'next/link';
 import { useAuth } from '@/src/hooks/useAuth';
 import { validateLoginForm } from '@/src/utils/validation';
 import Alert from '@/src/components/Alert';
-import { ValidationErrors } from '@/src/services/auth.service';
+import { ValidationErrors } from '@/src/types/auth.types';
 
 interface FormErrors {
     [key: string]: string;
@@ -55,7 +55,7 @@ function LoginPageContent() {
                 [name]: ''
             });
         }
-        
+
         // Clear the logged in message if it exists
         if (alreadyLoggedInMessage) {
             setAlreadyLoggedInMessage(null);
@@ -65,7 +65,7 @@ function LoginPageContent() {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         clearErrors();
-        
+
         // Check if user is already logged in
         if (user) {
             setAlreadyLoggedInMessage("You can go to the dashboard or log out first if you want to access another account.");
@@ -127,7 +127,7 @@ function LoginPageContent() {
                         onClose={clearErrors}
                     />
                 )}
-                
+
                 {alreadyLoggedInMessage && (
                     <Alert
                         type="info"
@@ -135,7 +135,7 @@ function LoginPageContent() {
                         onClose={() => setAlreadyLoggedInMessage(null)}
                     />
                 )}
-                
+
                 {user && (
                     <div className="bg-blue-50 border border-blue-200 text-blue-800 px-4 py-3 rounded relative mb-4">
                         <span className="block sm:inline">

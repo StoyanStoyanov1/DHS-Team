@@ -8,7 +8,9 @@ export interface LoginCredentials {
 }
 
 export interface RegisterCredentials extends LoginCredentials {
-    password_confirm: string;
+    re_password: string;
+    firstName?: string;
+    lastName?: string;
 }
 
 export interface AuthResponse {

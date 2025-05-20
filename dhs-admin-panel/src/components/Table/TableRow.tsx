@@ -46,7 +46,7 @@ function TableRow<T>({
       onClick={(e) => {
         // Handle row click logic if needed
       }}
-      onContextMenu={onContextMenu}
+      onContextMenu={(e) => onContextMenu && onContextMenu(e, item)}
     >
       {showSelectionColumn && (
         <td className="w-12 px-4 py-3 whitespace-nowrap border-r border-gray-200 dark:border-gray-700">

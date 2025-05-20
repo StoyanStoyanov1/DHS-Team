@@ -2,7 +2,10 @@
 export { default } from './Table';
 export * from './interfaces';
 export * from './TableService';
-export * from './utils';
+
+// Експлицитно реекспортиране на utils за избягване на конфликта
+import * as TableUtils from './utils';
+export { TableUtils };
 
 // Re-export hooks for external use
 export * from './hooks/useTableSelection';

@@ -11,8 +11,7 @@ export const loginUser = createAsyncThunk(
     try {
       const response = await authService.login({
         email: credentials.email,
-        password: credentials.password,
-        remember: credentials.rememberMe
+        password: credentials.password
       });
       return response;
     } catch (error: any) {
@@ -23,7 +22,7 @@ export const loginUser = createAsyncThunk(
           validationErrors: error.validationErrors
         });
       }
-      
+
       return rejectWithValue({
         error: error.message || 'Login failed'
       });
@@ -41,7 +40,7 @@ export const registerUser = createAsyncThunk(
       const response = await authService.register({
         email: userData.email,
         password: userData.password,
-        confirmPassword: userData.confirmPassword,
+        re_password: userData.confirmPassword, // changed from confirmPassword to re_password
         firstName: userData.firstName,
         lastName: userData.lastName
       });
@@ -54,7 +53,7 @@ export const registerUser = createAsyncThunk(
           validationErrors: error.validationErrors
         });
       }
-      
+
       return rejectWithValue({
         error: error.message || 'Registration failed'
       });

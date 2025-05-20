@@ -61,7 +61,7 @@ export default function FilterRenderer<T>({
     onFilterValueChange(value);
   };
 
-  const handleAdvancedSearch = (columnKey: string, term: string, field: string, method: string) => {
+  const handleAdvancedSearch = (columnKey: string, term: string | null, field: string, method: string) => {
     if (term === null || term === '') {
       onFilterValueChange(null);
       return;

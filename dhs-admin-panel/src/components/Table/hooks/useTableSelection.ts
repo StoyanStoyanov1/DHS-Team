@@ -87,7 +87,9 @@ export function useTableSelection<T>({
     } else {
       // Otherwise, select all items on current page
       const currentPageItemIds = currentPageItems.map(item => keyExtractor(item));
-      const newSelectedItemIds = new Set([...selectedItemIds, ...currentPageItemIds]);
+      const newSelectedItemIds = new Set(selectedItemIds);
+      // Добавяме новите ID-та към съществуващия Set
+      currentPageItemIds.forEach(id => newSelectedItemIds.add(id));
       
       // Find the actual items from data that correspond to the selected IDs
       const allSelectedItems = [
@@ -105,7 +107,9 @@ export function useTableSelection<T>({
     if (currentPageItems.length === 0) return;
     
     const currentPageItemIds = currentPageItems.map(item => keyExtractor(item));
-    const newSelectedItemIds = new Set([...selectedItemIds, ...currentPageItemIds]);
+    const newSelectedItemIds = new Set(selectedItemIds);
+    // Добавяме новите ID-та към съществуващия Set
+    currentPageItemIds.forEach(id => newSelectedItemIds.add(id));
     
     // Find the actual items from data that correspond to the selected IDs
     const allSelectedItems = [

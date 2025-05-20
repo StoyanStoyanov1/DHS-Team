@@ -46,16 +46,17 @@ export const useUsersService = (): UseUsersServiceResult => {
   ) => {
     setLoading(true);
     setError(null);
-    
+
     try {
       const response = await usersService.getAll({
+        endpoint: '/api/users', // Adding required endpoint parameter
         page,
         pageSize,
         sortBy,
         sortDirection,
         filters
       });
-      
+
       setUsers(response.data.data);
       setPagination({
         total: response.data.pagination.total,
@@ -65,7 +66,7 @@ export const useUsersService = (): UseUsersServiceResult => {
       });
     } catch (err) {
       const axiosError = err as AxiosError;
-      setError(axiosError.message || 'Възникна грешка при извличането на потребители');
+      setError(axiosError.message || 'An error occurred while fetching users');
       console.error('Error fetching users:', err);
     } finally {
       setLoading(false);
@@ -75,13 +76,16 @@ export const useUsersService = (): UseUsersServiceResult => {
   const fetchUserById = useCallback(async (id: number | string): Promise<User | null> => {
     setLoading(true);
     setError(null);
-    
+
     try {
-      const response = await usersService.getOne({ id });
+      const response = await usersService.getOne({ 
+        endpoint: '/api/users', // Adding required endpoint parameter
+        id 
+      });
       return response.data;
     } catch (err) {
       const axiosError = err as AxiosError;
-      setError(axiosError.message || 'Възникна грешка при извличането на потребителя');
+      setError(axiosError.message || 'An error occurred while fetching the user');
       console.error('Error fetching user by ID:', err);
       return null;
     } finally {
@@ -92,16 +96,19 @@ export const useUsersService = (): UseUsersServiceResult => {
   const createUser = useCallback(async (userData: Omit<User, 'id'>): Promise<User | null> => {
     setLoading(true);
     setError(null);
-    
+
     try {
-      const response = await usersService.create({ data: userData });
-      
+      const response = await usersService.create({ 
+        endpoint: '/api/users', 
+        data: userData 
+      });
+
       fetchUsers(pagination.page, pagination.pageSize);
-      
+
       return response.data;
     } catch (err) {
       const axiosError = err as AxiosError;
-      setError(axiosError.message || 'Възникна грешка при създаването на потребителя');
+      setError(axiosError.message || 'An error occurred while creating the user');
       console.error('Error creating user:', err);
       return null;
     } finally {
@@ -112,16 +119,20 @@ export const useUsersService = (): UseUsersServiceResult => {
   const updateUser = useCallback(async (id: number | string, userData: Partial<User>): Promise<User | null> => {
     setLoading(true);
     setError(null);
-    
+
     try {
-      const response = await usersService.update({ id, data: userData });
-      
+      const response = await usersService.update({ 
+        endpoint: '/api/users',
+        id, 
+        data: userData 
+      });
+
       fetchUsers(pagination.page, pagination.pageSize);
-      
+
       return response.data;
     } catch (err) {
       const axiosError = err as AxiosError;
-      setError(axiosError.message || 'Възникна грешка при обновяването на потребителя');
+      setError(axiosError.message || 'An error occurred while updating the user');
       console.error('Error updating user:', err);
       return null;
     } finally {
@@ -132,16 +143,19 @@ export const useUsersService = (): UseUsersServiceResult => {
   const deleteUser = useCallback(async (id: number | string): Promise<boolean> => {
     setLoading(true);
     setError(null);
-    
+
     try {
-      await usersService.delete({ id });
-      
+      await usersService.delete({ 
+        endpoint: '/api/users',
+        id 
+      });
+
       fetchUsers(pagination.page, pagination.pageSize);
-      
+
       return true;
     } catch (err) {
       const axiosError = err as AxiosError;
-      setError(axiosError.message || 'Възникна грешка при изтриването на потребителя');
+      setError(axiosError.message || 'An error occurred while deleting the user');
       console.error('Error deleting user:', err);
       return false;
     } finally {
@@ -152,16 +166,16 @@ export const useUsersService = (): UseUsersServiceResult => {
   const toggleUserStatus = useCallback(async (id: number | string, isActive: boolean): Promise<User | null> => {
     setLoading(true);
     setError(null);
-    
+
     try {
       const response = await usersService.toggleUserStatus(Number(id), isActive);
-      
+
       fetchUsers(pagination.page, pagination.pageSize);
-      
+
       return response.data;
     } catch (err) {
       const axiosError = err as AxiosError;
-      setError(axiosError.message || 'Възникна грешка при промяната на статуса на потребителя');
+      setError(axiosError.message || 'An error occurred while changing the user status');
       console.error('Error toggling user status:', err);
       return null;
     } finally {
@@ -172,16 +186,16 @@ export const useUsersService = (): UseUsersServiceResult => {
   const changeUserRole = useCallback(async (id: number | string, role: string): Promise<User | null> => {
     setLoading(true);
     setError(null);
-    
+
     try {
       const response = await usersService.changeUserRole(Number(id), role);
-      
+
       fetchUsers(pagination.page, pagination.pageSize);
-      
+
       return response.data;
     } catch (err) {
       const axiosError = err as AxiosError;
-      setError(axiosError.message || 'Възникна грешка при промяната на ролята на потребителя');
+      setError(axiosError.message || 'An error occurred while changing the user role');
       console.error('Error changing user role:', err);
       return null;
     } finally {
@@ -192,10 +206,10 @@ export const useUsersService = (): UseUsersServiceResult => {
   const searchUsers = useCallback(async (searchTerm: string): Promise<void> => {
     setLoading(true);
     setError(null);
-    
+
     try {
       const response = await usersService.searchUsers(searchTerm);
-      
+
       setUsers(response.data.data);
       setPagination({
         total: response.data.pagination.total,
@@ -205,7 +219,7 @@ export const useUsersService = (): UseUsersServiceResult => {
       });
     } catch (err) {
       const axiosError = err as AxiosError;
-      setError(axiosError.message || 'Възникна грешка при търсенето на потребители');
+      setError(axiosError.message || 'An error occurred while searching for users');
       console.error('Error searching users:', err);
     } finally {
       setLoading(false);
@@ -214,7 +228,7 @@ export const useUsersService = (): UseUsersServiceResult => {
 
   useEffect(() => {
     fetchUsers(pagination.page, pagination.pageSize);
-  }, []);
+  }, [fetchUsers, pagination.page, pagination.pageSize]);
 
   return {
     users,

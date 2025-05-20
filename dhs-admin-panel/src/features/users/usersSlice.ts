@@ -109,12 +109,14 @@ const usersSlice = createSlice({
       .addCase(updateUser.fulfilled, (state, action) => {
         state.loading = false;
         if (action.payload) {
-          const index = state.users.findIndex(user => user.id === action.payload.id);
+          const payload: any = action.payload; // Добавям типа any за payload
+          // Добавям типизиране за user, за да реша проблема с 'never' типа
+          const index = state.users.findIndex((user: any) => user.id === payload.id);
           if (index !== -1) {
-            state.users[index] = action.payload;
+            state.users[index] = payload;
           }
-          if (state.selectedUser?.id === action.payload.id) {
-            state.selectedUser = action.payload;
+          if (state.selectedUser?.id === payload.id) {
+            state.selectedUser = payload;
           }
         }
       })

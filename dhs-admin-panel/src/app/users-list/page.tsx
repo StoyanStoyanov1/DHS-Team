@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Layout from '@/src/components/Layout';
 import Table from '@/src/components/Table';
-import type { ITableColumn } from '@/src/components/Table';
+import type { ITableColumn } from '@/src/components/Table/interfaces';
 import DeleteConfirmationDialog from '@/src/components/Table/DeleteConfirmationDialog';
 import { FilterGroup, SelectedFilters } from '@/src/components/Filter/interfaces';
 import { Edit, Trash2, FileText, MoreVertical, UserIcon, ShieldCheck, Activity } from 'lucide-react';
@@ -153,10 +153,10 @@ function UsersListContent() {
     // The BulkEditBar will automatically show when items are selected
   };
 
-  const handleBulkEdit = async (selectedItems: User[], columnKey: string, newValue: any) => {
+  const handleBulkEdit = async (selectedItems: User[], columnKey: string, newValue: any): Promise<void> => {
     console.log(`Bulk updating ${selectedItems.length} users:`, { columnKey, newValue });
     // In a real app, you would call an API here
-    return new Promise(resolve => setTimeout(resolve, 1000));
+    return new Promise<void>(resolve => setTimeout(resolve, 1000));
   };
 
   const columns: ITableColumn<User>[] = [
@@ -204,7 +204,7 @@ function UsersListContent() {
       labelAll: 'All Roles',
       defaultSelectAll: true,
       hideable: true,
-      sortable: false // Disable sorting for Role
+      sortable: false
     },
     {
       header: 'Status',
@@ -308,11 +308,6 @@ function UsersListContent() {
             }
           ]}
           onBulkEdit={handleBulkEdit}
-          filterGroups={filterGroups}
-          initialFilterValues={{}}
-          onFilterChange={handleFilterChange}
-          showFilter={false}
-          filterTitle="Filter Users"
         />
 
         {showDeleteConfirm && (

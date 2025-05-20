@@ -1,14 +1,14 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
     reactStrictMode: true,
-    // Comment out or remove the export setting for development
-    // output: 'export',
+    // Uncommented for deployment
+    output: 'export',
     images: {
         unoptimized: true
     },
     // Remove trailingSlash if not needed
     // trailingSlash: true,
-    
+
     // Environment variables that will be available at build time
     env: {
         // Debug authentication is enabled by default in development mode
