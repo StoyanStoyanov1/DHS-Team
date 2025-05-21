@@ -37,6 +37,7 @@ import { useTableSelection } from './hooks/useTableSelection';
 import { addTableStyles, isSortableColumn } from './utils';
 import { ActiveFiltersDisplay, ActiveFilterItem } from '../Filter';
 import SelectionOptionsMenu from './SelectionOptionsMenu';
+import SelectionActionsMenu from './SelectionActionsMenu';
 
 export default function Table<T>({
   columns: initialColumns,
@@ -374,41 +375,26 @@ export default function Table<T>({
         {/* Top toolbar with selections, actions and filters */}
         <div className="px-6 py-3 flex flex-wrap items-center justify-between border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 relative">
           <div className="flex items-center space-x-4">
-            <h2 className="text-sm font-medium text-gray-900 dark:text-gray-100">
-              {sortedData.length} {sortedData.length === 1 ? 'item' : 'items'}
+            <div className="flex items-center">
+              <h2 className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                {sortedData.length} {sortedData.length === 1 ? 'item' : 'items'}
+                {selectedItems.length > 0 && (
+                  <span className="ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800 dark:bg-indigo-900 dark:text-indigo-200">
+                    {selectedItems.length} selected
+                  </span>
+                )}
+              </h2>
               {selectedItems.length > 0 && (
-                <span className="ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800 dark:bg-indigo-900 dark:text-indigo-200">
-                  {selectedItems.length} selected
-                </span>
+                <div className="flex items-center">
+                  <SelectionActionsMenu
+                    selectedCount={selectedItems.length}
+                    onUpdate={() => setShowBulkEditBar(true)}
+                    onDelete={() => setShowDeleteConfirmation(true)}
+                    showUpdateOption={editableColumns.length > 0}
+                  />
+                </div>
               )}
-</h2>
-
-            {/* Action buttons */}
-            {selectedItems.length > 0 && (
-              <div className="flex items-center space-x-2">
-                {/* Update button for bulk edits - only show when items are selected */}
-                {editableColumns.length > 0 && (
-                  <button
-                    onClick={() => setShowBulkEditBar(true)}
-                    className="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-700 dark:hover:bg-indigo-800 text-white text-sm rounded-md shadow dark:shadow-indigo-900/30 transition-all duration-200 flex items-center"
-                  >
-                    <PencilIcon size={14} className="mr-1.5" />
-                    Update
-                  </button>
-                )}
-
-                {/* Delete button */}
-                {onBulkEdit && (
-                  <button
-                    onClick={() => setShowDeleteConfirmation(true)}
-                    className="px-3 py-1.5 bg-red-600 hover:bg-red-700 dark:bg-red-700 dark:hover:bg-red-800 text-white text-sm rounded-md shadow dark:shadow-red-900/30 transition-all duration-200 flex items-center"
-                  >
-                    <Trash2 size={14} className="mr-1.5" />
-                    Delete
-                  </button>
-                )}
-              </div>
-            )}
+            </div>
 
             {/* Active filters and sorting display */}
             {(multiSort && sortCriteria.length > 0) || activeColumnFilterCount > 0 ? (
