@@ -23,7 +23,7 @@ interface FormErrors {
 function LoginPageContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
-    const redirectPath = searchParams.get('redirect') || '/';
+    const redirectPath = searchParams?.get('redirect') || '/';
     const { login, error, loading, validationErrors, clearErrors, user } = useAuth();
 
     const [formData, setFormData] = useState({

@@ -6,8 +6,10 @@ const nextConfig = {
     images: {
         unoptimized: true
     },
-    // Remove trailingSlash if not needed
-    // trailingSlash: true,
+    // Add trailingSlash for better Firebase hosting compatibility
+    trailingSlash: true,
+    // Add assetPrefix for Firebase hosting
+    assetPrefix: process.env.NODE_ENV === 'production' ? '/' : '',
 
     // Environment variables that will be available at build time
     env: {

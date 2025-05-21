@@ -13,9 +13,12 @@ const api: AxiosInstance = axios.create({
 
 api.interceptors.request.use(
     (config: InternalAxiosRequestConfig) => {
-        const token = localStorage.getItem('access_token');
-        if (token && config.headers) {
-            config.headers.Authorization = `Bearer ${token}`;
+        // Check if we're in a browser environment before accessing localStorage
+        if (typeof window !== 'undefined') {
+            const token = localStorage.getItem('access_token');
+            if (token && config.headers) {
+                config.headers.Authorization = `Bearer ${token}`;
+            }
         }
         return config;
     },
@@ -42,15 +45,21 @@ api.interceptors.response.use(
 
                 await axios.post(`${baseURL}/api/auth/refresh`, {}, { withCredentials: true });
 
-                const newToken = localStorage.getItem('access_token');
+                // Check if we're in a browser environment before accessing localStorage
+                if (typeof window !== 'undefined') {
+                    const newToken = localStorage.getItem('access_token');
 
-                if (originalRequest.headers && newToken) {
-                    originalRequest.headers.Authorization = `Bearer ${newToken}`;
+                    if (originalRequest.headers && newToken) {
+                        originalRequest.headers.Authorization = `Bearer ${newToken}`;
 
-                    return api(originalRequest);
+                        return api(originalRequest);
+                    }
                 }
             } catch (refreshError) {
-                localStorage.removeItem('access_token');
+                // Check if we're in a browser environment before accessing localStorage
+                if (typeof window !== 'undefined') {
+                    localStorage.removeItem('access_token');
+                }
                 return Promise.reject(refreshError);
             }
         }

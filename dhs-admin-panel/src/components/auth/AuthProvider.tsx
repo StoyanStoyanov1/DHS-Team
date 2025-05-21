@@ -30,7 +30,7 @@ export const AuthProviderContent: React.FC<AuthProviderProps> = ({ children }) =
                 setUser(currentUser);
 
                 if (currentUser) {
-                    const redirectParam = searchParams.get('redirect');
+                    const redirectParam = searchParams?.get('redirect');
                     if (redirectParam) {
                         const decodedRedirect = decodeURIComponent(redirectParam);
                         router.push(decodedRedirect);
