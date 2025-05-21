@@ -31,21 +31,21 @@ function BulkEditBar<T>({
 }: BulkEditBarProps<T>) {
   // Tracks which columns have been enabled for editing
   const [enabledColumns, setEnabledColumns] = useState<Record<string, boolean>>({});
-  
+
   // Store field values being edited
   const [fieldValues, setFieldValues] = useState<Record<string, any>>({});
-  
+
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  
+
   // Initialize enabledColumns and fieldValues
   useEffect(() => {
     const initialEnabled: Record<string, boolean> = {};
     const initialValues: Record<string, any> = {};
-    
+
     editableColumns.forEach(column => {
       initialEnabled[column.columnKey as string] = false;
-      
+
       // Set default values based on type
       if (column.type === 'boolean') {
         initialValues[column.columnKey as string] = null;
@@ -59,7 +59,7 @@ function BulkEditBar<T>({
         initialValues[column.columnKey as string] = '';
       }
     });
-    
+
     setEnabledColumns(initialEnabled);
     setFieldValues(initialValues);
   }, [editableColumns]);
@@ -87,35 +87,35 @@ function BulkEditBar<T>({
       (Array.isArray(fieldValues[key]) ? fieldValues[key].length > 0 : true)
     );
   };
-  
+
   // Handle form submission
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     const enabledColumnsArray = Object.entries(enabledColumns)
       .filter(([_, isEnabled]) => isEnabled)
       .map(([key]) => key);
-    
+
     if (enabledColumnsArray.length === 0) {
       setError('Please select at least one field to edit');
       return;
     }
-    
+
     // For each enabled column, validate and apply changes
     try {
       setIsSubmitting(true);
       setError(null);
-      
+
       // Process each enabled column one by one
       for (const columnKey of enabledColumnsArray) {
         const column = editableColumns.find(col => col.columnKey === columnKey);
         const value = fieldValues[columnKey];
-        
+
         // Skip if no value is selected
         if (value === null || value === '' || (Array.isArray(value) && value.length === 0)) {
           continue;
         }
-        
+
         // Validate if there's a validator
         if (column?.validator) {
           const validationResult = column.validator(value);
@@ -129,11 +129,11 @@ function BulkEditBar<T>({
             return;
           }
         }
-        
+
         // Apply the bulk edit
         await onBulkEdit(selectedItems, columnKey, value);
       }
-      
+
       // Reset form after successful submission
       onCancel();
     } catch (err) {
@@ -142,7 +142,7 @@ function BulkEditBar<T>({
       setIsSubmitting(false);
     }
   };
-  
+
   // Handle ESC key to close the modal
   const handleEscKey = useCallback((e: KeyboardEvent) => {
     if (e.key === 'Escape' && !isSubmitting) {
@@ -168,35 +168,35 @@ function BulkEditBar<T>({
       document.removeEventListener('keydown', handleEscKey);
     };
   }, [handleEscKey]);
-  
+
   // Render input control based on column type
   const renderInputControl = (column: EditableColumn<T>) => {
     const { columnKey, type, options, minValue, maxValue, step = 1 } = column;
     const value = fieldValues[columnKey];
-    
+
     if (!enabledColumns[columnKey]) {
       return (
-        <div className="text-gray-500 italic text-sm">Enable this field to edit</div>
+        <div className="text-gray-500 dark:text-gray-400 italic text-sm transition-colors duration-200">Enable this field to edit</div>
       );
     }
-    
+
     switch (type) {
       case 'text':
         return (
           <input
             type="text"
-            className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+            className="block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 dark:focus:ring-indigo-400 dark:focus:border-indigo-400 sm:text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 transition-colors duration-200"
             value={value || ''}
             onChange={(e) => handleFieldValueChange(columnKey, e.target.value)}
             placeholder={`Enter ${column.label.toLowerCase()}`}
           />
         );
-        
+
       case 'number':
         return (
           <input
             type="number"
-            className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+            className="block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 dark:focus:ring-indigo-400 dark:focus:border-indigo-400 sm:text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 transition-colors duration-200"
             value={value === null ? '' : value}
             min={minValue}
             max={maxValue}
@@ -205,27 +205,27 @@ function BulkEditBar<T>({
             placeholder={`Enter ${column.label.toLowerCase()}`}
           />
         );
-        
+
       case 'select':
         return (
           <select
-            className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+            className="block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 dark:focus:ring-indigo-400 dark:focus:border-indigo-400 sm:text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-colors duration-200"
             value={value === null ? '' : value}
             onChange={(e) => handleFieldValueChange(columnKey, e.target.value)}
           >
-            <option value="">-- Select {column.label.toLowerCase()} --</option>
+            <option value="" className="dark:bg-gray-700">-- Select {column.label.toLowerCase()} --</option>
             {options?.map((option) => (
-              <option key={option.value} value={option.value}>
+              <option key={option.value} value={option.value} className="dark:bg-gray-700">
                 {option.label}
               </option>
             ))}
           </select>
         );
-        
+
       case 'multiselect':
         return (
           <select
-            className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+            className="block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 dark:focus:ring-indigo-400 dark:focus:border-indigo-400 sm:text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-colors duration-200"
             value={value || []}
             onChange={(e) => {
               const selectedOptions = Array.from(e.target.selectedOptions).map(opt => opt.value);
@@ -234,59 +234,59 @@ function BulkEditBar<T>({
             multiple
           >
             {options?.map((option) => (
-              <option key={option.value} value={option.value}>
+              <option key={option.value} value={option.value} className="dark:bg-gray-700">
                 {option.label}
               </option>
             ))}
           </select>
         );
-        
+
       case 'boolean':
         const trueLabel = column.trueLabel || 'Active';
         const falseLabel = column.falseLabel || 'Inactive';
-        
+
         return (
           <div className="space-y-3">
             <div 
               className={`flex items-center gap-3 p-2 rounded-md border cursor-pointer transition-all ${
                 value === true 
-                  ? 'border-indigo-500 bg-indigo-50' 
-                  : 'border-gray-300 hover:bg-gray-50'
+                  ? 'border-indigo-500 bg-indigo-50 dark:bg-indigo-900/30 dark:border-indigo-400' 
+                  : 'border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600'
               }`}
               onClick={() => handleFieldValueChange(columnKey, true)}
             >
-              <div className={`p-1 rounded-full ${value === true ? 'bg-indigo-600 text-white' : 'bg-gray-200 text-gray-500'}`}>
+              <div className={`p-1 rounded-full ${value === true ? 'bg-indigo-600 dark:bg-indigo-500 text-white' : 'bg-gray-200 dark:bg-gray-600 text-gray-500 dark:text-gray-400'}`}>
                 <ToggleRight size={18} />
               </div>
-              <span className={`font-medium ${value === true ? 'text-indigo-700' : 'text-gray-700'}`}>{trueLabel}</span>
+              <span className={`font-medium ${value === true ? 'text-indigo-700 dark:text-indigo-300' : 'text-gray-700 dark:text-gray-300'} transition-colors duration-200`}>{trueLabel}</span>
             </div>
-            
+
             <div 
               className={`flex items-center gap-3 p-2 rounded-md border cursor-pointer transition-all ${
                 value === false 
-                  ? 'border-indigo-500 bg-indigo-50' 
-                  : 'border-gray-300 hover:bg-gray-50'
+                  ? 'border-indigo-500 bg-indigo-50 dark:bg-indigo-900/30 dark:border-indigo-400' 
+                  : 'border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600'
               }`}
               onClick={() => handleFieldValueChange(columnKey, false)}
             >
-              <div className={`p-1 rounded-full ${value === false ? 'bg-indigo-600 text-white' : 'bg-gray-200 text-gray-500'}`}>
+              <div className={`p-1 rounded-full ${value === false ? 'bg-indigo-600 dark:bg-indigo-500 text-white' : 'bg-gray-200 dark:bg-gray-600 text-gray-500 dark:text-gray-400'}`}>
                 <ToggleLeft size={18} />
               </div>
-              <span className={`font-medium ${value === false ? 'text-indigo-700' : 'text-gray-700'}`}>{falseLabel}</span>
+              <span className={`font-medium ${value === false ? 'text-indigo-700 dark:text-indigo-300' : 'text-gray-700 dark:text-gray-300'} transition-colors duration-200`}>{falseLabel}</span>
             </div>
           </div>
         );
-        
+
       default:
         return null;
     }
   };
-  
+
   if (selectedItems.length === 0) return null;
-  
+
   // Convert pageTitle to singular if needed (simple English rule)
   const singularTitle = pageTitle.endsWith('s') ? pageTitle.slice(0, -1) : pageTitle;
-  
+
   return (
     <>
       {/* Overlay */}
@@ -300,14 +300,14 @@ function BulkEditBar<T>({
         }}
       >
         {/* Modal */}
-        <div className="bg-white rounded-lg shadow-xl p-6 w-[550px] max-w-[90%] z-50 animate-scale-in max-h-[90vh] overflow-y-auto">
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl dark:shadow-black/30 p-6 w-[550px] max-w-[90%] z-50 animate-scale-in max-h-[90vh] overflow-y-auto transition-colors duration-200">
           <div className="flex items-center justify-between mb-2">
-            <h3 className="text-xl font-semibold text-gray-800">
+            <h3 className="text-xl font-semibold text-gray-800 dark:text-white transition-colors duration-200">
               Update {pageTitle}
             </h3>
             <button
               type="button"
-              className="p-1 rounded-full text-gray-600 hover:text-gray-800 hover:bg-gray-100 focus:outline-none"
+              className="p-1 rounded-full text-gray-600 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none transition-colors duration-200"
               onClick={onCancel}
               aria-label="Close"
             >
@@ -315,8 +315,8 @@ function BulkEditBar<T>({
             </button>
           </div>
 
-          <div className="mb-4 pb-4 border-b border-gray-200">
-            <p className="text-sm text-gray-700">
+          <div className="mb-4 pb-4 border-b border-gray-200 dark:border-gray-700 transition-colors duration-200">
+            <p className="text-sm text-gray-700 dark:text-gray-300 transition-colors duration-200">
               Updating {selectedItems.length} {selectedItems.length === 1 ? singularTitle : pageTitle}
             </p>
           </div>
@@ -325,26 +325,26 @@ function BulkEditBar<T>({
             {/* Fields to edit */}
             <div className="space-y-4">
               {editableColumns.map((column) => (
-                <div key={column.columnKey} className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                <div key={column.columnKey} className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg border border-gray-200 dark:border-gray-600 transition-colors duration-200">
                   <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center gap-2">
-                      <h4 className="text-base font-semibold text-gray-800">{column.label}</h4>
+                      <h4 className="text-base font-semibold text-gray-800 dark:text-white transition-colors duration-200">{column.label}</h4>
                     </div>
                     <button
                       type="button"
                       className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
-                        enabledColumns[column.columnKey] ? 'bg-indigo-600' : 'bg-gray-200'
+                        enabledColumns[column.columnKey] ? 'bg-indigo-600 dark:bg-indigo-500' : 'bg-gray-200 dark:bg-gray-600'
                       }`}
                       onClick={() => handleToggleColumn(column.columnKey)}
                     >
                       <span 
-                        className={`inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
+                        className={`inline-block h-5 w-5 transform rounded-full bg-white dark:bg-gray-200 shadow ring-0 transition duration-200 ease-in-out ${
                           enabledColumns[column.columnKey] ? 'translate-x-5' : 'translate-x-0'
                         }`} 
                       />
                     </button>
                   </div>
-                  
+
                   <div className={`transition-all duration-300 ${enabledColumns[column.columnKey] ? 'opacity-100' : 'opacity-50'}`}>
                     {renderInputControl(column)}
                   </div>
@@ -353,32 +353,32 @@ function BulkEditBar<T>({
             </div>
 
             {error && (
-              <div className="rounded-md bg-red-50 p-3 border border-red-200">
+              <div className="rounded-md bg-red-50 dark:bg-red-900/30 p-3 border border-red-200 dark:border-red-800 transition-colors duration-200">
                 <div className="flex">
                   <div className="flex-shrink-0">
-                    <AlertTriangle className="h-5 w-5 text-red-400" />
+                    <AlertTriangle className="h-5 w-5 text-red-400 dark:text-red-300" />
                   </div>
                   <div className="ml-3">
-                    <p className="text-sm text-red-700">{error}</p>
+                    <p className="text-sm text-red-700 dark:text-red-300">{error}</p>
                   </div>
                 </div>
               </div>
             )}
 
-            <div className="flex justify-end space-x-3 pt-3 border-t border-gray-200">
+            <div className="flex justify-end space-x-3 pt-3 border-t border-gray-200 dark:border-gray-700 transition-colors duration-200">
               <button
                 type="button"
-                className="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-indigo-400 dark:focus:ring-offset-gray-800 transition-colors duration-200"
                 onClick={onCancel}
               >
                 Cancel
               </button>
               <button
                 type="submit"
-                className={`px-6 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white 
+                className={`px-6 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white transition-colors duration-200
                   ${hasChanges() 
-                    ? 'bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500' 
-                    : 'bg-indigo-300 cursor-not-allowed'
+                    ? 'bg-indigo-600 dark:bg-indigo-500 hover:bg-indigo-700 dark:hover:bg-indigo-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-indigo-400 dark:focus:ring-offset-gray-800' 
+                    : 'bg-indigo-300 dark:bg-indigo-400/50 cursor-not-allowed'
                   }`}
                 disabled={isSubmitting || !hasChanges()}
               >
