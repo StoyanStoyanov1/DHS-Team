@@ -29,7 +29,7 @@ function TableRow<T>({
   ? 'bg-white dark:bg-gray-900' 
   : 'bg-gray-100 dark:bg-gray-850';
 
-  
+
   // Calculate dynamic row class name
   const dynamicRowClass = typeof rowClassName === 'function' 
     ? rowClassName(item) 
@@ -37,7 +37,7 @@ function TableRow<T>({
 
   // Determine if the row is selected
   const selectedRowClass = isSelected 
-    ? 'bg-indigo-50 dark:bg-indigo-900/30 border-l-4 border-indigo-500 dark:border-indigo-400 shadow-sm' 
+    ? 'bg-indigo-50 dark:bg-indigo-900/30 border-indigo-500 dark:border-indigo-400 shadow-sm' 
     : '';
 
   return (
@@ -78,7 +78,7 @@ function TableRow<T>({
           key={`${keyExtractor(item)}-${column.key}`}
           className={`px-6 py-4 whitespace-nowrap transition-colors ${column.className || ''} ${
             isSelected 
-              ? 'text-indigo-900 dark:text-indigo-100 font-medium' 
+              ? 'text-indigo-900 dark:text-indigo-100 font-medium bg-indigo-50 dark:bg-indigo-900/30' 
               : 'text-gray-700 dark:text-white'
           } group-hover:text-gray-900 dark:group-hover:text-white`}
           onContextMenu={(e) => {

@@ -346,8 +346,8 @@ export default function Table<T>({
             <h2 className="text-sm font-medium text-gray-900 dark:text-gray-100">
               {sortedData.length} {sortedData.length === 1 ? 'item' : 'items'}
               {selectedItems.length > 0 && (
-                <span className="ml-2 text-gray-600 dark:text-gray-400">
-                  ({selectedItems.length} selected)
+                <span className="ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800 dark:bg-indigo-900 dark:text-indigo-200">
+                  {selectedItems.length} selected
                 </span>
               )}
 </h2>

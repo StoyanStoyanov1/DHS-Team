@@ -161,7 +161,7 @@ function TableHeader<T>({
                 />
                 <div className={`pointer-events-none absolute left-0 top-0 flex h-full w-full items-center justify-center transition-opacity ${isPartiallySelected ? 'opacity-100' : (isAllSelected ? 'opacity-100' : 'opacity-0')}`}>
                   {isPartiallySelected ? (
-                    <div className="h-2 w-2 rounded-sm bg-white"></div>
+                    <div className="h-[2px] w-2 bg-white"></div>
                   ) : (
                     <svg className="h-3 w-3 fill-white stroke-white" viewBox="0 0 16 16">
                       <path d="M4 8l3 3 5-5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
