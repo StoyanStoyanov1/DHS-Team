@@ -36,6 +36,7 @@ import { useTableSort } from './hooks/useTableSort';
 import { useTableSelection } from './hooks/useTableSelection';
 import { addTableStyles, isSortableColumn } from './utils';
 import { ActiveFiltersDisplay, ActiveFilterItem } from '../Filter';
+import SelectionOptionsMenu from './SelectionOptionsMenu';
 
 export default function Table<T>({
   columns: initialColumns,
@@ -195,7 +196,9 @@ export default function Table<T>({
     toggleSelectAll,
     toggleSelectItem,
     isItemSelected,
-    clearSelection
+    clearSelection,
+    selectCurrentPageItems,
+    selectAllItems
   } = useTableSelection({
     data: sortedData,
     keyExtractor,
@@ -439,6 +442,7 @@ export default function Table<T>({
 
           {/* Add page size control to the top toolbar */}
           <div className="flex items-center space-x-2">
+
             {/* Refresh icon button - elegant circle design with animation */}
             <button
               onClick={() => {
@@ -518,6 +522,12 @@ export default function Table<T>({
               isAllSelected={isAllSelected}
               isPartiallySelected={isPartiallySelected}
               toggleSelectAll={toggleSelectAll}
+              selectedCount={selectedItems.length}
+              totalCount={sortedData.length}
+              currentPageCount={paginatedData.length}
+              onSelectCurrentPage={selectCurrentPageItems}
+              onSelectAll={selectAllItems}
+              onClearSelection={clearSelection}
             />
 
             <TableBody
@@ -570,6 +580,8 @@ export default function Table<T>({
           setShowBulkEditBar(false);
         } : undefined}
         onSelectAll={() => toggleSelectAll()}
+        onSelectAllPages={() => selectAllItems()}
+        totalItemCount={sortedData.length}
       />
 
       {/* Bulk Edit Bar */}

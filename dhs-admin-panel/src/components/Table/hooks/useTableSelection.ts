@@ -20,6 +20,7 @@ export interface UseTableSelectionReturn<T> {
   clearSelection: () => void;
   selectItems: (items: T[]) => void;
   selectCurrentPageItems: () => void;
+  selectAllItems: () => void;
 }
 
 export function useTableSelection<T>({
@@ -38,7 +39,7 @@ export function useTableSelection<T>({
   // Calculate current page items for page-specific selection
   const getCurrentPageItems = useCallback(() => {
     if (!currentPage || !itemsPerPage) return data;
-    
+
     const startIndex = (currentPage - 1) * itemsPerPage;
     const endIndex = startIndex + itemsPerPage;
     return data.slice(startIndex, endIndex);
@@ -62,7 +63,7 @@ export function useTableSelection<T>({
       const newSelectedItems = selectedItems.filter(item => 
         currentIds.has(keyExtractor(item))
       );
-      
+
       if (newSelectedItems.length !== selectedItems.length) {
         setSelectedItems(newSelectedItems);
         setSelectedItemIds(new Set(newSelectedItems.map(item => keyExtractor(item))));
@@ -81,7 +82,7 @@ export function useTableSelection<T>({
       // If all items on current page are selected, unselect them
       const currentPageIds = new Set(currentPageItems.map(item => keyExtractor(item)));
       const newSelectedItems = selectedItems.filter(item => !currentPageIds.has(keyExtractor(item)));
-      
+
       setSelectedItems(newSelectedItems);
       setSelectedItemIds(new Set(newSelectedItems.map(item => keyExtractor(item))));
     } else {
@@ -90,13 +91,13 @@ export function useTableSelection<T>({
       const newSelectedItemIds = new Set(selectedItemIds);
       // Добавяме новите ID-та към съществуващия Set
       currentPageItemIds.forEach(id => newSelectedItemIds.add(id));
-      
+
       // Find the actual items from data that correspond to the selected IDs
       const allSelectedItems = [
         ...selectedItems,
         ...currentPageItems.filter(item => !selectedItemIds.has(keyExtractor(item)))
       ];
-      
+
       setSelectedItems(allSelectedItems);
       setSelectedItemIds(newSelectedItemIds);
     }
@@ -105,18 +106,18 @@ export function useTableSelection<T>({
   // Select all items on the current page
   const selectCurrentPageItems = useCallback(() => {
     if (currentPageItems.length === 0) return;
-    
+
     const currentPageItemIds = currentPageItems.map(item => keyExtractor(item));
     const newSelectedItemIds = new Set(selectedItemIds);
     // Добавяме новите ID-та към съществуващия Set
     currentPageItemIds.forEach(id => newSelectedItemIds.add(id));
-    
+
     // Find the actual items from data that correspond to the selected IDs
     const allSelectedItems = [
       ...selectedItems,
       ...currentPageItems.filter(item => !selectedItemIds.has(keyExtractor(item)))
     ];
-    
+
     setSelectedItems(allSelectedItems);
     setSelectedItemIds(newSelectedItemIds);
   }, [currentPageItems, keyExtractor, selectedItems, selectedItemIds]);
@@ -150,6 +151,14 @@ export function useTableSelection<T>({
     setSelectedItemIds(new Set(items.map(item => keyExtractor(item))));
   }, [keyExtractor]);
 
+  // Select all items across all pages
+  const selectAllItems = useCallback(() => {
+    if (data.length === 0) return;
+
+    setSelectedItems(data);
+    setSelectedItemIds(new Set(data.map(item => keyExtractor(item))));
+  }, [data, keyExtractor]);
+
   return {
     selectedItems,
     selectedItemIds,
@@ -161,5 +170,6 @@ export function useTableSelection<T>({
     clearSelection,
     selectItems,
     selectCurrentPageItems,
+    selectAllItems,
   };
 }

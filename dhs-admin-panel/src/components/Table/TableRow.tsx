@@ -25,10 +25,11 @@ function TableRow<T>({
   rowIndex,
 }: TableRowProps<T>) {
   // Apply alternating row background colors - improving dark mode with more appropriate colors
-  const alternatingRowClass = rowIndex % 2 === 0 
-  ? 'bg-white dark:bg-gray-900' 
-  : 'bg-gray-100 dark:bg-gray-850';
-
+  const alternatingRowClass = isSelected 
+    ? '' // Don't apply alternating colors to selected rows
+    : (rowIndex % 2 === 0 
+      ? 'bg-white dark:bg-gray-900' 
+      : 'bg-gray-100 dark:bg-gray-850');
 
   // Calculate dynamic row class name
   const dynamicRowClass = typeof rowClassName === 'function' 
@@ -37,7 +38,7 @@ function TableRow<T>({
 
   // Determine if the row is selected
   const selectedRowClass = isSelected 
-    ? 'bg-indigo-50 dark:bg-indigo-900/30 border-indigo-500 dark:border-indigo-400 shadow-sm' 
+    ? '!bg-indigo-50 dark:!bg-indigo-900/30 border-indigo-500 dark:border-indigo-400 shadow-sm' 
     : '';
 
   return (
@@ -78,7 +79,7 @@ function TableRow<T>({
           key={`${keyExtractor(item)}-${column.key}`}
           className={`px-6 py-4 whitespace-nowrap transition-colors ${column.className || ''} ${
             isSelected 
-              ? 'text-indigo-900 dark:text-indigo-100 font-medium bg-indigo-50 dark:bg-indigo-900/30' 
+              ? 'text-indigo-900 dark:text-white font-medium' 
               : 'text-gray-700 dark:text-white'
           } group-hover:text-gray-900 dark:group-hover:text-white`}
           onContextMenu={(e) => {

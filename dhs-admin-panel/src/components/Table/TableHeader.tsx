@@ -2,6 +2,7 @@ import React from 'react';
 import { ITableColumn, SortDirection, SortCriterion } from './interfaces';
 import { ArrowUp } from 'lucide-react';
 import ColumnMenu from './ColumnMenu';
+import SelectionOptionsMenu from './SelectionOptionsMenu';
 
 interface TableHeaderProps<T> {
   columns: ITableColumn<T>[];
@@ -19,6 +20,13 @@ interface TableHeaderProps<T> {
   isAllSelected: boolean;
   isPartiallySelected: boolean;
   toggleSelectAll: () => void;
+  // SelectionOptionsMenu props
+  selectedCount: number;
+  totalCount: number;
+  currentPageCount: number;
+  onSelectCurrentPage: () => void;
+  onSelectAll: () => void;
+  onClearSelection: () => void;
 }
 
 function TableHeader<T>({
@@ -37,6 +45,13 @@ function TableHeader<T>({
   isAllSelected,
   isPartiallySelected,
   toggleSelectAll,
+  // SelectionOptionsMenu props
+  selectedCount,
+  totalCount,
+  currentPageCount,
+  onSelectCurrentPage,
+  onSelectAll,
+  onClearSelection,
 }: TableHeaderProps<T>) {
   const renderSortIndicator = (columnKey: string) => {
     if (!multiSort) {
@@ -64,7 +79,7 @@ function TableHeader<T>({
                 ? sortDirection === 'asc' 
                   ? 'bg-indigo-100 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-400 rotate-0' 
                   : 'bg-indigo-100 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-400 rotate-180' 
-                : 'bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500 hover:bg-gray-200 dark:hover:bg-gray-600'
+                : 'bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
             }`}
             title={isColumnSorted 
               ? sortDirection === 'asc' 
@@ -97,7 +112,7 @@ function TableHeader<T>({
             e.currentTarget.classList.remove('dragging');
           }}
         >
-          <div className="w-5 h-5 rounded-full bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500 hover:bg-gray-200 dark:hover:bg-gray-600 flex items-center justify-center">
+          <div className="w-5 h-5 rounded-full bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 flex items-center justify-center">
             <ArrowUp size={14} />
           </div>
         </div>
@@ -148,27 +163,19 @@ function TableHeader<T>({
     <thead className="bg-gray-50 dark:bg-gray-800 border-y border-gray-200 dark:border-gray-700 sticky top-0 z-10">
       <tr className="shadow-sm dark:shadow-gray-900">
         {showSelectionColumn && (
-          <th className="w-12 px-4 py-3 border-r border-gray-200 dark:border-gray-700">
+          <th className="w-auto px-4 py-3 border-r border-gray-200 dark:border-gray-700">
             <div className="flex items-center justify-center">
-              <div className="relative">
-                <input
-                  type="checkbox"
-                  className="h-4 w-4 cursor-pointer appearance-none rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 
-                  checked:border-indigo-500 checked:bg-indigo-500 dark:checked:bg-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-200 dark:focus:ring-indigo-800"
-                  checked={isAllSelected}
-                  onChange={toggleSelectAll}
-                  title={isAllSelected ? 'Премахване на селекцията' : 'Избиране на всички редове'}
-                />
-                <div className={`pointer-events-none absolute left-0 top-0 flex h-full w-full items-center justify-center transition-opacity ${isPartiallySelected ? 'opacity-100' : (isAllSelected ? 'opacity-100' : 'opacity-0')}`}>
-                  {isPartiallySelected ? (
-                    <div className="h-[2px] w-2 bg-white"></div>
-                  ) : (
-                    <svg className="h-3 w-3 fill-white stroke-white" viewBox="0 0 16 16">
-                      <path d="M4 8l3 3 5-5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                    </svg>
-                  )}
-                </div>
-              </div>
+              <SelectionOptionsMenu
+                selectedCount={selectedCount}
+                totalCount={totalCount}
+                currentPageCount={currentPageCount}
+                onSelectCurrentPage={onSelectCurrentPage}
+                onSelectAll={onSelectAll}
+                onClearSelection={onClearSelection}
+                isAllSelected={isAllSelected}
+                isPartiallySelected={isPartiallySelected}
+                isAllCurrentPageSelected={selectedCount >= currentPageCount && currentPageCount > 0}
+              />
             </div>
           </th>
         )}
