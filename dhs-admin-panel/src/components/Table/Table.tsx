@@ -562,11 +562,17 @@ export default function Table<T>({
         onResetAllFilters={resetColumnFilters}
         selectedItemCount={selectedItems.length}
         onDeleteSelected={selectedItems.length > 0 ? () => {
-          clearSelection();
-          setShowBulkEditBar(false);
+          setShowDeleteConfirmation(true);
+          handleCloseContextMenu();
         } : undefined}
+        onUpdateSelected={selectedItems.length > 0 && editableColumns.length > 0 ? () => {
+          setShowBulkEditBar(true);
+          handleCloseContextMenu();
+        } : undefined}
+        showUpdateOption={editableColumns.length > 0}
         onSelectAll={() => toggleSelectAll()}
         onSelectAllPages={() => selectAllItems()}
+        onClearSelection={clearSelection}
         totalItemCount={sortedData.length}
       />
 

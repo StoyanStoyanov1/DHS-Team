@@ -12,7 +12,8 @@ import {
   ArrowDown,
   ChevronRight,
   Trash2,
-  CheckSquare
+  CheckSquare,
+  PencilIcon
 } from 'lucide-react';
 import { SelectedFilters } from '../Filter/interfaces';
 import FilterRenderer from '../Filter/FilterRenderer';
@@ -33,9 +34,12 @@ interface TableContextMenuProps<T> {
   onResetAllFilters?: () => void;
   selectedItemCount?: number;
   onDeleteSelected?: () => void;
+  onUpdateSelected?: () => void;
   onSelectAll?: () => void;
   onSelectAllPages?: () => void;
+  onClearSelection?: () => void;
   totalItemCount?: number;
+  showUpdateOption?: boolean;
 }
 
 export default function TableContextMenu<T>({
@@ -53,9 +57,12 @@ export default function TableContextMenu<T>({
   onResetAllFilters,
   selectedItemCount = 0,
   onDeleteSelected,
+  onUpdateSelected,
   onSelectAll,
   onSelectAllPages,
+  onClearSelection,
   totalItemCount = 0,
+  showUpdateOption = false,
 }: TableContextMenuProps<T>) {
   const [selectedColumn, setSelectedColumn] = useState<string | null>(null);
   const [filterValue, setFilterValue] = useState<any>(null);
@@ -452,19 +459,38 @@ export default function TableContextMenu<T>({
           </div>
 
           {/* Selection specific actions */}
-          {selectedItemCount > 0 && onDeleteSelected && (
+          {selectedItemCount > 0 && (
             <div className="py-1 border-b border-gray-100 dark:border-gray-700">
-              <button
-                className="w-full text-left px-3 py-2 text-sm hover:bg-red-50 dark:hover:bg-red-900/30 hover:text-red-600 dark:hover:text-red-400 flex items-center"
-                onClick={() => {
-                  onDeleteSelected();
-                  onClose();
-                }}
-              >
-                <Trash2 size={16} className="mr-2 text-red-500 dark:text-red-400" />
-                <span className="dark:text-white">Delete Selected ({selectedItemCount})</span>
-              </button>
+              {showUpdateOption && onUpdateSelected && (
+                <button
+                  className="w-full text-left px-3 py-2 text-sm hover:bg-indigo-50 dark:hover:bg-indigo-900/30 hover:text-indigo-600 dark:hover:text-indigo-400 flex items-center"
+                  onClick={() => {
+                    onUpdateSelected();
+                    onClose();
+                  }}
+                >
+                  <PencilIcon size={16} className="mr-2 text-indigo-500 dark:text-indigo-400" />
+                  <span className="dark:text-white">Update Selected ({selectedItemCount})</span>
+                </button>
+              )}
+              {onDeleteSelected && (
+                <button
+                  className="w-full text-left px-3 py-2 text-sm hover:bg-red-50 dark:hover:bg-red-900/30 hover:text-red-600 dark:hover:text-red-400 flex items-center"
+                  onClick={() => {
+                    onDeleteSelected();
+                    onClose();
+                  }}
+                >
+                  <Trash2 size={16} className="mr-2 text-red-500 dark:text-red-400" />
+                  <span className="dark:text-white">Delete Selected ({selectedItemCount})</span>
+                </button>
+              )}
+            </div>
+          )}
 
+          {/* Selection options - always shown */}
+          {(onSelectAll || onSelectAllPages) && (
+            <div className="py-1 border-b border-gray-100 dark:border-gray-700">
               {onSelectAll && (
                 <button
                   className="w-full text-left px-3 py-2 text-sm hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center"
@@ -488,6 +514,19 @@ export default function TableContextMenu<T>({
                 >
                   <CheckSquare size={16} className="mr-2 text-indigo-600 dark:text-indigo-400" />
                   <span className="dark:text-white">Select all items ({totalItemCount})</span>
+                </button>
+              )}
+
+              {selectedItemCount > 0 && onClearSelection && (
+                <button
+                  className="w-full text-left px-3 py-2 text-sm hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center text-red-600 dark:text-red-400"
+                  onClick={() => {
+                    onClearSelection();
+                    onClose();
+                  }}
+                >
+                  <X size={16} className="mr-2" />
+                  <span>Clear selection</span>
                 </button>
               )}
             </div>

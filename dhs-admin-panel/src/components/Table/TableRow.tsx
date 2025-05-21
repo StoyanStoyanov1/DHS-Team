@@ -50,7 +50,16 @@ function TableRow<T>({
       onContextMenu={(e) => onContextMenu && onContextMenu(e, item)}
     >
       {showSelectionColumn && (
-        <td className="w-12 px-4 py-3 whitespace-nowrap border-r border-gray-200 dark:border-gray-700">
+        <td 
+          className="w-12 px-4 py-3 whitespace-nowrap border-r border-gray-200 dark:border-gray-700"
+          onContextMenu={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            if (onContextMenu) {
+              onContextMenu(e, item);
+            }
+          }}
+        >
           <div className="flex items-center justify-center">
             <div className="relative">
               <input
