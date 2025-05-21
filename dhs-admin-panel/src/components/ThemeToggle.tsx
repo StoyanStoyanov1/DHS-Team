@@ -10,10 +10,34 @@ export function ThemeToggle() {
   const { theme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
+  const [systemTheme, setSystemTheme] = useState<"dark" | "light">("light");
 
   // Avoid hydration mismatch by only rendering client-side
   useEffect(() => {
     setMounted(true);
+
+    // Detect system theme
+    const detectSystemTheme = () => {
+      const isDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+      setSystemTheme(isDark ? "dark" : "light");
+    };
+
+    // Initial detection
+    detectSystemTheme();
+
+    // Listen for changes in system theme
+    const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+    const handleChange = (e: MediaQueryListEvent) => {
+      setSystemTheme(e.matches ? "dark" : "light");
+    };
+
+    // Add event listener
+    mediaQuery.addEventListener("change", handleChange);
+
+    // Cleanup
+    return () => {
+      mediaQuery.removeEventListener("change", handleChange);
+    };
   }, []);
 
   if (!mounted) return null;
@@ -35,24 +59,24 @@ export function ThemeToggle() {
           `}
         >
           <span className="sr-only">Toggle theme</span>
-          
+
           {/* Light mode icon with animation */}
           <span 
             className={`
               absolute inset-0 flex items-center justify-center
               transition-all duration-500 ease-spring
-              ${theme === 'dark' ? 'translate-y-10 opacity-0' : 'translate-y-0 opacity-100'}
+              ${(theme === 'dark' || (theme === 'system' && systemTheme === 'dark')) ? 'translate-y-10 opacity-0' : 'translate-y-0 opacity-100'}
             `}
           >
             <Sun className="h-5 w-5 text-amber-500 animate-slight-pulse" />
           </span>
-          
+
           {/* Dark mode icon with animation */}
           <span 
             className={`
               absolute inset-0 flex items-center justify-center
               transition-all duration-500 ease-spring
-              ${theme === 'light' ? 'translate-y-10 opacity-0' : 'translate-y-0 opacity-100'}
+              ${(theme === 'light' || (theme === 'system' && systemTheme === 'light')) ? 'translate-y-10 opacity-0' : 'translate-y-0 opacity-100'}
             `}
           >
             <Moon className="h-5 w-5 text-indigo-400" />
@@ -64,7 +88,7 @@ export function ThemeToggle() {
           )}
         </Button>
       </PopoverTrigger>
-      
+
       <PopoverContent 
         className="w-[200px] p-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-lg dark:shadow-gray-900/30"
         sideOffset={8}
@@ -87,7 +111,7 @@ export function ThemeToggle() {
             <Sun className={`h-5 w-5 ${theme === "light" ? "text-white" : "text-amber-500"}`} />
             <span className="font-medium">Light Mode</span>
           </Button>
-          
+
           <Button
             variant={theme === "dark" ? "default" : "ghost"}
             className={`
@@ -105,7 +129,7 @@ export function ThemeToggle() {
             <Moon className={`h-5 w-5 ${theme === "dark" ? "text-white" : "text-indigo-400"}`} />
             <span className="font-medium">Dark Mode</span>
           </Button>
-          
+
           <Button
             variant={theme === "system" ? "default" : "ghost"}
             className={`
@@ -124,7 +148,7 @@ export function ThemeToggle() {
             <span className="font-medium">System Default</span>
           </Button>
         </div>
-        
+
         <div className="mt-2 pt-2 border-t border-gray-200 dark:border-gray-700">
           <p className="text-xs text-center text-gray-500 dark:text-gray-400">
             {theme === "system" ? "Following your system preference" : 
