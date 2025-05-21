@@ -6,6 +6,7 @@ import {
 } from 'lucide-react';
 import { SelectedFilters } from '../Filter/interfaces';
 import FilterRenderer from '../Filter/FilterRenderer';
+import { DirectCalendarFilter } from '../Filter/DateRangeFilter';
 
 interface ColumnMenuProps<T> {
   column: ITableColumn<T>;
@@ -104,7 +105,16 @@ export default function ColumnMenu<T>({
       <div className={`flex items-center column-menu-actions ${hasActiveFilter ? 'active' : ''}`}>
         {column.filterable && (
           <div className="flex items-center">
-           
+            {hasActiveFilter && (
+              <button 
+                onClick={handleFilterClear}
+                className="p-1 rounded-md mr-1 text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 hover:bg-red-50 dark:hover:bg-red-900/20 focus:outline-none transition-colors duration-150"
+                aria-label={`Clear filter for ${column.header}`}
+                title={`Clear filter for ${column.header}`}
+              >
+                <X size={14} />
+              </button>
+            )}
             <button 
               onClick={toggleMenu}
               className={`p-1 rounded-md mr-1 focus:outline-none transition-colors duration-150 ${
@@ -152,26 +162,48 @@ export default function ColumnMenu<T>({
       )}
 
       {isMenuOpen && column.filterType !== 'search' && (
-        <div 
-          className={`absolute z-50 mt-1 right-0 transform origin-top-right bg-white dark:bg-gray-800 rounded-md shadow-lg border border-gray-200 dark:border-gray-700 ${column.filterType === 'daterange' ? 'min-w-[320px]' : 'min-w-[160px]'}`}
-          style={{
-            animation: 'menuAppear 0.2s ease-out forwards'
-          }}
-        >
-          <div className="mb-2 pb-1 border-b border-gray-100 dark:border-gray-700 px-3 pt-2">
-            <h3 className="font-medium text-sm text-gray-800 dark:text-gray-200">{column.header}</h3>
-          </div>
+        <>
+          {column.filterType === 'daterange' ? (
+            <div 
+              className="absolute z-50 mt-1 right-0 transform origin-top-right"
+              style={{
+                animation: 'menuAppear 0.2s ease-out forwards'
+              }}
+            >
+              <DirectCalendarFilter
+                value={filterValue}
+                onChange={(value) => {
+                  setFilterValue(value);
+                  handleFilterApply(value);
+                }}
+                placeholder=""
+                columnName={column.header}
+                onClearFilter={handleFilterClear}
+              />
+            </div>
+          ) : (
+            <div 
+              className={`absolute z-50 mt-1 right-0 transform origin-top-right bg-white dark:bg-gray-800 rounded-md shadow-lg border border-gray-200 dark:border-gray-700 min-w-[160px]`}
+              style={{
+                animation: 'menuAppear 0.2s ease-out forwards'
+              }}
+            >
+              <div className="mb-2 pb-1 border-b border-gray-100 dark:border-gray-700 px-3 pt-2">
+                <h3 className="font-medium text-sm text-gray-800 dark:text-gray-200">{column.header}</h3>
+              </div>
 
-          <FilterRenderer
-            column={column}
-            data={data}
-            filterValue={filterValue}
-            onFilterValueChange={setFilterValue}
-            onFilterApply={handleFilterApply}
-            onFilterClear={handleFilterClear}
-            onClose={() => setIsMenuOpen(false)}
-          />
-        </div>
+              <FilterRenderer
+                column={column}
+                data={data}
+                filterValue={filterValue}
+                onFilterValueChange={setFilterValue}
+                onFilterApply={handleFilterApply}
+                onFilterClear={handleFilterClear}
+                onClose={() => setIsMenuOpen(false)}
+              />
+            </div>
+          )}
+        </>
       )}
     </div>
   );

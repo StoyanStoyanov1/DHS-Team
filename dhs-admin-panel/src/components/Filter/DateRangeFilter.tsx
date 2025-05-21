@@ -24,14 +24,14 @@ const DateRangeFilter: React.FC<DateRangeFilterProps> = ({
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [filterMode, setFilterMode] = useState<FilterMode>('range');
-  
+
   const [showMonthDropdown, setShowMonthDropdown] = useState<boolean>(false);
   const [showYearDropdown, setShowYearDropdown] = useState<boolean>(false);
-  
+
   const [rangeStart, setRangeStart] = useState<Date | null>(null);
   const [rangeEnd, setRangeEnd] = useState<Date | null>(null);
   const [selectingStartDate, setSelectingStartDate] = useState<boolean>(true);
-  
+
   const [draftState, setDraftState] = useState<{
     mode: FilterMode,
     singleDate: Date | null,
@@ -43,13 +43,13 @@ const DateRangeFilter: React.FC<DateRangeFilterProps> = ({
     start: null,
     end: null
   });
-  
+
   // Month names for dropdown
   const monthNames = [
     'January', 'February', 'March', 'April', 'May', 'June',
     'July', 'August', 'September', 'October', 'November', 'December'
   ];
-  
+
   // Generate available years (10 years before and after current)
   const getAvailableYears = () => {
     const years = [];
@@ -59,18 +59,18 @@ const DateRangeFilter: React.FC<DateRangeFilterProps> = ({
     }
     return years;
   };
-  
+
   // Month and year selection functions
   const handleMonthChange = (monthIndex: number) => {
     setCurrentMonth(new Date(currentMonth.getFullYear(), monthIndex, 1));
     setShowMonthDropdown(false);
   };
-  
+
   const handleYearChange = (year: number) => {
     setCurrentMonth(new Date(year, currentMonth.getMonth(), 1));
     setShowYearDropdown(false);
   };
-  
+
   useEffect(() => {
     if (value) {
       if (value.start && !value.end) {
@@ -108,29 +108,29 @@ const DateRangeFilter: React.FC<DateRangeFilterProps> = ({
       resetAllSelections();
     }
   }, [value]);
-  
+
   // Close dropdowns when clicking outside
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       const target = e.target as HTMLElement;
       const isMonthDropdown = target.closest('.month-dropdown');
       const isYearDropdown = target.closest('.year-dropdown');
-      
+
       if (!isMonthDropdown) {
         setShowMonthDropdown(false);
       }
-      
+
       if (!isYearDropdown) {
         setShowYearDropdown(false);
       }
     };
-    
+
     document.addEventListener('mousedown', handleClickOutside);
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, []);
-  
+
   const resetAllSelections = () => {
     setSelectedDate(null);
     setRangeStart(null);
@@ -143,83 +143,83 @@ const DateRangeFilter: React.FC<DateRangeFilterProps> = ({
       end: null
     });
   };
-  
+
   const formatDate = (date: Date | null | undefined) => {
     if (!date) return '';
     return date.toLocaleDateString('bg-BG', { day: '2-digit', month: '2-digit', year: 'numeric' });
   };
-  
+
   const getDaysInMonth = (year: number, month: number) => {
     return new Date(year, month + 1, 0).getDate();
   };
-  
+
   const getMonthDays = (year: number, month: number) => {
     const days = [];
     const daysInMonth = getDaysInMonth(year, month);
-    
+
     const firstDay = new Date(year, month, 1).getDay();
     const firstDayAdjusted = firstDay === 0 ? 6 : firstDay - 1;
-    
+
     for (let i = 0; i < firstDayAdjusted; i++) {
       days.push(null);
     }
-    
+
     for (let i = 1; i <= daysInMonth; i++) {
       days.push(new Date(year, month, i));
     }
-    
+
     return days;
   };
-  
+
   const isSingleDateSelected = (date: Date | null) => {
     if (!date || !draftState.singleDate) return false;
-    
+
     return date.getDate() === draftState.singleDate.getDate() &&
            date.getMonth() === draftState.singleDate.getMonth() &&
            date.getFullYear() === draftState.singleDate.getFullYear();
   };
-  
+
   const isRangeDateSelected = (date: Date | null) => {
     if (!date) return false;
-    
+
     const isStart = draftState.start && 
       date.getDate() === draftState.start.getDate() &&
       date.getMonth() === draftState.start.getMonth() &&
       date.getFullYear() === draftState.start.getFullYear();
-      
+
     const isEnd = draftState.end && 
       date.getDate() === draftState.end.getDate() &&
       date.getMonth() === draftState.end.getMonth() &&
       date.getFullYear() === draftState.end.getFullYear();
-    
+
     return isStart || isEnd;
   };
-  
+
   const isDateInRange = (date: Date | null) => {
     if (!date || !draftState.start || !draftState.end) return false;
     return date > draftState.start && date < draftState.end;
   };
-  
+
   const isToday = (date: Date | null) => {
     if (!date) return false;
-    
+
     const today = new Date();
     return date.getDate() === today.getDate() &&
            date.getMonth() === today.getMonth() &&
            date.getFullYear() === today.getFullYear();
   };
-  
+
   const goToPrevMonth = () => {
     setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1, 1));
   };
-  
+
   const goToNextMonth = () => {
     setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 1));
   };
-  
+
   const handleDateClick = (date: Date | null) => {
     if (!date) return;
-    
+
     if (draftState.mode === 'range') {
       if (selectingStartDate) {
         setDraftState({
@@ -249,10 +249,10 @@ const DateRangeFilter: React.FC<DateRangeFilterProps> = ({
       });
     }
   };
-  
+
   const applyFilter = () => {
     let filterValue: { start?: Date | null; end?: Date | null } | null = null;
-    
+
     if (draftState.mode === 'before' && draftState.singleDate) {
       filterValue = { start: null, end: draftState.singleDate };
     } 
@@ -262,10 +262,10 @@ const DateRangeFilter: React.FC<DateRangeFilterProps> = ({
     else if (draftState.mode === 'range' && draftState.start && draftState.end) {
       filterValue = { start: draftState.start, end: draftState.end };
     }
-    
+
     onChange(filterValue);
     setShowCalendar(false);
-    
+
     if (draftState.mode === 'range') {
       setRangeStart(draftState.start);
       setRangeEnd(draftState.end);
@@ -274,13 +274,13 @@ const DateRangeFilter: React.FC<DateRangeFilterProps> = ({
     }
     setFilterMode(draftState.mode);
   };
-  
+
   const clearFilter = () => {
     resetAllSelections();
     onChange(null);
     setShowCalendar(false);
   };
-  
+
   // Switch filter mode
   const switchFilterMode = (mode: FilterMode) => {
     setDraftState({
@@ -292,10 +292,10 @@ const DateRangeFilter: React.FC<DateRangeFilterProps> = ({
     });
     setSelectingStartDate(true);
   };
-  
+
   // Weekday labels
   const weekDays = ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'];
-  
+
   // Display the current filter value
   const displayValue = () => {
     if (!value || (!value.start && !value.end)) {
@@ -306,7 +306,7 @@ const DateRangeFilter: React.FC<DateRangeFilterProps> = ({
         </span>
       );
     }
-    
+
     // After date filter
     if (value.start && !value.end) {
       return (
@@ -318,7 +318,7 @@ const DateRangeFilter: React.FC<DateRangeFilterProps> = ({
         </div>
       );
     }
-    
+
     // Before date filter
     if (!value.start && value.end) {
       return (
@@ -330,7 +330,7 @@ const DateRangeFilter: React.FC<DateRangeFilterProps> = ({
         </div>
       );
     }
-    
+
     // Date range
     return (
       <div className="flex items-center">
@@ -341,7 +341,7 @@ const DateRangeFilter: React.FC<DateRangeFilterProps> = ({
       </div>
     );
   };
-  
+
   // Helper to check if filter can be applied
   const canApplyFilter = () => {
     if (draftState.mode === 'before' || draftState.mode === 'after') {
@@ -349,29 +349,11 @@ const DateRangeFilter: React.FC<DateRangeFilterProps> = ({
     }
     return !!draftState.start && !!draftState.end;
   };
-  
+
   return (
     <div className={`relative ${className}`}>
-      <div 
-        className={`flex items-center justify-between rounded-lg border px-3.5 py-2.5 text-sm cursor-pointer transition-all duration-200 shadow-sm
-          ${showCalendar ? 'border-blue-500 dark:border-blue-400 ring-1 ring-blue-300 dark:ring-blue-500/30' : 'border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500 hover:shadow'}
-          ${value?.start || value?.end ? 'border-blue-200 dark:border-blue-700 bg-blue-50/40 dark:bg-blue-900/20' : 'bg-white dark:bg-gray-800'}`}
-        onClick={() => setShowCalendar(!showCalendar)}
-      >
-        {displayValue()}
-        
-        <div className="flex items-center gap-1">
-          {(value?.start || value?.end) && (
-            <button 
-              className="p-1 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition-colors"
-              onClick={(e) => { e.stopPropagation(); clearFilter(); }}
-            >
-              <X size={16} />
-            </button>
-          )}
-        </div>
-      </div>
-      
+
+
       {showCalendar && (
         <div className="absolute z-10 mt-2 bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-gray-200 dark:border-gray-700 p-4 right-0 w-80 daterange-animation">
           {/* Filter mode selector */}
@@ -412,7 +394,7 @@ const DateRangeFilter: React.FC<DateRangeFilterProps> = ({
               </button>
             </div>
           </div>
-          
+
           {/* Calendar header with month/year selectors */}
           <div className="mb-3 flex items-center justify-between">
             <button 
@@ -421,7 +403,7 @@ const DateRangeFilter: React.FC<DateRangeFilterProps> = ({
             >
               <ChevronLeft size={20} />
             </button>
-            
+
             <div className="flex items-center space-x-2">
               {/* Month selector dropdown */}
               <div className="relative month-dropdown">
@@ -436,7 +418,7 @@ const DateRangeFilter: React.FC<DateRangeFilterProps> = ({
                   <span>{monthNames[currentMonth.getMonth()]}</span>
                   <ChevronDown size={14} className="ml-1 text-gray-500 dark:text-gray-400" />
                 </button>
-                
+
                 {showMonthDropdown && (
                   <div className="absolute top-full left-0 mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-20 max-h-52 overflow-y-auto w-full">
                     {monthNames.map((month, index) => (
@@ -457,7 +439,7 @@ const DateRangeFilter: React.FC<DateRangeFilterProps> = ({
                   </div>
                 )}
               </div>
-              
+
               {/* Year selector dropdown */}
               <div className="relative year-dropdown">
                 <button
@@ -471,7 +453,7 @@ const DateRangeFilter: React.FC<DateRangeFilterProps> = ({
                   <span>{currentMonth.getFullYear()}</span>
                   <ChevronDown size={14} className="ml-1 text-gray-500 dark:text-gray-400" />
                 </button>
-                
+
                 {showYearDropdown && (
                   <div className="absolute top-full left-0 mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-20 max-h-52 overflow-y-auto w-full">
                     {getAvailableYears().map((year) => (
@@ -493,7 +475,7 @@ const DateRangeFilter: React.FC<DateRangeFilterProps> = ({
                 )}
               </div>
             </div>
-            
+
             <button 
               className="p-1.5 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition-colors"
               onClick={(e) => { e.stopPropagation(); goToNextMonth(); }}
@@ -501,7 +483,7 @@ const DateRangeFilter: React.FC<DateRangeFilterProps> = ({
               <ChevronRight size={20} />
             </button>
           </div>
-          
+
           <div className="grid grid-cols-7 gap-1.5 mb-2">
             {/* Weekday headers */}
             {weekDays.map((day, i) => (
@@ -509,7 +491,7 @@ const DateRangeFilter: React.FC<DateRangeFilterProps> = ({
                 {day}
               </div>
             ))}
-            
+
             {/* Calendar days */}
             {getMonthDays(currentMonth.getFullYear(), currentMonth.getMonth()).map((day, i) => (
               <button
@@ -537,7 +519,7 @@ const DateRangeFilter: React.FC<DateRangeFilterProps> = ({
               </button>
             ))}
           </div>
-          
+
           {/* Selection status */}
           <div className="mt-3 pt-3 border-t border-gray-100 dark:border-gray-700">
             {draftState.mode === 'range' ? (
@@ -555,7 +537,7 @@ const DateRangeFilter: React.FC<DateRangeFilterProps> = ({
                   : 'Select a date'}
               </div>
             )}
-            
+
             {/* Action buttons */}
             <div className="flex justify-between">
               <button
@@ -594,7 +576,7 @@ const DateRangeFilter: React.FC<DateRangeFilterProps> = ({
               >
                 Cancel
               </button>
-              
+
               <button
                 disabled={!canApplyFilter()}
                 className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
@@ -615,7 +597,16 @@ const DateRangeFilter: React.FC<DateRangeFilterProps> = ({
 };
 
 // DirectCalendarFilter component that shows only the calendar
-export const DirectCalendarFilter: React.FC<DateRangeFilterProps> = (props) => {
+interface DirectCalendarFilterProps extends DateRangeFilterProps {
+  columnName?: string;
+  onClearFilter?: () => void;
+}
+
+export const DirectCalendarFilter: React.FC<DirectCalendarFilterProps> = ({
+  columnName,
+  onClearFilter,
+  ...props
+}) => {
   return (
     <div className="calendar-filter-container">
       <style jsx>{`
@@ -640,6 +631,15 @@ export const DirectCalendarFilter: React.FC<DateRangeFilterProps> = (props) => {
         .calendar-only .flex.items-center.justify-between.rounded-lg {
           display: none !important;
         }
+        /* Hide the field showing column name and selected date */
+        /* Hide all elements except the calendar grid itself */
+        .calendar-only .absolute .mb-4,
+        .calendar-only .absolute .mt-3.pt-3,
+        .calendar-only .absolute .flex.justify-between,
+        .calendar-only .absolute .text-xs.font-medium,
+        .calendar-header {
+          display: none !important;
+        }
         .calendar-only-wrapper .flex.items-center.justify-between {
           display: none !important;
         }
@@ -655,12 +655,81 @@ export const DirectCalendarFilter: React.FC<DateRangeFilterProps> = (props) => {
           from { opacity: 0; transform: translateY(-10px); }
           to { opacity: 1; transform: translateY(0); }
         }
+
+        /* Column name header styles */
+        .calendar-header {
+          padding: 8px 12px;
+          font-weight: 500;
+          font-size: 14px;
+          color: #4b5563;
+          background-color: #f9fafb;
+          border-bottom: 1px solid #e5e7eb;
+          text-align: center;
+          margin-bottom: 8px;
+        }
+
+        .dark .calendar-header {
+          color: #e5e7eb;
+          background-color: #374151;
+          border-bottom: 1px solid #4b5563;
+        }
+
+        /* Clear filter button styles */
+        .clear-filter-btn {
+          position: absolute;
+          top: 8px;
+          right: 8px;
+          padding: 4px;
+          border-radius: 50%;
+          background-color: #f3f4f6;
+          color: #6b7280;
+          cursor: pointer;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          z-index: 10;
+          transition: all 0.2s;
+        }
+
+        .clear-filter-btn:hover {
+          background-color: #e5e7eb;
+          color: #4b5563;
+        }
+
+        .dark .clear-filter-btn {
+          background-color: #374151;
+          color: #9ca3af;
+        }
+
+        .dark .clear-filter-btn:hover {
+          background-color: #4b5563;
+          color: #e5e7eb;
+        }
       `}</style>
-      <DateRangeFilter 
-        {...props} 
-        defaultOpen={true}
-        className="calendar-only"
-      />
+      <div className="relative">
+        {props.value && onClearFilter && (
+          <button 
+            className="clear-filter-btn"
+            onClick={(e) => {
+              e.stopPropagation();
+              onClearFilter();
+            }}
+            title="Clear filter"
+          >
+            <X size={14} />
+          </button>
+        )}
+        <DateRangeFilter 
+          {...props} 
+          defaultOpen={true}
+          className="calendar-only"
+        />
+        {columnName && (
+          <div className="calendar-header">
+            {columnName}
+          </div>
+        )}
+      </div>
     </div>
   );
 };
