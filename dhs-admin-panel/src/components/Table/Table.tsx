@@ -7,6 +7,21 @@ import { ITableProps } from './interfaces';
 interface WindowWithTableContext extends Window {
   __currentColumnForContextMenu: any;
 }
+
+// Add CSS for refresh button animation
+const refreshButtonAnimationStyle = `
+@keyframes rotate360 {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(-360deg);
+  }
+}
+.refresh-rotate {
+  animation: rotate360 0.5s ease-in-out forwards;
+}
+`;
 import { TableService } from './TableService';
 import TableHeader from './TableHeader';
 import TableBody from './TableBody';
@@ -15,7 +30,7 @@ import PageSizeControl from './PageSizeControl';
 import TableContextMenu from './TableContextMenu';
 import BulkEditBar from './BulkEditBar';
 import DeleteConfirmationDialog from './DeleteConfirmationDialog';
-import { Eye, PencilIcon, Trash2 } from 'lucide-react';
+import { Eye, PencilIcon, Trash2, RotateCcw } from 'lucide-react';
 import { useTableFilters } from './hooks/useTableFilters';
 import { useTableSort } from './hooks/useTableSort';
 import { useTableSelection } from './hooks/useTableSelection';
@@ -59,6 +74,7 @@ export default function Table<T>({
   const [contextMenuPosition, setContextMenuPosition] = useState<{ x: number; y: number } | null>(null);
   const [showBulkEditBar, setShowBulkEditBar] = useState(false);
   const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
   const currentPage = externalCurrentPage ?? internalCurrentPage;
   const setCurrentPage = externalSetCurrentPage ?? setInternalCurrentPage;
@@ -294,6 +310,11 @@ export default function Table<T>({
   useEffect(() => {
     addTableStyles();
 
+    // Add refresh button animation style
+    const styleElement = document.createElement('style');
+    styleElement.textContent = refreshButtonAnimationStyle;
+    document.head.appendChild(styleElement);
+
     if (autoResizeColumns) {
       // Defer execution to next frame to ensure DOM is updated
       const timer = setTimeout(() => {
@@ -302,8 +323,15 @@ export default function Table<T>({
         });
       }, 0);
 
-      return () => clearTimeout(timer);
+      return () => {
+        clearTimeout(timer);
+        document.head.removeChild(styleElement);
+      };
     }
+
+    return () => {
+      document.head.removeChild(styleElement);
+    };
   }, [data, visibleColumns, autoResizeColumns, tableId, minColumnWidth, maxColumnWidth, columnPadding]);
 
   // BulkEditBar is now shown only when the Update button is clicked
@@ -410,17 +438,45 @@ export default function Table<T>({
           </div>
 
           {/* Add page size control to the top toolbar */}
-          {showTableSizeControls && (
-            <PageSizeControl
-              itemsPerPage={itemsPerPage}
-              setItemsPerPage={handleItemsPerPageChange}
-              options={rowsPerPageOptions.map(size => ({
-                size, 
-                available: size <= Math.max(...rowsPerPageOptions, sortedData.length)
-              }))}
-              label="Rows:"
-            />
-          )}
+          <div className="flex items-center space-x-2">
+            {/* Refresh icon button - elegant circle design with animation */}
+            <button
+              onClick={() => {
+                // Set refreshing state to trigger animation
+                setIsRefreshing(true);
+
+                // Execute refresh actions
+                resetColumnFilters();
+                handleClearAllSorting();
+                setCurrentPage(1);
+                clearSelection(); // Clear all selected items
+
+                // Reset the refreshing state after animation completes
+                setTimeout(() => {
+                  setIsRefreshing(false);
+                }, 500); // Match animation duration
+              }}
+              className="p-1.5 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition-all duration-200"
+              title="Refresh table"
+            >
+              <RotateCcw 
+                size={16} 
+                className={isRefreshing ? 'refresh-rotate' : ''}
+              />
+            </button>
+
+            {showTableSizeControls && (
+              <PageSizeControl
+                itemsPerPage={itemsPerPage}
+                setItemsPerPage={handleItemsPerPageChange}
+                options={rowsPerPageOptions.map(size => ({
+                  size, 
+                  available: size <= Math.max(...rowsPerPageOptions, sortedData.length)
+                }))}
+                label="Rows:"
+              />
+            )}
+          </div>
         </div>
 
         {columns.some(col => col.hidden) && (
