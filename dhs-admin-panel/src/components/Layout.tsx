@@ -21,14 +21,8 @@ const Layout: React.FC<DashboardLayoutProps> = ({ children }) => {
 
     const isAuthPage = pathname?.startsWith('/auth');
 
-    useEffect(() => {
-        if (isAuthPage) return;
-
-        if (!loading && !user) {
-            const redirectPath = encodeURIComponent(pathname || '/');
-            router.push(`/auth/login?redirect=${redirectPath}`);
-        }
-    }, [user, loading, router, pathname, isAuthPage]);
+    // We no longer redirect non-authenticated users
+    // They can access the application without being logged in
 
     if (isAuthPage) {
         return (
@@ -46,10 +40,6 @@ const Layout: React.FC<DashboardLayoutProps> = ({ children }) => {
                 </div>
             </ThemeProvider>
         );
-    }
-
-    if (!user) {
-        return null;
     }
 
     return (

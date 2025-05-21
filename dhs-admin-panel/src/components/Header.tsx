@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useRef, useEffect } from 'react';
-import { LayoutGrid, Bell, Settings, LogOut, User } from 'lucide-react';
+import { LayoutGrid, Bell, Settings, LogOut, User, LogIn } from 'lucide-react';
 import { useRouter, usePathname } from 'next/navigation';
 import SearchBar from './SearchBar';
 import { useAuth } from '@/src/hooks/useAuth';
@@ -14,12 +14,7 @@ const Header: React.FC = () => {
     const [dropdownOpen, setDropdownOpen] = useState(false);
     const dropdownRef = useRef<HTMLDivElement>(null);
 
-    useEffect(() => {
-        if (!user) {
-            const redirectPath = encodeURIComponent(pathname || '/');
-            router.push(`/auth/login?redirect=${redirectPath}`);
-        }
-    }, [user, router, pathname]);
+    // We no longer redirect non-authenticated users
 
     useEffect(() => {
         function handleClickOutside(event: MouseEvent) {
@@ -40,14 +35,15 @@ const Header: React.FC = () => {
         router.push(`/auth/login?redirect=${redirectPath}`);
     };
 
+    const handleLogin = () => {
+        const redirectPath = encodeURIComponent(pathname || '/');
+        router.push(`/auth/login?redirect=${redirectPath}`);
+    };
+
     const getInitials = () => {
         if (!user || !user.email) return 'U';
         return user.email.charAt(0).toUpperCase();
     };
-
-    if (!user) {
-        return null;
-    }
 
     return (
         <header className="bg-white dark:bg-gray-800 shadow-sm dark:shadow-gray-800 h-16 flex items-center transition-colors duration-200">
@@ -70,39 +66,49 @@ const Header: React.FC = () => {
                         <Settings size={20} />
                     </button>
 
-                    <div className="relative" ref={dropdownRef}>
-                        <button 
-                            onClick={() => setDropdownOpen(!dropdownOpen)}
-                            className="w-9 h-9 rounded-full bg-blue-500 text-white flex items-center justify-center text-sm font-medium border-2 border-white dark:border-gray-700 shadow-sm hover:bg-blue-600 transition-colors"
-                        >
-                            {getInitials()}
-                        </button>
+                    {user ? (
+                        <div className="relative" ref={dropdownRef}>
+                            <button 
+                                onClick={() => setDropdownOpen(!dropdownOpen)}
+                                className="w-9 h-9 rounded-full bg-blue-500 text-white flex items-center justify-center text-sm font-medium border-2 border-white dark:border-gray-700 shadow-sm hover:bg-blue-600 transition-colors"
+                            >
+                                {getInitials()}
+                            </button>
 
-                        {dropdownOpen && (
-                            <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-md shadow-lg py-1 z-10 border border-gray-200 dark:border-gray-700 transition-colors duration-200">
-                                <div className="px-4 py-2 text-sm text-gray-700 dark:text-gray-300 border-b border-gray-200 dark:border-gray-700">
-                                    {user?.email || 'User'}
+                            {dropdownOpen && (
+                                <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-md shadow-lg py-1 z-10 border border-gray-200 dark:border-gray-700 transition-colors duration-200">
+                                    <div className="px-4 py-2 text-sm text-gray-700 dark:text-gray-300 border-b border-gray-200 dark:border-gray-700">
+                                        {user?.email || 'User'}
+                                    </div>
+
+                                    <a href="/profile" className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+                                        <div className="flex items-center">
+                                            <User size={16} className="mr-2" />
+                                            Profile
+                                        </div>
+                                    </a>
+
+                                    <button 
+                                        onClick={handleLogout}
+                                        className="block w-full text-left px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                                    >
+                                        <div className="flex items-center">
+                                            <LogOut size={16} className="mr-2" />
+                                            Log out
+                                        </div>
+                                    </button>
                                 </div>
-
-                                <a href="/profile" className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
-                                    <div className="flex items-center">
-                                        <User size={16} className="mr-2" />
-                                        Profile
-                                    </div>
-                                </a>
-
-                                <button 
-                                    onClick={handleLogout}
-                                    className="block w-full text-left px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-                                >
-                                    <div className="flex items-center">
-                                        <LogOut size={16} className="mr-2" />
-                                        Log out
-                                    </div>
-                                </button>
-                            </div>
-                        )}
-                    </div>
+                            )}
+                        </div>
+                    ) : (
+                        <button 
+                            onClick={handleLogin}
+                            className="w-9 h-9 rounded-full bg-blue-500 text-white flex items-center justify-center text-sm font-medium border-2 border-white dark:border-gray-700 shadow-sm hover:bg-blue-600 transition-colors"
+                            title="Log in"
+                        >
+                            <LogIn size={18} />
+                        </button>
+                    )}
                 </div>
             </div>
         </header>
