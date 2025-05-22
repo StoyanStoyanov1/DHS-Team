@@ -147,6 +147,24 @@ function UsersListContent() {
 
   const handleBulkEdit = async (selectedItems: User[], columnKey: string, newValue: any): Promise<void> => {
     console.log(`Bulk updating ${selectedItems.length} users:`, { columnKey, newValue });
+
+    // Format date values to match the expected format in the mock data
+    let formattedValue = newValue;
+    if (columnKey === 'lastLogin' && newValue instanceof Date) {
+      // Format date as YYYY-MM-DD
+      formattedValue = newValue.toISOString().split('T')[0];
+    }
+
+    // Update the filteredUsers state with the new values
+    setFilteredUsers(prev => 
+      prev.map(user => {
+        if (selectedItems.find(selected => selected.id === user.id)) {
+          return { ...user, [columnKey]: formattedValue };
+        }
+        return user;
+      })
+    );
+
     // In a real app, you would call an API here
     return new Promise<void>(resolve => setTimeout(resolve, 1000));
   };
@@ -225,7 +243,8 @@ function UsersListContent() {
       filterType: 'daterange',
       hideable: true,
       sortable: true,
-      sortFn: sortLastLogin
+      sortFn: sortLastLogin,
+      fieldDataType: 'date'
     },
     {
       header: 'Actions',
@@ -307,6 +326,11 @@ function UsersListContent() {
                 { label: 'Analyst', value: 'Analyst' },
                 { label: 'Developer', value: 'Developer' }
               ]
+            },
+            {
+              columnKey: 'lastLogin',
+              label: 'Last Login',
+              type: 'date'
             }
           ]}
           onBulkEdit={handleBulkEdit}

@@ -261,10 +261,10 @@ export default function ColumnSearchFilter({
 
             {/* Recent searches dropdown */}
             {showRecentSearches && recentSearches.length > 0 && (
-              <div className="absolute w-full mt-1 bg-white dark:bg-gray-700 rounded-md border border-gray-200 dark:border-gray-600 shadow-md z-50">
+              <div className="absolute w-full mt-1 bg-white dark:bg-gray-700 rounded-md border border-gray-200 dark:border-gray-600 shadow-md z-10">
                 <div className="flex items-center justify-between px-2.5 py-1.5 border-b border-gray-100 dark:border-gray-600">
                   <span className="text-xs text-gray-500 dark:text-gray-400">Recent searches</span>
-                  <button 
+                  <button
                     className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 p-0.5 rounded-full hover:bg-gray-100 dark:hover:bg-gray-600"
                     onClick={() => setShowRecentSearches(false)}
                   >
@@ -297,7 +297,7 @@ export default function ColumnSearchFilter({
             <div className="relative">
               <select
                 id="search-field"
-                className="block w-full pl-2.5 pr-7 py-1.5 text-xs border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 dark:text-gray-200 rounded-md 
+                className="block w-full pl-2.5 pr-7 py-1.5 text-xs border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 dark:text-gray-200 rounded-md
                   focus:outline-none focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 dark:focus:border-blue-400 appearance-none"
                 value={selectedField}
                 onChange={(e) => setSelectedField(e.target.value)}
@@ -323,7 +323,7 @@ export default function ColumnSearchFilter({
           <div className="relative">
             <select
               id="search-method"
-              className="block w-full pl-2.5 pr-7 py-1.5 text-xs border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 dark:text-gray-200 rounded-md 
+              className="block w-full pl-2.5 pr-7 py-1.5 text-xs border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 dark:text-gray-200 rounded-md
                 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 dark:focus:border-blue-400 appearance-none"
               value={searchMethod}
               onChange={(e) => setSearchMethod(e.target.value as EnhancedSearchMethod)}
@@ -373,7 +373,7 @@ export default function ColumnSearchFilter({
       <div className="px-3 py-2 bg-gray-50 dark:bg-gray-850 border-t border-gray-200 dark:border-gray-700 flex justify-end space-x-2">
         <button
           type="button"
-          className="px-2.5 py-1 text-xs font-medium text-gray-600 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md 
+          className="px-2.5 py-1 text-xs font-medium text-gray-600 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md
             hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400"
           onClick={handleClear}
         >
@@ -381,7 +381,7 @@ export default function ColumnSearchFilter({
         </button>
         <button
           type="button"
-          className="px-2.5 py-1 text-xs font-medium text-white bg-blue-600 dark:bg-blue-700 border border-blue-600 dark:border-blue-700 rounded-md 
+          className="px-2.5 py-1 text-xs font-medium text-white bg-blue-600 dark:bg-blue-700 border border-blue-600 dark:border-blue-700 rounded-md
             hover:bg-blue-700 dark:hover:bg-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400"
           onClick={handleSearch}
         >

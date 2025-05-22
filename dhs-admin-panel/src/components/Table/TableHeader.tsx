@@ -160,7 +160,7 @@ function TableHeader<T>({
   const isSortableColumn = (column: ITableColumn<T>) => column.sortable !== false;
 
   return (
-    <thead className="bg-gray-50 dark:bg-gray-800 border-y border-gray-200 dark:border-gray-700 sticky top-0 z-20">
+    <thead className="bg-gray-50 dark:bg-gray-800 border-y border-gray-200 dark:border-gray-700 sticky top-0 z-10">
       <tr className="shadow-sm dark:shadow-gray-900">
         {showSelectionColumn && (
           <th className="w-auto px-4 py-3 border-r border-gray-200 dark:border-gray-700">

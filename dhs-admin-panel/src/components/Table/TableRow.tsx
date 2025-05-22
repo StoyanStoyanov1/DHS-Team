@@ -33,8 +33,12 @@ function TableRow<T>({
   const [isDropdownOpen, setIsDropdownOpen] = useState<boolean>(false);
   const [focusedOptionIndex, setFocusedOptionIndex] = useState<number>(-1);
 
-  // Ref for dropdown to detect clicks outside
+  // State for date editing
+  const [dateValue, setDateValue] = useState<{ start?: Date | null; end?: Date | null } | null>(null);
+
+  // Refs for dropdown and date picker to detect clicks outside
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const datePickerRef = useRef<HTMLDivElement>(null);
 
   // Apply alternating row background colors - improving dark mode with more appropriate colors
   const alternatingRowClass = isSelected 
@@ -58,6 +62,7 @@ function TableRow<T>({
     // Reset editing state when the item changes (e.g., when table is refreshed)
     setEditingCell(null);
     setIsDropdownOpen(false);
+    setDateValue(null);
   }, [item]);
 
   // Effect to load dropdown options when editing a role, enum, or boolean field
@@ -98,14 +103,22 @@ function TableRow<T>({
     }
   }, [editingCell, item, visibleColumns]);
 
-  // Effect to handle clicks outside the dropdown and keyboard events
+  // Effect to handle clicks outside the dropdown and date picker, and keyboard events
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+      // Handle clicks outside dropdown
+      if (isDropdownOpen && dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
         // Close the dropdown and exit edit mode without applying changes
         setIsDropdownOpen(false);
         setEditingCell(null);
         setFocusedOptionIndex(-1);
+      }
+
+      // Handle clicks outside date picker
+      const currentColumn = editingCell ? visibleColumns.find(col => col.key === editingCell) : null;
+      if (currentColumn && currentColumn.fieldDataType === 'date') {
+        // We don't close the date picker when clicking inside the calendar
+        // This allows the user to interact with the calendar without it closing
       }
     }
 
@@ -239,8 +252,8 @@ function TableRow<T>({
             }
           }}
           onDoubleClick={() => {
-            // Enable editing for text, enum, role, and boolean type columns
-            // For role, enum, and boolean types, allow editing even if there's a render function
+            // Enable editing for text, enum, role, boolean, and date type columns
+            // For role, enum, boolean, and date types, allow editing even if there's a render function
             if (column.fieldDataType === 'text' && !column.render) {
               setEditingCell(column.key);
               setEditValue((item as any)[column.key] || '');
@@ -249,6 +262,11 @@ function TableRow<T>({
               setEditValue(String((item as any)[column.key])); // Convert boolean to string
               setFocusedOptionIndex(-1); // Reset focused option index
               setIsDropdownOpen(true);
+            } else if (column.fieldDataType === 'date') {
+              // For date fields, open the calendar
+              setEditingCell(column.key);
+              const currentDate = (item as any)[column.key] ? new Date((item as any)[column.key]) : new Date();
+              setDateValue({ start: currentDate, end: null });
             }
           }}
         >
@@ -256,8 +274,50 @@ function TableRow<T>({
             (() => {
               const currentColumn = visibleColumns.find(col => col.key === editingCell);
 
+              // For date type, show a standard HTML date input with confirm button
+              if (currentColumn && currentColumn.fieldDataType === 'date') {
+                // Format the date as YYYY-MM-DD for the HTML date input
+                const formatDateForInput = (date: Date | null | undefined) => {
+                  if (!date) return '';
+                  return date.toISOString().split('T')[0]; // Returns YYYY-MM-DD
+                };
+
+                const initialDate = dateValue?.start ? formatDateForInput(dateValue.start) : '';
+
+                const applyDateChange = () => {
+                  if (dateValue?.start && onBulkEdit) {
+                    onBulkEdit([item], editingCell, dateValue.start);
+                  }
+                  setEditingCell(null);
+                };
+
+                return (
+                  <div className="relative" ref={datePickerRef}>
+                    <div className="flex items-center">
+                      <input
+                        type="date"
+                        className="w-40 px-2 py-1 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-400"
+                        value={initialDate}
+                        onChange={(e) => {
+                          const newDate = e.target.value ? new Date(e.target.value) : null;
+                          setDateValue(newDate ? { start: newDate, end: null } : null);
+                          // No immediate update, just store the selected date
+                        }}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') {
+                            applyDateChange();
+                          } else if (e.key === 'Escape') {
+                            setEditingCell(null);
+                          }
+                        }}
+                        autoFocus
+                      />
+                    </div>
+                  </div>
+                );
+              }
               // For enum, role, and boolean types, show a dropdown
-              if (currentColumn && (currentColumn.fieldDataType === 'enum' || currentColumn.fieldDataType === 'role' || currentColumn.fieldDataType === 'boolean')) {
+              else if (currentColumn && (currentColumn.fieldDataType === 'enum' || currentColumn.fieldDataType === 'role' || currentColumn.fieldDataType === 'boolean')) {
                 return (
                   <div 
                     className="relative" 
@@ -412,6 +472,9 @@ function TableRow<T>({
               // For boolean fields, display the user-friendly label
               column.fieldDataType === 'boolean' ? 
                 (item as any)[column.key] ? (column.labelTrue || 'Active') : (column.labelFalse || 'Inactive') :
+              // For date fields, format the date
+              column.fieldDataType === 'date' && (item as any)[column.key] ?
+                new Date((item as any)[column.key]).toLocaleDateString('bg-BG', { day: '2-digit', month: '2-digit', year: 'numeric' }) :
                 (item as any)[column.key]
           )}
         </td>
