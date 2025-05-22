@@ -60,11 +60,11 @@ function TableRow<T>({
     setIsDropdownOpen(false);
   }, [item]);
 
-  // Effect to load dropdown options when editing a role or enum field
+  // Effect to load dropdown options when editing a role, enum, or boolean field
   useEffect(() => {
     if (editingCell) {
       const column = visibleColumns.find(col => col.key === editingCell);
-      if (column && (column.fieldDataType === 'enum' || column.fieldDataType === 'role')) {
+      if (column && (column.fieldDataType === 'enum' || column.fieldDataType === 'role' || column.fieldDataType === 'boolean')) {
         // If filterOptions are provided, use them
         if (column.filterOptions && column.filterOptions.length > 0) {
           setDropdownOptions(column.filterOptions);
@@ -73,6 +73,13 @@ function TableRow<T>({
         else if (column.getFilterOptions) {
           const options = column.getFilterOptions([item]);
           setDropdownOptions(options);
+        }
+        // For boolean type, create true/false options with labels from column
+        else if (column.fieldDataType === 'boolean') {
+          setDropdownOptions([
+            { id: 'true', label: column.labelTrue || 'Active', value: 'true' },
+            { id: 'false', label: column.labelFalse || 'Inactive', value: 'false' }
+          ]);
         }
         // Default options for roles if none provided
         else if (column.fieldDataType === 'role') {
@@ -95,8 +102,10 @@ function TableRow<T>({
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-        // Only close the dropdown menu, but keep the edit mode active
+        // Close the dropdown and exit edit mode without applying changes
         setIsDropdownOpen(false);
+        setEditingCell(null);
+        setFocusedOptionIndex(-1);
       }
     }
 
@@ -107,11 +116,21 @@ function TableRow<T>({
             // If an option is focused, select it
             setEditValue(dropdownOptions[focusedOptionIndex].value);
             if (onBulkEdit) {
-              onBulkEdit([item], editingCell, dropdownOptions[focusedOptionIndex].value);
+              const column = visibleColumns.find(col => col.key === editingCell);
+              // Convert string 'true'/'false' to boolean for boolean fields
+              const finalValue = column && column.fieldDataType === 'boolean' 
+                ? dropdownOptions[focusedOptionIndex].value === 'true' 
+                : dropdownOptions[focusedOptionIndex].value;
+              onBulkEdit([item], editingCell, finalValue);
             }
           } else if (onBulkEdit) {
             // Otherwise use the current edit value
-            onBulkEdit([item], editingCell, editValue);
+            const column = visibleColumns.find(col => col.key === editingCell);
+            // Convert string 'true'/'false' to boolean for boolean fields
+            const finalValue = column && column.fieldDataType === 'boolean' 
+              ? editValue === 'true' 
+              : editValue;
+            onBulkEdit([item], editingCell, finalValue);
           }
           setIsDropdownOpen(false);
           setEditingCell(null);
@@ -220,14 +239,14 @@ function TableRow<T>({
             }
           }}
           onDoubleClick={() => {
-            // Enable editing for text, enum, and role type columns
-            // For role and enum types, allow editing even if there's a render function
+            // Enable editing for text, enum, role, and boolean type columns
+            // For role, enum, and boolean types, allow editing even if there's a render function
             if (column.fieldDataType === 'text' && !column.render) {
               setEditingCell(column.key);
               setEditValue((item as any)[column.key] || '');
-            } else if (column.fieldDataType === 'enum' || column.fieldDataType === 'role') {
+            } else if (column.fieldDataType === 'enum' || column.fieldDataType === 'role' || column.fieldDataType === 'boolean') {
               setEditingCell(column.key);
-              setEditValue((item as any)[column.key] || '');
+              setEditValue(String((item as any)[column.key])); // Convert boolean to string
               setFocusedOptionIndex(-1); // Reset focused option index
               setIsDropdownOpen(true);
             }
@@ -237,8 +256,8 @@ function TableRow<T>({
             (() => {
               const currentColumn = visibleColumns.find(col => col.key === editingCell);
 
-              // For enum and role types, show a dropdown
-              if (currentColumn && (currentColumn.fieldDataType === 'enum' || currentColumn.fieldDataType === 'role')) {
+              // For enum, role, and boolean types, show a dropdown
+              if (currentColumn && (currentColumn.fieldDataType === 'enum' || currentColumn.fieldDataType === 'role' || currentColumn.fieldDataType === 'boolean')) {
                 return (
                   <div 
                     className="relative" 
@@ -269,7 +288,12 @@ function TableRow<T>({
                       onKeyDown={(e) => {
                         if (e.key === 'Enter') {
                           if (onBulkEdit && editingCell) {
-                            onBulkEdit([item], editingCell, editValue);
+                            const column = visibleColumns.find(col => col.key === editingCell);
+                            // Convert string 'true'/'false' to boolean for boolean fields
+                            const finalValue = column && column.fieldDataType === 'boolean' 
+                              ? editValue === 'true' 
+                              : editValue;
+                            onBulkEdit([item], editingCell, finalValue);
                           }
                           setIsDropdownOpen(false);
                           setEditingCell(null);
@@ -301,6 +325,8 @@ function TableRow<T>({
                                 setEditValue(option.value);
                                 setFocusedOptionIndex(index);
                                 // Keep dropdown open and don't end editing mode
+                                // Note: We don't call onBulkEdit here because we want to keep the dropdown open
+                                // The actual save happens when the user presses Enter
                               }}
                               onMouseEnter={() => setFocusedOptionIndex(index)}
                               tabIndex={0}
@@ -308,7 +334,12 @@ function TableRow<T>({
                                 if (e.key === 'Enter') {
                                   setEditValue(option.value);
                                   if (onBulkEdit && editingCell) {
-                                    onBulkEdit([item], editingCell, option.value);
+                                    const column = visibleColumns.find(col => col.key === editingCell);
+                                    // Convert string 'true'/'false' to boolean for boolean fields
+                                    const finalValue = column && column.fieldDataType === 'boolean' 
+                                      ? option.value === 'true' 
+                                      : option.value;
+                                    onBulkEdit([item], editingCell, finalValue);
                                   }
                                   setIsDropdownOpen(false);
                                   setEditingCell(null);
@@ -348,14 +379,24 @@ function TableRow<T>({
                   onChange={(e) => setEditValue(e.target.value)}
                   onBlur={() => {
                     if (onBulkEdit && editingCell) {
-                      onBulkEdit([item], editingCell, editValue);
+                      const column = visibleColumns.find(col => col.key === editingCell);
+                      // Convert string 'true'/'false' to boolean for boolean fields
+                      const finalValue = column && column.fieldDataType === 'boolean' 
+                        ? editValue === 'true' 
+                        : editValue;
+                      onBulkEdit([item], editingCell, finalValue);
                     }
                     setEditingCell(null);
                   }}
                   onKeyDown={(e) => {
                     if (e.key === 'Enter') {
                       if (onBulkEdit && editingCell) {
-                        onBulkEdit([item], editingCell, editValue);
+                        const column = visibleColumns.find(col => col.key === editingCell);
+                        // Convert string 'true'/'false' to boolean for boolean fields
+                        const finalValue = column && column.fieldDataType === 'boolean' 
+                          ? editValue === 'true' 
+                          : editValue;
+                        onBulkEdit([item], editingCell, finalValue);
                       }
                       setEditingCell(null);
                     } else if (e.key === 'Escape') {
@@ -367,7 +408,11 @@ function TableRow<T>({
               );
             })()
           ) : (
-            column.render ? column.render(item) : (item as any)[column.key]
+            column.render ? column.render(item) : 
+              // For boolean fields, display the user-friendly label
+              column.fieldDataType === 'boolean' ? 
+                (item as any)[column.key] ? (column.labelTrue || 'Active') : (column.labelFalse || 'Inactive') :
+                (item as any)[column.key]
           )}
         </td>
       ))}

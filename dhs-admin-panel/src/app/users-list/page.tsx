@@ -212,7 +212,8 @@ function UsersListContent() {
       labelFalse: 'Inactive',
       labelAll: 'All Statuses',
       hideable: true,
-      sortable: false // Disable sorting for Status
+      sortable: false, // Disable sorting for Status
+      fieldDataType: 'boolean'
     },
     {
       header: 'Last Login',
