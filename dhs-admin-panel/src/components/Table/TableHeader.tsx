@@ -1,6 +1,6 @@
 import React from 'react';
 import { ITableColumn, SortDirection, SortCriterion } from './interfaces';
-import { ArrowUp } from 'lucide-react';
+import { ArrowUp, Settings } from 'lucide-react';
 import ColumnMenu from './ColumnMenu';
 import SelectionOptionsMenu from './SelectionOptionsMenu';
 
@@ -234,6 +234,14 @@ function TableHeader<T>({
             </div>
           </th>
         ))}
+        {/* Settings icon column */}
+        <th 
+          className="w-12 px-4 py-3 text-center text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider border-r border-gray-200 dark:border-gray-700 table-column-header transition-colors duration-200 shadow-sm"
+        >
+          <div className="flex items-center justify-center">
+            <Settings size={18} className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300" />
+          </div>
+        </th>
       </tr>
     </thead>
   );

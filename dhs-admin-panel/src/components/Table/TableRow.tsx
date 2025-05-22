@@ -560,57 +560,58 @@ function TableRow<T>({
                 }
               </div>
 
-              {/* Add the actions menu to the last column */}
-              {columnIndex === visibleColumns.length - 1 && (
-                <div className="relative" ref={actionsMenuRef}>
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setIsActionsMenuOpen(!isActionsMenuOpen);
-                    }}
-                    className="ml-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 focus:outline-none"
-                  >
-                    <MoreVertical size={18} />
-                  </button>
-
-                  {isActionsMenuOpen && (
-                    <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-md shadow-lg z-10 border border-gray-200 dark:border-gray-700">
-                      <div className="py-1">
-                        <button
-                          className="flex items-center w-full px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setIsActionsMenuOpen(false);
-                            if (onEdit) {
-                              onEdit(item);
-                            }
-                          }}
-                        >
-                          <Edit size={16} className="mr-2 text-green-600" />
-                          Edit
-                        </button>
-                        <button
-                          className="flex items-center w-full px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setIsActionsMenuOpen(false);
-                            if (onDelete) {
-                              onDelete(item);
-                            }
-                          }}
-                        >
-                          <Trash2 size={16} className="mr-2 text-red-600" />
-                          Delete
-                        </button>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              )}
+              {/* Remove the actions menu from the last column */}
             </div>
           )}
         </td>
       ))}
+      {/* Settings/Actions column */}
+      <td className="w-12 px-4 py-3 whitespace-nowrap border-r border-gray-200 dark:border-gray-700">
+        <div className="relative" ref={actionsMenuRef}>
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              setIsActionsMenuOpen(!isActionsMenuOpen);
+            }}
+            className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 focus:outline-none"
+          >
+            <MoreVertical size={18} />
+          </button>
+
+          {isActionsMenuOpen && (
+            <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-md shadow-lg z-10 border border-gray-200 dark:border-gray-700">
+              <div className="py-1">
+                <button
+                  className="flex items-center w-full px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setIsActionsMenuOpen(false);
+                    if (onEdit) {
+                      onEdit(item);
+                    }
+                  }}
+                >
+                  <Edit size={16} className="mr-2 text-green-600" />
+                  Edit
+                </button>
+                <button
+                  className="flex items-center w-full px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setIsActionsMenuOpen(false);
+                    if (onDelete) {
+                      onDelete(item);
+                    }
+                  }}
+                >
+                  <Trash2 size={16} className="mr-2 text-red-600" />
+                  Delete
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+      </td>
     </tr>
   );
 }

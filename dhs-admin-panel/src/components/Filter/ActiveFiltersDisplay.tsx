@@ -119,11 +119,13 @@ export function ActiveFiltersDisplay<T>({
                                 {...provided.draggableProps}
                                 className="flex items-center justify-between bg-gray-50 dark:bg-gray-700 rounded-md p-2 text-sm"
                               >
-                                <div className="flex items-center space-x-2">
-                                  <div {...provided.dragHandleProps} className="cursor-grab">
-                                    <GripVertical size={14} className="text-gray-400 dark:text-gray-500" />
+                                <div className="flex items-center justify-between w-full">
+                                  <div className="flex items-center">
+                                    <div {...provided.dragHandleProps} className="cursor-grab mr-2">
+                                      <GripVertical size={14} className="text-gray-400 dark:text-gray-500" />
+                                    </div>
+                                    <span className="font-medium dark:text-white">{getColumnHeader(criterion.key)}</span>
                                   </div>
-                                  <span className="font-medium dark:text-white">{getColumnHeader(criterion.key)}</span>
                                   <span className="text-gray-500 dark:text-gray-400">
                                     {criterion.direction === 'asc' ? 
                                       <ChevronUp size={14} className="inline" /> : 
@@ -189,12 +191,14 @@ export function ActiveFiltersDisplay<T>({
                       key={filter.id} 
                       className="flex items-center justify-between bg-gray-50 dark:bg-gray-700 rounded-md p-2 text-sm"
                     >
-                      <div className="overflow-hidden">
+                      <div className="overflow-hidden flex justify-between w-full">
                         <span className="font-medium dark:text-white">{getColumnHeader(filter.column)}</span>
-                        {filter.operator && (
-                          <span className="text-gray-500 dark:text-gray-400 mx-1">{filter.operator}</span>
-                        )}
-                        <span className="text-gray-700 dark:text-gray-300 truncate">{filter.displayValue}</span>
+                        <div className="flex items-center">
+                          {filter.operator && (
+                            <span className="text-gray-500 dark:text-gray-400 mr-1">{filter.operator}</span>
+                          )}
+                          <span className="text-gray-700 dark:text-gray-300 truncate">{filter.displayValue}</span>
+                        </div>
                       </div>
                       <button
                         onClick={() => onRemoveFilter(filter.id)}

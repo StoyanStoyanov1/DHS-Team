@@ -40,7 +40,7 @@ function TableBody<T>({
         <>
           <tr className="bg-white dark:bg-gray-800">
             <td 
-              colSpan={visibleColumns.length + (showSelectionColumn ? 1 : 0)} 
+              colSpan={visibleColumns.length + (showSelectionColumn ? 1 : 0) + 1} 
               className="px-6 py-4 text-center text-gray-500 dark:text-gray-300 border-b border-gray-200 dark:border-gray-700 h-14"
             >
               {emptyMessage}
@@ -66,6 +66,8 @@ function TableBody<T>({
                   &nbsp;
                 </td>
               ))}
+              {/* Settings icon column */}
+              <td className="w-12 px-4 py-3 whitespace-nowrap border-r border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800"></td>
             </tr>
           ))}
         </>
@@ -106,6 +108,8 @@ function TableBody<T>({
                     &nbsp;
                   </td>
                 ))}
+                {/* Settings icon column */}
+                <td className="w-12 px-4 py-3 whitespace-nowrap border-r border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800"></td>
               </tr>
             ))
           }
