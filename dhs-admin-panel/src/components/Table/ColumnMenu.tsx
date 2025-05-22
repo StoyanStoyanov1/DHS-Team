@@ -144,9 +144,11 @@ export default function ColumnMenu<T>({
 
       {showSearchFilter && column.filterType === 'search' && (
         <div 
-          className="absolute z-50 mt-1 right-0 transform origin-top-right"
+          className="fixed z-50 mt-1 transform origin-top-right"
           style={{
-            animation: 'menuAppear 0.2s ease-out forwards'
+            animation: 'menuAppear 0.2s ease-out forwards',
+            top: menuRef.current?.getBoundingClientRect().bottom + 'px',
+            left: menuRef.current?.getBoundingClientRect().left + 'px'
           }}
         >
           <FilterRenderer
@@ -165,9 +167,11 @@ export default function ColumnMenu<T>({
         <>
           {column.filterType === 'daterange' ? (
             <div 
-              className="absolute z-50 mt-1 right-0 transform origin-top-right"
+              className="fixed z-50 mt-1 transform origin-top-right"
               style={{
-                animation: 'menuAppear 0.2s ease-out forwards'
+                animation: 'menuAppear 0.2s ease-out forwards',
+                top: menuRef.current?.getBoundingClientRect().bottom + 'px',
+                left: menuRef.current?.getBoundingClientRect().left + 'px'
               }}
             >
               <DirectCalendarFilter
@@ -183,9 +187,11 @@ export default function ColumnMenu<T>({
             </div>
           ) : (
             <div 
-              className={`absolute z-50 mt-1 right-0 transform origin-top-right bg-white dark:bg-gray-800 rounded-md shadow-lg border border-gray-200 dark:border-gray-700 min-w-[160px]`}
+              className={`fixed z-50 mt-1 transform origin-top-right bg-white dark:bg-gray-800 rounded-md shadow-lg border border-gray-200 dark:border-gray-700 min-w-[160px]`}
               style={{
-                animation: 'menuAppear 0.2s ease-out forwards'
+                animation: 'menuAppear 0.2s ease-out forwards',
+                top: menuRef.current?.getBoundingClientRect().bottom + 'px',
+                left: menuRef.current?.getBoundingClientRect().left + 'px'
               }}
             >
               <div className="mb-2 pb-1 border-b border-gray-100 dark:border-gray-700 px-3 pt-2">

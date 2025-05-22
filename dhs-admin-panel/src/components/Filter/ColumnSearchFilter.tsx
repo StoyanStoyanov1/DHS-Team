@@ -231,7 +231,7 @@ export default function ColumnSearchFilter({
           </button>
         )}
       </div>
-      
+
       {/* Main content */}
       <div className="p-3 space-y-2.5 dark:bg-gray-800">
         {/* Search input at the top */}
@@ -258,10 +258,10 @@ export default function ColumnSearchFilter({
                 </button>
               </div>
             )}
-            
+
             {/* Recent searches dropdown */}
             {showRecentSearches && recentSearches.length > 0 && (
-              <div className="absolute w-full mt-1 bg-white dark:bg-gray-700 rounded-md border border-gray-200 dark:border-gray-600 shadow-md z-10">
+              <div className="absolute w-full mt-1 bg-white dark:bg-gray-700 rounded-md border border-gray-200 dark:border-gray-600 shadow-md z-50">
                 <div className="flex items-center justify-between px-2.5 py-1.5 border-b border-gray-100 dark:border-gray-600">
                   <span className="text-xs text-gray-500 dark:text-gray-400">Recent searches</span>
                   <button 
@@ -287,7 +287,7 @@ export default function ColumnSearchFilter({
             )}
           </div>
         )}
-        
+
         {/* Search fields selector (only if multiple fields available) */}
         {searchFields.length > 1 && (
           <div>
@@ -368,7 +368,7 @@ export default function ColumnSearchFilter({
           </div>
         )}
       </div>
-      
+
       {/* Action buttons */}
       <div className="px-3 py-2 bg-gray-50 dark:bg-gray-850 border-t border-gray-200 dark:border-gray-700 flex justify-end space-x-2">
         <button
