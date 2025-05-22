@@ -194,7 +194,8 @@ function UsersListContent() {
       labelAll: 'All Roles',
       defaultSelectAll: true,
       hideable: true,
-      sortable: false
+      sortable: false,
+      fieldDataType: 'role'
     },
     {
       header: 'Status',
