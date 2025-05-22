@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { ITableColumn } from './interfaces';
 
 interface TableRowProps<T> {
@@ -11,6 +11,7 @@ interface TableRowProps<T> {
   onToggleSelect?: () => void;
   onContextMenu?: (e: React.MouseEvent, item: T, column?: ITableColumn<T>) => void;
   rowIndex: number;
+  onBulkEdit?: (selectedItems: T[], columnKey: string, newValue: any) => Promise<void>;
 }
 
 function TableRow<T>({
@@ -23,7 +24,11 @@ function TableRow<T>({
   onToggleSelect,
   onContextMenu,
   rowIndex,
+  onBulkEdit,
 }: TableRowProps<T>) {
+  // State to track which cell is being edited
+  const [editingCell, setEditingCell] = useState<string | null>(null);
+  const [editValue, setEditValue] = useState<string>('');
   // Apply alternating row background colors - improving dark mode with more appropriate colors
   const alternatingRowClass = isSelected 
     ? '' // Don't apply alternating colors to selected rows
@@ -97,8 +102,41 @@ function TableRow<T>({
               onContextMenu(e, item, column);
             }
           }}
+          onDoubleClick={() => {
+            // Only enable editing for string type columns
+            if (column.fieldDataType === 'text' && !column.render) {
+              setEditingCell(column.key);
+              setEditValue((item as any)[column.key] || '');
+            }
+          }}
         >
-          {column.render ? column.render(item) : (item as any)[column.key]}
+          {editingCell === column.key ? (
+            <input
+              type="text"
+              className="w-full px-2 py-1 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-400"
+              value={editValue}
+              onChange={(e) => setEditValue(e.target.value)}
+              onBlur={() => {
+                if (onBulkEdit && editingCell) {
+                  onBulkEdit([item], editingCell, editValue);
+                }
+                setEditingCell(null);
+              }}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  if (onBulkEdit && editingCell) {
+                    onBulkEdit([item], editingCell, editValue);
+                  }
+                  setEditingCell(null);
+                } else if (e.key === 'Escape') {
+                  setEditingCell(null);
+                }
+              }}
+              autoFocus
+            />
+          ) : (
+            column.render ? column.render(item) : (item as any)[column.key]
+          )}
         </td>
       ))}
     </tr>

@@ -153,31 +153,29 @@ function UsersListContent() {
 
   const columns: ITableColumn<User>[] = [
     {
-      header: 'User',
+      header: 'Name',
       key: 'name',
-      render: (user) => (
-        <div className="flex items-center">
-          <div className="flex-shrink-0 h-10 w-10">
-            <div className="h-10 w-10 rounded-full bg-blue-100 dark:bg-blue-900 flex items-center justify-center text-blue-600 dark:text-blue-300 font-medium">
-              {user.name.split(' ').map(n => n[0]).join('')}
-            </div>
-          </div>
-          <div className="ml-4">
-            <div className="text-sm font-medium text-gray-900 dark:text-white">{user.name}</div>
-            <div className="text-sm text-gray-500 dark:text-gray-300">{user.email}</div>
-          </div>
-        </div>
-      ),
       filterable: true,
       filterType: 'search',
       hideable: true,
       sortable: true,
       searchFields: [
-        { key: 'name', label: 'Name', path: 'name' },
-        { key: 'email', label: 'Email', path: 'email' }
+        { key: 'name', label: 'Name', path: 'name' }
       ],
       fieldDataType: 'text',
       recentSearches: ['John', 'admin', 'support']
+    },
+    {
+      header: 'Email',
+      key: 'email',
+      filterable: true,
+      filterType: 'search',
+      hideable: true,
+      sortable: true,
+      searchFields: [
+        { key: 'email', label: 'Email', path: 'email' }
+      ],
+      fieldDataType: 'text'
     },
     {
       header: 'Role',
@@ -279,6 +277,16 @@ function UsersListContent() {
           showSelectionColumn={true}
           onSelectionChange={handleSelectionChange}
           editableColumns={[
+            {
+              columnKey: 'name',
+              label: 'Name',
+              type: 'text'
+            },
+            {
+              columnKey: 'email',
+              label: 'Email',
+              type: 'text'
+            },
             {
               columnKey: 'isActive',
               label: 'Status',

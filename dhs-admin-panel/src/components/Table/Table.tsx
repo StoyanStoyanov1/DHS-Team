@@ -527,6 +527,7 @@ export default function Table<T>({
               selectedItemIds={selectedItemIds}
               onToggleSelectItem={toggleSelectItem}
               onContextMenu={handleCellContextMenu}
+              onBulkEdit={onBulkEdit}
             />
           </table>
         </div>

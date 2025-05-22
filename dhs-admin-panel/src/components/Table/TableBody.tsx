@@ -13,6 +13,7 @@ interface TableBodyProps<T> {
   selectedItemIds?: Set<string | number>;
   onToggleSelectItem?: (item: T) => void;
   onContextMenu?: (e: React.MouseEvent, item: T, column?: ITableColumn<T>) => void;
+  onBulkEdit?: (selectedItems: T[], columnKey: string, newValue: any) => Promise<void>;
 }
 
 function TableBody<T>({
@@ -26,6 +27,7 @@ function TableBody<T>({
   selectedItemIds = new Set(),
   onToggleSelectItem,
   onContextMenu,
+  onBulkEdit,
 }: TableBodyProps<T>) {
   return (
     <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
@@ -76,6 +78,7 @@ function TableBody<T>({
               onToggleSelect={() => onToggleSelectItem && onToggleSelectItem(item)}
               onContextMenu={onContextMenu}
               rowIndex={index}
+              onBulkEdit={onBulkEdit}
             />
           ))}
 
