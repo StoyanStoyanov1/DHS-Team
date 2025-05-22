@@ -9,7 +9,7 @@ export type EnhancedSearchMethod =
   | 'contains' | 'equals' | 'startsWith' | 'endsWith'  
   | 'notContains' | 'isEmpty' | 'isNotEmpty' | 'regex';        
 
-export type FieldDataType = 'text' | 'number' | 'date' | 'boolean' | 'array';
+export type FieldDataType = 'text' | 'number' | 'date' | 'boolean' | 'array' | 'enum' | 'role';
 
 interface ColumnSearchFilterProps {
   columnKey: string;

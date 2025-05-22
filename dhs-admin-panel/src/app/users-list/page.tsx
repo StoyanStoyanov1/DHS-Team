@@ -318,7 +318,7 @@ function UsersListContent() {
             {
               columnKey: 'lastLogin',
               label: 'Last Login',
-              type: 'date'
+              type: 'text'
             }
           ]}
           onBulkEdit={handleBulkEdit}

@@ -711,8 +711,10 @@ function TableRowWithConfirmation<T>(props: TableRowProps<T>) {
 
   // Create a new onBulkEdit function that shows the confirmation dialog
   const onBulkEditWithConfirmation = props.onBulkEdit 
-    ? (items: T[], columnKey: string, newValue: any) => {
+    ? (items: T[], columnKey: string, newValue: any): Promise<void> => {
         handleShowConfirmation(columnKey, newValue);
+        // Return a resolved promise to match the expected return type
+        return Promise.resolve();
       }
     : undefined;
 
