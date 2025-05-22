@@ -117,8 +117,12 @@ function TableRow<T>({
       // Handle clicks outside date picker
       const currentColumn = editingCell ? visibleColumns.find(col => col.key === editingCell) : null;
       if (currentColumn && currentColumn.fieldDataType === 'date') {
-        // We don't close the date picker when clicking inside the calendar
-        // This allows the user to interact with the calendar without it closing
+        // Check if click is outside the date input field
+        const datePickerElement = datePickerRef.current;
+        if (datePickerElement && !datePickerElement.contains(event.target as Node)) {
+          setEditingCell(null);
+          setDateValue(null);
+        }
       }
     }
 
@@ -182,8 +186,9 @@ function TableRow<T>({
       }
     }
 
-    // Add event listeners when dropdown is open
-    if (isDropdownOpen) {
+    // Add event listeners when dropdown is open or date field is being edited
+    const isDateFieldEditing = editingCell && visibleColumns.find(col => col.key === editingCell)?.fieldDataType === 'date';
+    if (isDropdownOpen || isDateFieldEditing) {
       document.addEventListener('mousedown', handleClickOutside);
       document.addEventListener('keydown', handleKeyDown);
     }
@@ -193,7 +198,7 @@ function TableRow<T>({
       document.removeEventListener('mousedown', handleClickOutside);
       document.removeEventListener('keydown', handleKeyDown);
     };
-  }, [isDropdownOpen, editingCell, editValue, item, onBulkEdit, dropdownOptions, focusedOptionIndex]);
+  }, [isDropdownOpen, editingCell, editValue, item, onBulkEdit, dropdownOptions, focusedOptionIndex, visibleColumns]);
 
   return (
     <tr 
