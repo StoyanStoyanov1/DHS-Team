@@ -103,6 +103,10 @@ export interface ITableProps<T> {
   editableColumns?: EditableColumn<T>[];
   onBulkEdit?: (selectedItems: T[], columnKey: string, newValue: any) => Promise<void>;
 
+  // Row action props
+  onEdit?: (item: T) => void;
+  onDelete?: (item: T) => void;
+
   // Item type for delete confirmation dialog
   itemType?: string;
 }

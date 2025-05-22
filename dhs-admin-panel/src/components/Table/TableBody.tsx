@@ -1,6 +1,7 @@
 import React from 'react';
 import { ITableColumn } from './interfaces';
-import TableRow from './TableRow';
+// Import the wrapped TableRow component that includes confirmation dialog
+import TableRowWithConfirmation from './TableRow';
 
 interface TableBodyProps<T> {
   data: T[];
@@ -14,6 +15,8 @@ interface TableBodyProps<T> {
   onToggleSelectItem?: (item: T) => void;
   onContextMenu?: (e: React.MouseEvent, item: T, column?: ITableColumn<T>) => void;
   onBulkEdit?: (selectedItems: T[], columnKey: string, newValue: any) => Promise<void>;
+  onEdit?: (item: T) => void;
+  onDelete?: (item: T) => void;
 }
 
 function TableBody<T>({
@@ -28,6 +31,8 @@ function TableBody<T>({
   onToggleSelectItem,
   onContextMenu,
   onBulkEdit,
+  onEdit,
+  onDelete,
 }: TableBodyProps<T>) {
   return (
     <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
@@ -67,7 +72,7 @@ function TableBody<T>({
       ) : (
         <>
           {data.map((item, index) => (
-            <TableRow
+            <TableRowWithConfirmation
               key={keyExtractor(item)}
               item={item}
               keyExtractor={keyExtractor}
@@ -79,6 +84,8 @@ function TableBody<T>({
               onContextMenu={onContextMenu}
               rowIndex={index}
               onBulkEdit={onBulkEdit}
+              onEdit={onEdit}
+              onDelete={onDelete}
             />
           ))}
 

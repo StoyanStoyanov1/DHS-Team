@@ -1,4 +1,4 @@
-import React, { useEffect, useCallback } from 'react';
+import React, { useEffect, useCallback, useState } from 'react';
 import { AlertTriangle, X } from 'lucide-react';
 
 interface DeleteConfirmationDialogProps {
@@ -16,10 +16,18 @@ const DeleteConfirmationDialog: React.FC<DeleteConfirmationDialogProps> = ({
   onConfirm,
   onCancel,
 }) => {
+  // Add state to track client-side rendering
+  const [isMounted, setIsMounted] = useState(false);
+
+  // Set mounted state when component mounts (client-side only)
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
   // Handle ESC key to close and ENTER key to confirm
   const handleKeyDown = useCallback((e: KeyboardEvent) => {
     if (!isOpen) return;
-    
+
     if (e.key === 'Escape') {
       onCancel();
     } else if (e.key === 'Enter') {
@@ -33,13 +41,16 @@ const DeleteConfirmationDialog: React.FC<DeleteConfirmationDialogProps> = ({
 
   // Add event listener for keyboard shortcuts
   useEffect(() => {
-    document.addEventListener('keydown', handleKeyDown);
-    return () => {
-      document.removeEventListener('keydown', handleKeyDown);
-    };
-  }, [handleKeyDown]);
+    if (isOpen) {
+      document.addEventListener('keydown', handleKeyDown);
+      return () => {
+        document.removeEventListener('keydown', handleKeyDown);
+      };
+    }
+  }, [handleKeyDown, isOpen]);
 
-  if (!isOpen) return null;
+  // Don't render anything during SSR or if dialog is closed
+  if (!isMounted || !isOpen) return null;
 
   // Handle singular/plural forms
   const displayItemType = itemCount === 1 && itemType.endsWith('s') 
@@ -75,14 +86,14 @@ const DeleteConfirmationDialog: React.FC<DeleteConfirmationDialogProps> = ({
                 <X className="h-5 w-5" />
               </button>
             </div>
-            
+
             <div className="mt-3">
               <p className="text-sm text-gray-600 dark:text-gray-300">
                 Are you sure you want to delete {itemCount === 1 ? 'this' : 'these'} {itemCount} {displayItemType}?
                 This action cannot be undone.
               </p>
             </div>
-            
+
             <div className="mt-6 flex justify-end space-x-3">
               <button
                 type="button"
@@ -102,7 +113,7 @@ const DeleteConfirmationDialog: React.FC<DeleteConfirmationDialogProps> = ({
           </div>
         </div>
       </div>
-      
+
       {/* Animation styles */}
       <style jsx global>{`
         @keyframes scale-in {

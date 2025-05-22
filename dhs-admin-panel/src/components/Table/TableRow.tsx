@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { ITableColumn } from './interfaces';
+import { MoreVertical, Edit, Trash2 } from 'lucide-react';
+import EditConfirmationDialog from './EditConfirmationDialog';
 
 interface TableRowProps<T> {
   item: T;
@@ -12,6 +14,8 @@ interface TableRowProps<T> {
   onContextMenu?: (e: React.MouseEvent, item: T, column?: ITableColumn<T>) => void;
   rowIndex: number;
   onBulkEdit?: (selectedItems: T[], columnKey: string, newValue: any) => Promise<void>;
+  onEdit?: (item: T) => void;
+  onDelete?: (item: T) => void;
 }
 
 function TableRow<T>({
@@ -25,7 +29,10 @@ function TableRow<T>({
   onContextMenu,
   rowIndex,
   onBulkEdit,
+  onEdit,
+  onDelete,
 }: TableRowProps<T>) {
+  // Wrap the component in a fragment to include the confirmation dialog
   // State to track which cell is being edited
   const [editingCell, setEditingCell] = useState<string | null>(null);
   const [editValue, setEditValue] = useState<string>('');
@@ -36,9 +43,22 @@ function TableRow<T>({
   // State for date editing
   const [dateValue, setDateValue] = useState<{ start?: Date | null; end?: Date | null } | null>(null);
 
+  // State for row actions menu
+  const [isActionsMenuOpen, setIsActionsMenuOpen] = useState<boolean>(false);
+
+  // State for edit confirmation dialog
+  const [showConfirmDialog, setShowConfirmDialog] = useState<boolean>(false);
+  const [pendingEdit, setPendingEdit] = useState<{
+    columnKey: string;
+    oldValue: any;
+    newValue: any;
+    fieldName: string;
+  } | null>(null);
+
   // Refs for dropdown and date picker to detect clicks outside
   const dropdownRef = useRef<HTMLDivElement>(null);
   const datePickerRef = useRef<HTMLDivElement>(null);
+  const actionsMenuRef = useRef<HTMLDivElement>(null);
 
   // Apply alternating row background colors - improving dark mode with more appropriate colors
   const alternatingRowClass = isSelected 
@@ -63,6 +83,7 @@ function TableRow<T>({
     setEditingCell(null);
     setIsDropdownOpen(false);
     setDateValue(null);
+    setIsActionsMenuOpen(false);
   }, [item]);
 
   // Effect to load dropdown options when editing a role, enum, or boolean field
@@ -123,6 +144,11 @@ function TableRow<T>({
           setEditingCell(null);
           setDateValue(null);
         }
+      }
+
+      // Handle clicks outside actions menu
+      if (isActionsMenuOpen && actionsMenuRef.current && !actionsMenuRef.current.contains(event.target as Node)) {
+        setIsActionsMenuOpen(false);
       }
     }
 
@@ -186,9 +212,9 @@ function TableRow<T>({
       }
     }
 
-    // Add event listeners when dropdown is open or date field is being edited
+    // Add event listeners when dropdown is open, date field is being edited, or actions menu is open
     const isDateFieldEditing = editingCell && visibleColumns.find(col => col.key === editingCell)?.fieldDataType === 'date';
-    if (isDropdownOpen || isDateFieldEditing) {
+    if (isDropdownOpen || isDateFieldEditing || isActionsMenuOpen) {
       document.addEventListener('mousedown', handleClickOutside);
       document.addEventListener('keydown', handleKeyDown);
     }
@@ -198,7 +224,55 @@ function TableRow<T>({
       document.removeEventListener('mousedown', handleClickOutside);
       document.removeEventListener('keydown', handleKeyDown);
     };
-  }, [isDropdownOpen, editingCell, editValue, item, onBulkEdit, dropdownOptions, focusedOptionIndex, visibleColumns]);
+  }, [isDropdownOpen, editingCell, editValue, item, onBulkEdit, dropdownOptions, focusedOptionIndex, visibleColumns, isActionsMenuOpen]);
+
+  // Function to handle showing the confirmation dialog
+  const handleShowConfirmation = (columnKey: string, newValue: any) => {
+    const column = visibleColumns.find(col => col.key === columnKey);
+    if (!column) return;
+
+    // Get the current value from the item
+    const oldValue = (item as any)[columnKey];
+
+    // Get a user-friendly field name
+    const fieldName = column.header || columnKey;
+
+    // Store the pending edit
+    setPendingEdit({
+      columnKey,
+      oldValue,
+      newValue,
+      fieldName
+    });
+
+    // Show the confirmation dialog
+    setShowConfirmDialog(true);
+  };
+
+  // Function to handle confirming the edit
+  const handleConfirmEdit = () => {
+    if (!pendingEdit || !onBulkEdit) return;
+
+    // Apply the edit
+    onBulkEdit([item], pendingEdit.columnKey, pendingEdit.newValue);
+
+    // Reset state
+    setShowConfirmDialog(false);
+    setPendingEdit(null);
+    setEditingCell(null);
+    setIsDropdownOpen(false);
+    setFocusedOptionIndex(-1);
+  };
+
+  // Function to handle canceling the edit
+  const handleCancelEdit = () => {
+    // Reset state
+    setShowConfirmDialog(false);
+    setPendingEdit(null);
+    setEditingCell(null);
+    setIsDropdownOpen(false);
+    setFocusedOptionIndex(-1);
+  };
 
   return (
     <tr 
@@ -242,14 +316,14 @@ function TableRow<T>({
         </td>
       )}
 
-      {visibleColumns.map((column) => (
+      {visibleColumns.map((column, columnIndex) => (
         <td 
           key={`${keyExtractor(item)}-${column.key}`}
           className={`px-6 py-4 whitespace-nowrap transition-colors ${column.className || ''} ${
             isSelected 
               ? 'text-indigo-900 dark:text-white font-medium' 
               : 'text-gray-700 dark:text-white'
-          } group-hover:text-gray-900 dark:group-hover:text-white`}
+          } group-hover:text-gray-900 dark:group-hover:text-white relative`}
           onContextMenu={(e) => {
             e.preventDefault();
             if (onContextMenu) {
@@ -473,14 +547,67 @@ function TableRow<T>({
               );
             })()
           ) : (
-            column.render ? column.render(item) : 
-              // For boolean fields, display the user-friendly label
-              column.fieldDataType === 'boolean' ? 
-                (item as any)[column.key] ? (column.labelTrue || 'Active') : (column.labelFalse || 'Inactive') :
-              // For date fields, format the date
-              column.fieldDataType === 'date' && (item as any)[column.key] ?
-                new Date((item as any)[column.key]).toLocaleDateString('bg-BG', { day: '2-digit', month: '2-digit', year: 'numeric' }) :
-                (item as any)[column.key]
+            <div className="flex items-center justify-between">
+              <div className="flex-grow">
+                {column.render ? column.render(item) : 
+                  // For boolean fields, display the user-friendly label
+                  column.fieldDataType === 'boolean' ? 
+                    (item as any)[column.key] ? (column.labelTrue || 'Active') : (column.labelFalse || 'Inactive') :
+                  // For date fields, format the date
+                  column.fieldDataType === 'date' && (item as any)[column.key] ?
+                    new Date((item as any)[column.key]).toLocaleDateString('bg-BG', { day: '2-digit', month: '2-digit', year: 'numeric' }) :
+                    (item as any)[column.key]
+                }
+              </div>
+
+              {/* Add the actions menu to the last column */}
+              {columnIndex === visibleColumns.length - 1 && (
+                <div className="relative" ref={actionsMenuRef}>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setIsActionsMenuOpen(!isActionsMenuOpen);
+                    }}
+                    className="ml-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 focus:outline-none"
+                  >
+                    <MoreVertical size={18} />
+                  </button>
+
+                  {isActionsMenuOpen && (
+                    <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-md shadow-lg z-10 border border-gray-200 dark:border-gray-700">
+                      <div className="py-1">
+                        <button
+                          className="flex items-center w-full px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setIsActionsMenuOpen(false);
+                            if (onEdit) {
+                              onEdit(item);
+                            }
+                          }}
+                        >
+                          <Edit size={16} className="mr-2 text-green-600" />
+                          Edit
+                        </button>
+                        <button
+                          className="flex items-center w-full px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setIsActionsMenuOpen(false);
+                            if (onDelete) {
+                              onDelete(item);
+                            }
+                          }}
+                        >
+                          <Trash2 size={16} className="mr-2 text-red-600" />
+                          Delete
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
           )}
         </td>
       ))}
@@ -488,4 +615,109 @@ function TableRow<T>({
   );
 }
 
-export default TableRow;
+// Global state for edit confirmations
+// This approach avoids rendering dialogs inside the table structure
+type EditConfirmationState = {
+  isOpen: boolean;
+  fieldName: string;
+  oldValue: any;
+  newValue: any;
+  onConfirm: () => void;
+  onCancel: () => void;
+};
+
+// Use a global variable to store the current edit confirmation state
+// This is safe because only one confirmation can be open at a time
+let globalEditConfirmation: EditConfirmationState | null = null;
+
+// Function to set the global edit confirmation state
+export function setGlobalEditConfirmation(state: EditConfirmationState | null) {
+  globalEditConfirmation = state;
+  // Force a re-render of the EditConfirmationPortal
+  if (typeof window !== 'undefined') {
+    window.dispatchEvent(new CustomEvent('editconfirmationchange'));
+  }
+}
+
+// Component to render the EditConfirmationDialog outside the table structure
+export function EditConfirmationPortal() {
+  const [confirmationState, setConfirmationState] = useState<EditConfirmationState | null>(null);
+
+  // Update local state when global state changes
+  useEffect(() => {
+    const handleChange = () => {
+      setConfirmationState(globalEditConfirmation);
+    };
+
+    // Initial state
+    setConfirmationState(globalEditConfirmation);
+
+    // Listen for changes
+    window.addEventListener('editconfirmationchange', handleChange);
+    return () => {
+      window.removeEventListener('editconfirmationchange', handleChange);
+    };
+  }, []);
+
+  if (!confirmationState) return null;
+
+  return (
+    <EditConfirmationDialog
+      isOpen={confirmationState.isOpen}
+      fieldName={confirmationState.fieldName}
+      oldValue={confirmationState.oldValue}
+      newValue={confirmationState.newValue}
+      onConfirm={() => {
+        confirmationState.onConfirm();
+        setGlobalEditConfirmation(null);
+      }}
+      onCancel={() => {
+        confirmationState.onCancel();
+        setGlobalEditConfirmation(null);
+      }}
+    />
+  );
+}
+
+// Wrap the TableRow component to include the confirmation dialog functionality
+function TableRowWithConfirmation<T>(props: TableRowProps<T>) {
+  // Function to handle showing the confirmation dialog
+  const handleShowConfirmation = (columnKey: string, newValue: any) => {
+    const column = props.visibleColumns.find(col => col.key === columnKey);
+    if (!column) return;
+
+    // Get the current value from the item
+    const oldValue = (props.item as any)[columnKey];
+
+    // Get a user-friendly field name
+    const fieldName = column.header || columnKey;
+
+    // Set the global edit confirmation state
+    setGlobalEditConfirmation({
+      isOpen: true,
+      fieldName,
+      oldValue,
+      newValue,
+      onConfirm: () => {
+        if (props.onBulkEdit) {
+          props.onBulkEdit([props.item], columnKey, newValue);
+        }
+      },
+      onCancel: () => {
+        // Just close the dialog
+      }
+    });
+  };
+
+  // Create a new onBulkEdit function that shows the confirmation dialog
+  const onBulkEditWithConfirmation = props.onBulkEdit 
+    ? (items: T[], columnKey: string, newValue: any) => {
+        handleShowConfirmation(columnKey, newValue);
+      }
+    : undefined;
+
+  // Only render the TableRow, not the dialog
+  return <TableRow {...props} onBulkEdit={onBulkEditWithConfirmation} />;
+}
+
+export default TableRowWithConfirmation;

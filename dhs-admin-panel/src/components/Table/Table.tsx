@@ -30,6 +30,7 @@ import PageSizeControl from './PageSizeControl';
 import TableContextMenu from './TableContextMenu';
 import BulkEditBar from './BulkEditBar';
 import DeleteConfirmationDialog from './DeleteConfirmationDialog';
+import { EditConfirmationPortal } from './TableRow';
 import { Eye, PencilIcon, Trash2, RotateCcw } from 'lucide-react';
 import { useTableFilters } from './hooks/useTableFilters';
 import { useTableSort } from './hooks/useTableSort';
@@ -66,6 +67,8 @@ export default function Table<T>({
   showSelectionColumn = false,
   editableColumns = [],
   onBulkEdit,
+  onEdit,
+  onDelete,
   itemType = 'items',
 }: ITableProps<T>) {
   const tableService = useMemo(() => new TableService<T>(), []);
@@ -528,6 +531,8 @@ export default function Table<T>({
               onToggleSelectItem={toggleSelectItem}
               onContextMenu={handleCellContextMenu}
               onBulkEdit={onBulkEdit}
+              onEdit={onEdit}
+              onDelete={onDelete}
             />
           </table>
         </div>
@@ -616,6 +621,9 @@ export default function Table<T>({
           }}
         />
       )}
+
+      {/* Edit Confirmation Portal - renders dialogs outside the table structure */}
+      <EditConfirmationPortal />
     </div>
   );
 }

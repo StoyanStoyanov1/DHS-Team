@@ -127,7 +127,7 @@ function UsersListContent() {
     setSelectedUsers(selected);
   };
 
-  const handleDelete = () => {
+  const handleBulkDelete = () => {
     if (selectedUsers.length > 0) {
       setShowDeleteConfirm(true);
     }
@@ -143,6 +143,17 @@ function UsersListContent() {
 
   const handleUpdate = () => {
     // The BulkEditBar will automatically show when items are selected
+  };
+
+  const handleEdit = (user: User) => {
+    console.log('Edit user:', user);
+    // In a real app, you would navigate to the edit page or open a modal
+  };
+
+  const handleDelete = (user: User) => {
+    console.log('Delete user:', user);
+    // In a real app, you would show a confirmation dialog and then delete the user
+    setFilteredUsers(prev => prev.filter(u => u.id !== user.id));
   };
 
   const handleBulkEdit = async (selectedItems: User[], columnKey: string, newValue: any): Promise<void> => {
@@ -246,29 +257,6 @@ function UsersListContent() {
       sortFn: sortLastLogin,
       fieldDataType: 'date'
     },
-    {
-      header: 'Actions',
-      key: 'actions',
-      render: (user) => (
-        <div className="flex space-x-2">
-          <button className="text-blue-600 hover:text-blue-900" title="View Details">
-            <FileText size={18} />
-          </button>
-          <button className="text-green-600 hover:text-green-900" title="Edit User">
-            <Edit size={18} />
-          </button>
-          <button className="text-red-600 hover:text-red-900" title="Delete User">
-            <Trash2 size={18} />
-          </button>
-          <button className="text-gray-600 hover:text-gray-900" title="More Options">
-            <MoreVertical size={18} />
-          </button>
-        </div>
-      ),
-      filterable: false,
-      hideable: false,
-      sortable: false
-    }
   ];
 
   return (
@@ -334,6 +322,8 @@ function UsersListContent() {
             }
           ]}
           onBulkEdit={handleBulkEdit}
+          onEdit={handleEdit}
+          onDelete={handleDelete}
         />
 
         {showDeleteConfirm && (

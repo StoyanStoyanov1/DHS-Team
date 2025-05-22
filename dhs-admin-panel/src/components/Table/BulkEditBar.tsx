@@ -29,6 +29,14 @@ function BulkEditBar<T>({
   onCancel,
   pageTitle = 'Items', // Default to "Items" if no page title is provided
 }: BulkEditBarProps<T>) {
+  // Add state to track client-side rendering
+  const [isMounted, setIsMounted] = useState(false);
+
+  // Set mounted state when component mounts (client-side only)
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
   // Tracks which columns have been enabled for editing
   const [enabledColumns, setEnabledColumns] = useState<Record<string, boolean>>({});
 
@@ -161,13 +169,15 @@ function BulkEditBar<T>({
     }
   }, [onCancel, hasChanges, isSubmitting]);
 
-  // Add event listener for ESC key
+  // Add event listener for ESC key only when component is mounted
   useEffect(() => {
-    document.addEventListener('keydown', handleEscKey);
-    return () => {
-      document.removeEventListener('keydown', handleEscKey);
-    };
-  }, [handleEscKey]);
+    if (isMounted) {
+      document.addEventListener('keydown', handleEscKey);
+      return () => {
+        document.removeEventListener('keydown', handleEscKey);
+      };
+    }
+  }, [handleEscKey, isMounted]);
 
   // Render input control based on column type
   const renderInputControl = (column: EditableColumn<T>) => {
@@ -282,7 +292,8 @@ function BulkEditBar<T>({
     }
   };
 
-  if (selectedItems.length === 0) return null;
+  // Don't render anything during SSR or if no items are selected
+  if (!isMounted || selectedItems.length === 0) return null;
 
   // Convert pageTitle to singular if needed (simple English rule)
   const singularTitle = pageTitle.endsWith('s') ? pageTitle.slice(0, -1) : pageTitle;
