@@ -166,13 +166,29 @@ function TableRow<T>({
         const datePickerElement = datePickerRef.current;
         if (datePickerElement && !datePickerElement.contains(event.target as Node)) {
           // Check if there are changes before closing
-          if (handleShowConfirmation && dateValue?.start) {
+          if (handleShowConfirmation) {
             const oldValue = (item as any)[editingCell];
-            const newValue = dateValue.start;
+            const newValue = dateValue?.start || null;
 
             // Check if the value has changed
+            if (oldValue === null && newValue === null) {
+              // No change if both are null
+              setEditingCell(null);
+              setDateValue(null);
+              return;
+            }
+
+            if ((oldValue === null && newValue !== null) || (oldValue !== null && newValue === null)) {
+              // Value changed if one is null and the other is not
+              handleShowConfirmation(editingCell, newValue);
+              setEditingCell(null);
+              setDateValue(null);
+              return;
+            }
+
+            // Both values are not null, compare them
             const oldDate = oldValue ? new Date(oldValue) : null;
-            const isValueChanged = !oldDate || 
+            const isValueChanged = !oldDate || !newValue ||
               oldDate.getFullYear() !== newValue.getFullYear() || 
               oldDate.getMonth() !== newValue.getMonth() || 
               oldDate.getDate() !== newValue.getDate();
@@ -302,7 +318,7 @@ function TableRow<T>({
       document.removeEventListener('mousedown', handleClickOutside);
       document.removeEventListener('keydown', handleKeyDown);
     };
-  }, [isDropdownOpen, editingCell, editValue, item, onBulkEdit, dropdownOptions, focusedOptionIndex, visibleColumns, isActionsMenuOpen]);
+  }, [isDropdownOpen, editingCell, editValue, dateValue, item, onBulkEdit, dropdownOptions, focusedOptionIndex, visibleColumns, isActionsMenuOpen]);
 
 
   return (
@@ -395,10 +411,41 @@ function TableRow<T>({
                 const initialDate = dateValue?.start ? formatDateForInput(dateValue.start) : '';
 
                 const applyDateChange = () => {
-                  if (dateValue?.start && handleShowConfirmation) {
-                    handleShowConfirmation(editingCell, dateValue.start);
+                  if (handleShowConfirmation) {
+                    const oldValue = (item as any)[editingCell];
+                    const newValue = dateValue?.start || null;
+
+                    // Check if the value has changed
+                    if (oldValue === null && newValue === null) {
+                      // No change if both are null
+                      setEditingCell(null);
+                      setDateValue(null);
+                      return;
+                    }
+
+                    if ((oldValue === null && newValue !== null) || (oldValue !== null && newValue === null)) {
+                      // Value changed if one is null and the other is not
+                      handleShowConfirmation(editingCell, newValue);
+                      setEditingCell(null);
+                      setDateValue(null);
+                      return;
+                    }
+
+                    // Both values are not null, compare them
+                    const oldDate = oldValue ? new Date(oldValue) : null;
+                    const isValueChanged = !oldDate || !newValue ||
+                      oldDate.getFullYear() !== newValue.getFullYear() || 
+                      oldDate.getMonth() !== newValue.getMonth() || 
+                      oldDate.getDate() !== newValue.getDate();
+
+                    // If the value has changed, show confirmation dialog
+                    if (isValueChanged) {
+                      handleShowConfirmation(editingCell, newValue);
+                    }
                   }
+
                   setEditingCell(null);
+                  setDateValue(null);
                 };
 
                 return (
@@ -417,7 +464,46 @@ function TableRow<T>({
                           if (e.key === 'Enter') {
                             applyDateChange();
                           } else if (e.key === 'Escape') {
+                            // Check if there are changes before closing
+                            if (handleShowConfirmation) {
+                              const oldValue = (item as any)[editingCell];
+                              const newValue = dateValue?.start || null;
+
+                              // Check if the value has changed
+                              if (oldValue === null && newValue === null) {
+                                // No change if both are null
+                                setEditingCell(null);
+                                setDateValue(null);
+                                return;
+                              }
+
+                              if ((oldValue === null && newValue !== null) || (oldValue !== null && newValue === null)) {
+                                // Value changed if one is null and the other is not
+                                handleShowConfirmation(editingCell, newValue);
+                                setEditingCell(null);
+                                setDateValue(null);
+                                return;
+                              }
+
+                              // Both values are not null, compare them
+                              const oldDate = oldValue ? new Date(oldValue) : null;
+                              const isValueChanged = !oldDate || !newValue ||
+                                oldDate.getFullYear() !== newValue.getFullYear() || 
+                                oldDate.getMonth() !== newValue.getMonth() || 
+                                oldDate.getDate() !== newValue.getDate();
+
+                              // If the value has changed, show confirmation dialog
+                              if (isValueChanged) {
+                                handleShowConfirmation(editingCell, newValue);
+                                setEditingCell(null);
+                                setDateValue(null);
+                                return;
+                              }
+                            }
+
+                            // If no changes or no confirmation handler, just close
                             setEditingCell(null);
+                            setDateValue(null);
                           }
                         }}
                         autoFocus
@@ -791,6 +877,10 @@ function TableRowWithConfirmation<T>(props: TableRowProps<T>) {
     if (column.fieldDataType === 'boolean') {
       displayOldValue = oldValue ? (column.labelTrue || 'Active') : (column.labelFalse || 'Inactive');
       displayNewValue = newValue ? (column.labelTrue || 'Active') : (column.labelFalse || 'Inactive');
+    } else if (column.fieldDataType === 'date') {
+      // Format date values for display
+      displayOldValue = oldValue ? new Date(oldValue).toLocaleDateString('bg-BG', { day: '2-digit', month: '2-digit', year: 'numeric' }) : 'None';
+      displayNewValue = newValue ? new Date(newValue).toLocaleDateString('bg-BG', { day: '2-digit', month: '2-digit', year: 'numeric' }) : 'None';
     }
 
     // Set the global edit confirmation state
