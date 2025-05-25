@@ -62,8 +62,8 @@ function EditRowModal<T>({
     }));
   };
 
-  // Get visible and editable columns
-  const visibleColumns = columns.filter(col => !col.hidden);
+  // Use all columns, not just visible ones
+  // const visibleColumns = columns.filter(col => !col.hidden);
 
   return (
     <div className="fixed inset-0 overflow-y-auto z-50">
@@ -94,7 +94,7 @@ function EditRowModal<T>({
 
             <div className="mt-3 max-h-[60vh] overflow-y-auto px-1">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {visibleColumns.map((column) => {
+                {columns.map((column) => {
                   // Skip columns that don't have a key or are not meant to be displayed
                   if (!column.key || column.key === '_actions') return null;
 

@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { ITableColumn } from './interfaces';
 import { MoreVertical, Edit, Trash2 } from 'lucide-react';
 import EditConfirmationDialog from './EditConfirmationDialog';
+import DeleteConfirmationDialog from './DeleteConfirmationDialog';
 import TableSettings from './TableSettings';
 
 interface TableRowProps<T> {
@@ -791,7 +792,39 @@ function TableRow<T>({
                 {onDelete && (
                   <button
                     onClick={() => {
-                      onDelete(item);
+                      // Get the item name to display in the confirmation dialog
+                      let itemName = '';
+                      // Try to find a name property or similar to display
+                      if (typeof item === 'object' && item !== null) {
+                        if ((item as any).name) {
+                          itemName = (item as any).name;
+                        } else if ((item as any).title) {
+                          itemName = (item as any).title;
+                        } else if ((item as any).id) {
+                          itemName = `Item #${(item as any).id}`;
+                        } else {
+                          // If no suitable property is found, use the first property value
+                          const firstKey = Object.keys(item)[0];
+                          if (firstKey) {
+                            itemName = String((item as any)[firstKey]);
+                          }
+                        }
+                      }
+
+                      // Show the delete confirmation dialog
+                      setGlobalDeleteConfirmation({
+                        isOpen: true,
+                        itemName,
+                        onConfirm: () => {
+                          if (onDelete) {
+                            onDelete(item);
+                          }
+                        },
+                        onCancel: () => {
+                          // Just close the dialog
+                        }
+                      });
+
                       setIsActionsMenuOpen(false);
                     }}
                     className="w-full flex items-center px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-700"
@@ -820,9 +853,19 @@ type EditConfirmationState = {
   onCancel: () => void;
 };
 
-// Use a global variable to store the current edit confirmation state
-// This is safe because only one confirmation can be open at a time
+// Global state for delete confirmations
+// This approach avoids rendering dialogs inside the table structure
+type DeleteConfirmationState = {
+  isOpen: boolean;
+  itemName: string;
+  onConfirm: () => void;
+  onCancel: () => void;
+};
+
+// Use global variables to store the current confirmation states
+// This is safe because only one confirmation of each type can be open at a time
 let globalEditConfirmation: EditConfirmationState | null = null;
+let globalDeleteConfirmation: DeleteConfirmationState | null = null;
 
 // Function to set the global edit confirmation state
 export function setGlobalEditConfirmation(state: EditConfirmationState | null) {
@@ -830,6 +873,15 @@ export function setGlobalEditConfirmation(state: EditConfirmationState | null) {
   // Force a re-render of the EditConfirmationPortal
   if (typeof window !== 'undefined') {
     window.dispatchEvent(new CustomEvent('editconfirmationchange'));
+  }
+}
+
+// Function to set the global delete confirmation state
+export function setGlobalDeleteConfirmation(state: DeleteConfirmationState | null) {
+  globalDeleteConfirmation = state;
+  // Force a re-render of the DeleteConfirmationPortal
+  if (typeof window !== 'undefined') {
+    window.dispatchEvent(new CustomEvent('deleteconfirmationchange'));
   }
 }
 
@@ -868,6 +920,45 @@ export function EditConfirmationPortal() {
       onCancel={() => {
         confirmationState.onCancel();
         setGlobalEditConfirmation(null);
+      }}
+    />
+  );
+}
+
+// Component to render the DeleteConfirmationDialog outside the table structure
+export function DeleteConfirmationPortal() {
+  const [confirmationState, setConfirmationState] = useState<DeleteConfirmationState | null>(null);
+
+  // Update local state when global state changes
+  useEffect(() => {
+    const handleChange = () => {
+      setConfirmationState(globalDeleteConfirmation);
+    };
+
+    // Initial state
+    setConfirmationState(globalDeleteConfirmation);
+
+    // Listen for changes
+    window.addEventListener('deleteconfirmationchange', handleChange);
+    return () => {
+      window.removeEventListener('deleteconfirmationchange', handleChange);
+    };
+  }, []);
+
+  if (!confirmationState) return null;
+
+  return (
+    <DeleteConfirmationDialog
+      isOpen={confirmationState.isOpen}
+      itemCount={1}
+      itemName={confirmationState.itemName}
+      onConfirm={() => {
+        confirmationState.onConfirm();
+        setGlobalDeleteConfirmation(null);
+      }}
+      onCancel={() => {
+        confirmationState.onCancel();
+        setGlobalDeleteConfirmation(null);
       }}
     />
   );
@@ -936,12 +1027,17 @@ function TableRowWithConfirmation<T>(props: TableRowProps<T>) {
       }
     : undefined;
 
-  // Only render the TableRow, not the dialog
-  return <TableRow 
-    {...props} 
-    onBulkEdit={props.onBulkEdit} 
-    handleShowConfirmation={handleShowConfirmation}
-  />;
+  // Only render the TableRow, not the dialogs
+  return (
+    <>
+      <TableRow 
+        {...props} 
+        onBulkEdit={props.onBulkEdit} 
+        handleShowConfirmation={handleShowConfirmation}
+      />
+      <DeleteConfirmationPortal />
+    </>
+  );
 }
 
 export default TableRowWithConfirmation;

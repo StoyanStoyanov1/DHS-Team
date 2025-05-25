@@ -5,6 +5,7 @@ interface DeleteConfirmationDialogProps {
   isOpen: boolean;
   itemCount: number;
   itemType?: string;
+  itemName?: string;
   onConfirm: () => void;
   onCancel: () => void;
 }
@@ -13,6 +14,7 @@ const DeleteConfirmationDialog: React.FC<DeleteConfirmationDialogProps> = ({
   isOpen,
   itemCount,
   itemType = 'items',
+  itemName,
   onConfirm,
   onCancel,
 }) => {
@@ -58,7 +60,7 @@ const DeleteConfirmationDialog: React.FC<DeleteConfirmationDialogProps> = ({
     : itemType;
 
   return (
-    <div className="fixed inset-0 overflow-y-auto z-50">
+    <div className="delete-confirmation-dialog-container">
       {/* Backdrop */}
       <div 
         className="fixed inset-0 bg-black/60 backdrop-blur-sm transition-opacity"
@@ -75,7 +77,7 @@ const DeleteConfirmationDialog: React.FC<DeleteConfirmationDialogProps> = ({
                   <AlertTriangle className="h-6 w-6 text-red-600 dark:text-red-400" />
                 </div>
                 <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 ml-3">
-                  Delete {itemCount} {displayItemType}?
+                  Delete {itemCount === 1 && itemName ? itemName : `${itemCount} ${displayItemType}`}?
                 </h3>
               </div>
               <button 
@@ -89,7 +91,9 @@ const DeleteConfirmationDialog: React.FC<DeleteConfirmationDialogProps> = ({
 
             <div className="mt-3">
               <p className="text-sm text-gray-600 dark:text-gray-300">
-                Are you sure you want to delete {itemCount === 1 ? 'this' : 'these'} {itemCount} {displayItemType}?
+                Are you sure you want to delete {itemCount === 1 && itemName 
+                  ? `${itemName}` 
+                  : `${itemCount === 1 ? 'this' : 'these'} ${itemCount} ${displayItemType}`}?
                 This action cannot be undone.
               </p>
             </div>
@@ -128,6 +132,12 @@ const DeleteConfirmationDialog: React.FC<DeleteConfirmationDialogProps> = ({
         }
         .animate-scale-in {
           animation: scale-in 0.15s ease-out forwards;
+        }
+        .delete-confirmation-dialog-container {
+          position: fixed;
+          inset: 0;
+          overflow-y: auto;
+          z-index: 50;
         }
       `}</style>
     </div>

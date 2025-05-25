@@ -438,8 +438,251 @@ export default function Table<T>({
         link.setAttribute('href', url);
         link.setAttribute('download', `table-export-${new Date().toISOString()}.csv`);
         link.click();
+      } else if (format === 'pdf') {
+        // PDF export using browser's print-to-PDF capability
+        if (tableRef.current) {
+          // Helper function to normalize values based on column type
+          const normalizeValue = (value: any, column: typeof initialColumns[0]): string => {
+            if (value === null || value === undefined) return '';
+
+            // Check column's fieldDataType if available
+            const dataType = column.fieldDataType;
+
+            if (typeof value === 'object') {
+              if (value instanceof Date || (dataType === 'date' && typeof value === 'string' && !isNaN(Date.parse(value)))) {
+                // Format dates consistently
+                const date = value instanceof Date ? value : new Date(value);
+                return date.toLocaleDateString();
+              } else if (Array.isArray(value)) {
+                // Format arrays
+                return value.map(item => normalizeValue(item, column)).join(', ');
+              } else {
+                // Format objects
+                try {
+                  // Special handling for common object types
+                  if (dataType === 'role' && value.name) {
+                    return value.name; // Assuming role objects have a name property
+                  }
+
+                  if (value.label || value.name || value.title || value.displayName) {
+                    return value.label || value.name || value.title || value.displayName;
+                  }
+
+                  if (value.value !== undefined) {
+                    return String(value.value);
+                  }
+
+                  // For Last Login or date-like objects with timestamp
+                  if (value.timestamp || value.date) {
+                    const timestamp = value.timestamp || value.date;
+                    return new Date(timestamp).toLocaleString();
+                  }
+
+                  // For Status-like objects
+                  if (value.status) {
+                    return value.status;
+                  }
+
+                  // Default object handling - create a string of key-value pairs
+                  const objProps = Object.entries(value)
+                    .map(([key, val]) => `${key}: ${normalizeValue(val, { fieldDataType: undefined })}`)
+                    .join(', ');
+                  return objProps || JSON.stringify(value);
+                } catch (e) {
+                  return JSON.stringify(value);
+                }
+              }
+            } else if (typeof value === 'number') {
+              // Format numbers consistently
+              return value.toLocaleString();
+            } else if (typeof value === 'boolean') {
+              // Format booleans
+              return value ? (column.labelTrue || 'Yes') : (column.labelFalse || 'No');
+            }
+
+            // Default string representation
+            return String(value);
+          };
+
+          // Try to find a suitable name for the PDF file
+          let fileName = 'table-export';
+
+          // If there's data, try to use the name property from the first item
+          if (sortedData.length > 0 && typeof sortedData[0] === 'object' && sortedData[0] !== null) {
+            const firstItem = sortedData[0] as any;
+            if (firstItem.name) {
+              fileName = firstItem.name;
+            } else if (firstItem.title) {
+              fileName = firstItem.title;
+            } else if (firstItem.id) {
+              fileName = `Item-${firstItem.id}`;
+            }
+          }
+
+          // Create a hidden iframe for PDF export
+          const iframe = document.createElement('iframe');
+          iframe.style.position = 'fixed';
+          iframe.style.right = '0';
+          iframe.style.bottom = '0';
+          iframe.style.width = '0';
+          iframe.style.height = '0';
+          iframe.style.border = '0';
+          document.body.appendChild(iframe);
+
+          // Create a clean table with all rows and all columns, with header
+          let printTableHTML = '<table class="print-table">';
+
+          // Add table header with column names, including a column for row numbers
+          printTableHTML += '<thead><tr>';
+          printTableHTML += '<th>N</th>'; // Add row number column
+          initialColumns.filter(col => !col.key.includes('selection')).forEach(column => {
+            printTableHTML += `<th>${column.header}</th>`;
+          });
+          printTableHTML += '</tr></thead>';
+
+          // Add all rows (not just current page)
+          printTableHTML += '<tbody>';
+          sortedData.forEach((item, index) => {
+            printTableHTML += '<tr>';
+            // Add row number cell
+            printTableHTML += `<td>${index + 1}</td>`;
+            // Skip adding cells for selection column
+            initialColumns.filter(col => !col.key.includes('selection')).forEach(column => {
+              let cellContent = '';
+              // Always get the raw value first
+              const rawValue = (item as any)[column.key];
+
+              if (column.render) {
+                // For rendered cells, try to get the text content
+                try {
+                  const renderedContent = column.render(item);
+                  if (typeof renderedContent === 'string') {
+                    cellContent = renderedContent;
+                  } else if (React.isValidElement(renderedContent)) {
+                    // For React elements, use the normalized raw value instead
+                    // This ensures consistent formatting for complex objects
+                    cellContent = normalizeValue(rawValue, column);
+                  } else if (renderedContent === null || renderedContent === undefined) {
+                    cellContent = '';
+                  } else {
+                    // For other types of rendered content, try to convert to string
+                    cellContent = String(renderedContent);
+                  }
+                } catch (e) {
+                  // Fallback to raw data if render fails, using normalization
+                  cellContent = normalizeValue(rawValue, column);
+                }
+              } else {
+                // For non-rendered cells, use the raw data with normalization
+                cellContent = normalizeValue(rawValue, column);
+              }
+              printTableHTML += `<td>${cellContent}</td>`;
+            });
+            printTableHTML += '</tr>';
+          });
+          printTableHTML += '</tbody></table>';
+
+          // Add total count of printed items
+          const totalItemsText = `<div class="total-items">Total items: ${sortedData.length}</div>`;
+
+          // Create print-friendly styles
+          const styles = `
+            <style>
+              body {
+                font-family: Arial, sans-serif;
+                margin: 20px;
+              }
+              .print-table {
+                border-collapse: collapse;
+                width: 100%;
+                margin-bottom: 10px;
+              }
+              .print-table th, .print-table td {
+                padding: 8px;
+                text-align: left;
+                border: 1px solid #ddd;
+              }
+              .print-table th {
+                background-color: #f2f2f2;
+                font-weight: bold;
+              }
+              .dark .print-table th {
+                background-color: #333;
+                color: white;
+              }
+              .dark .print-table td {
+                background-color: #444;
+                color: white;
+              }
+              .dark {
+                background-color: #333;
+                color: white;
+              }
+              .total-items {
+                margin-top: 10px;
+                font-weight: bold;
+                text-align: right;
+              }
+              @media print {
+                body {
+                  margin: 0;
+                  padding: 0;
+                }
+                button, .no-print {
+                  display: none !important;
+                }
+              }
+            </style>
+          `;
+
+          // Write to the iframe document
+          const iframeDoc = iframe.contentDocument || iframe.contentWindow?.document;
+          if (iframeDoc) {
+            iframeDoc.open();
+            iframeDoc.write(`
+              <!DOCTYPE html>
+              <html>
+                <head>
+                  <title>${fileName}</title>
+                  ${styles}
+                </head>
+                <body class="${effectiveTheme === 'dark' ? 'dark' : 'light'}">
+                  ${printTableHTML}
+                  ${totalItemsText}
+                </body>
+              </html>
+            `);
+            iframeDoc.close();
+
+            // Wait for the iframe to load before printing
+            iframe.onload = () => {
+              try {
+                iframe.contentWindow?.focus();
+                // Use print() to trigger the browser's print dialog, which allows saving as PDF
+                iframe.contentWindow?.print();
+
+                // Remove the iframe after printing
+                setTimeout(() => {
+                  document.body.removeChild(iframe);
+                }, 1000);
+              } catch (e) {
+                console.error('Error printing to PDF:', e);
+                // Fallback to window.print() if iframe printing fails
+                window.print();
+                document.body.removeChild(iframe);
+              }
+            };
+          } else {
+            // Fallback if iframe document is not available
+            document.body.removeChild(iframe);
+            window.print();
+          }
+        } else {
+          // Fallback if table ref is not available
+          window.print();
+        }
       }
-      // For Excel and PDF, additional libraries would be needed
+      // For Excel, additional libraries would be needed
     }
   };
 
