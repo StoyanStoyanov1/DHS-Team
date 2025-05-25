@@ -439,7 +439,7 @@ export default function Table<T>({
         link.setAttribute('download', `table-export-${new Date().toISOString()}.csv`);
         link.click();
       } else if (format === 'pdf') {
-        // PDF export using browser's print-to-PDF capability
+        // Direct PDF download without print dialog
         if (tableRef.current) {
           // Helper function to normalize values based on column type
           const normalizeValue = (value: any, column: typeof initialColumns[0]): string => {
@@ -519,33 +519,30 @@ export default function Table<T>({
             }
           }
 
-          // Create a hidden iframe for PDF export
-          const iframe = document.createElement('iframe');
-          iframe.style.position = 'fixed';
-          iframe.style.right = '0';
-          iframe.style.bottom = '0';
-          iframe.style.width = '0';
-          iframe.style.height = '0';
-          iframe.style.border = '0';
-          document.body.appendChild(iframe);
+          // Create a container for the PDF content
+          const container = document.createElement('div');
+          container.style.position = 'absolute';
+          container.style.left = '-9999px';
+          container.style.top = '-9999px';
+          document.body.appendChild(container);
 
           // Create a clean table with all rows and all columns, with header
-          let printTableHTML = '<table class="print-table">';
+          let tableHTML = '<table class="pdf-table">';
 
           // Add table header with column names, including a column for row numbers
-          printTableHTML += '<thead><tr>';
-          printTableHTML += '<th>N</th>'; // Add row number column
+          tableHTML += '<thead><tr>';
+          tableHTML += '<th>N</th>'; // Add row number column
           initialColumns.filter(col => !col.key.includes('selection')).forEach(column => {
-            printTableHTML += `<th>${column.header}</th>`;
+            tableHTML += `<th>${column.header}</th>`;
           });
-          printTableHTML += '</tr></thead>';
+          tableHTML += '</tr></thead>';
 
           // Add all rows (not just current page)
-          printTableHTML += '<tbody>';
+          tableHTML += '<tbody>';
           sortedData.forEach((item, index) => {
-            printTableHTML += '<tr>';
+            tableHTML += '<tr>';
             // Add row number cell
-            printTableHTML += `<td>${index + 1}</td>`;
+            tableHTML += `<td>${index + 1}</td>`;
             // Skip adding cells for selection column
             initialColumns.filter(col => !col.key.includes('selection')).forEach(column => {
               let cellContent = '';
@@ -576,41 +573,41 @@ export default function Table<T>({
                 // For non-rendered cells, use the raw data with normalization
                 cellContent = normalizeValue(rawValue, column);
               }
-              printTableHTML += `<td>${cellContent}</td>`;
+              tableHTML += `<td>${cellContent}</td>`;
             });
-            printTableHTML += '</tr>';
+            tableHTML += '</tr>';
           });
-          printTableHTML += '</tbody></table>';
+          tableHTML += '</tbody></table>';
 
-          // Add total count of printed items
+          // Add total count of items
           const totalItemsText = `<div class="total-items">Total items: ${sortedData.length}</div>`;
 
-          // Create print-friendly styles
+          // Create styles for the PDF
           const styles = `
             <style>
               body {
                 font-family: Arial, sans-serif;
                 margin: 20px;
               }
-              .print-table {
+              .pdf-table {
                 border-collapse: collapse;
                 width: 100%;
                 margin-bottom: 10px;
               }
-              .print-table th, .print-table td {
+              .pdf-table th, .pdf-table td {
                 padding: 8px;
                 text-align: left;
                 border: 1px solid #ddd;
               }
-              .print-table th {
+              .pdf-table th {
                 background-color: #f2f2f2;
                 font-weight: bold;
               }
-              .dark .print-table th {
+              .dark .pdf-table th {
                 background-color: #333;
                 color: white;
               }
-              .dark .print-table td {
+              .dark .pdf-table td {
                 background-color: #444;
                 color: white;
               }
@@ -623,60 +620,154 @@ export default function Table<T>({
                 font-weight: bold;
                 text-align: right;
               }
-              @media print {
-                body {
-                  margin: 0;
-                  padding: 0;
-                }
-                button, .no-print {
-                  display: none !important;
-                }
-              }
             </style>
           `;
 
-          // Write to the iframe document
-          const iframeDoc = iframe.contentDocument || iframe.contentWindow?.document;
-          if (iframeDoc) {
-            iframeDoc.open();
-            iframeDoc.write(`
-              <!DOCTYPE html>
-              <html>
-                <head>
-                  <title>${fileName}</title>
-                  ${styles}
-                </head>
-                <body class="${effectiveTheme === 'dark' ? 'dark' : 'light'}">
-                  ${printTableHTML}
-                  ${totalItemsText}
-                </body>
-              </html>
-            `);
-            iframeDoc.close();
+          // Create the complete HTML content
+          const htmlContent = `
+            <!DOCTYPE html>
+            <html>
+              <head>
+                <title>${fileName}</title>
+                ${styles}
+              </head>
+              <body class="${effectiveTheme === 'dark' ? 'dark' : 'light'}">
+                ${tableHTML}
+                ${totalItemsText}
+              </body>
+            </html>
+          `;
 
-            // Wait for the iframe to load before printing
-            iframe.onload = () => {
-              try {
-                iframe.contentWindow?.focus();
-                // Use print() to trigger the browser's print dialog, which allows saving as PDF
-                iframe.contentWindow?.print();
+          // Set the container content
+          container.innerHTML = htmlContent;
 
-                // Remove the iframe after printing
-                setTimeout(() => {
-                  document.body.removeChild(iframe);
-                }, 1000);
-              } catch (e) {
-                console.error('Error printing to PDF:', e);
-                // Fallback to window.print() if iframe printing fails
-                window.print();
-                document.body.removeChild(iframe);
+          // Function to convert HTML to canvas
+          const html2canvas = (element: HTMLElement): Promise<HTMLCanvasElement> => {
+            return new Promise((resolve, reject) => {
+              // Load html2canvas from CDN
+              const script = document.createElement('script');
+              script.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js';
+              script.onload = () => {
+                // Now html2canvas is available
+                (window as any).html2canvas(element, {
+                  scale: 2, // Higher scale for better quality
+                  useCORS: true,
+                  logging: false
+                }).then((canvas: HTMLCanvasElement) => {
+                  resolve(canvas);
+                }).catch((error: any) => {
+                  reject(error);
+                });
+              };
+              script.onerror = (error) => {
+                reject(error);
+              };
+              document.head.appendChild(script);
+            });
+          };
+
+          // Function to convert canvas to PDF and download
+          const canvasToPdf = (canvas: HTMLCanvasElement, filename: string) => {
+            // Load jsPDF from CDN
+            const script = document.createElement('script');
+            script.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
+            script.onload = () => {
+              // Now jsPDF is available
+              // Access jsPDF from the jspdf namespace
+              const jspdf = window.jspdf as any;
+              const pdf = new jspdf.jsPDF({
+                orientation: 'portrait',
+                unit: 'mm',
+                format: 'a4'
+              });
+
+              // Calculate dimensions
+              const imgData = canvas.toDataURL('image/png');
+              const imgWidth = 210; // A4 width in mm
+              const pageHeight = 297; // A4 height in mm
+              const imgHeight = (canvas.height * imgWidth) / canvas.width;
+              let heightLeft = imgHeight;
+              let position = 0;
+
+              // Add first page
+              pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+              heightLeft -= pageHeight;
+
+              // Add additional pages if needed
+              while (heightLeft > 0) {
+                position = heightLeft - imgHeight;
+                pdf.addPage();
+                pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+                heightLeft -= pageHeight;
+              }
+
+              // Save the PDF
+              pdf.save(`${filename}.pdf`);
+
+              // Clean up
+              document.body.removeChild(container);
+              document.head.removeChild(script);
+            };
+            script.onerror = () => {
+              console.error('Failed to load jsPDF');
+              // Fallback to the old method if jsPDF fails to load
+              const iframe = document.createElement('iframe');
+              iframe.style.position = 'fixed';
+              iframe.style.right = '0';
+              iframe.style.bottom = '0';
+              iframe.style.width = '0';
+              iframe.style.height = '0';
+              iframe.style.border = '0';
+              document.body.appendChild(iframe);
+
+              const iframeDoc = iframe.contentDocument || iframe.contentWindow?.document;
+              if (iframeDoc) {
+                iframeDoc.open();
+                iframeDoc.write(htmlContent);
+                iframeDoc.close();
+
+                iframe.onload = () => {
+                  iframe.contentWindow?.print();
+                  setTimeout(() => {
+                    document.body.removeChild(iframe);
+                  }, 1000);
+                };
               }
             };
-          } else {
-            // Fallback if iframe document is not available
-            document.body.removeChild(iframe);
-            window.print();
-          }
+            document.head.appendChild(script);
+          };
+
+          // Convert HTML to canvas and then to PDF
+          html2canvas(container)
+            .then(canvas => {
+              canvasToPdf(canvas, fileName);
+            })
+            .catch(error => {
+              console.error('Error generating PDF:', error);
+              // Fallback to the old method if html2canvas fails
+              const iframe = document.createElement('iframe');
+              iframe.style.position = 'fixed';
+              iframe.style.right = '0';
+              iframe.style.bottom = '0';
+              iframe.style.width = '0';
+              iframe.style.height = '0';
+              iframe.style.border = '0';
+              document.body.appendChild(iframe);
+
+              const iframeDoc = iframe.contentDocument || iframe.contentWindow?.document;
+              if (iframeDoc) {
+                iframeDoc.open();
+                iframeDoc.write(htmlContent);
+                iframeDoc.close();
+
+                iframe.onload = () => {
+                  iframe.contentWindow?.print();
+                  setTimeout(() => {
+                    document.body.removeChild(iframe);
+                  }, 1000);
+                };
+              }
+            });
         } else {
           // Fallback if table ref is not available
           window.print();
