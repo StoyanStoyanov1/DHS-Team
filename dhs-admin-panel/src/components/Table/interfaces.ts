@@ -94,6 +94,18 @@ export interface ITableProps<T> {
   columnPadding?: number;
   tableId?: string;
 
+  // Table appearance settings
+  density?: 'compact' | 'normal' | 'relaxed';
+  theme?: 'light' | 'dark' | 'site';
+  showGridLines?: boolean;
+  stripedRows?: boolean;
+  highlightOnHover?: boolean;
+  stickyHeader?: boolean;
+
+  // Export options
+  onExportData?: (format: 'csv' | 'excel' | 'pdf') => void;
+  onPrint?: () => void;
+
   // Selection props
   selectedItems?: T[];
   onSelectionChange?: (selectedItems: T[]) => void;

@@ -2,6 +2,7 @@ import React from 'react';
 import { FilterIcon, RotateCcw, Hash } from 'lucide-react';
 import TablePagination from './TablePagination';
 import PageSizeControl from './PageSizeControl';
+import TableSettings from './TableSettings';
 import { SortCriterion } from './interfaces';
 
 interface TableControlsProps<T> {
@@ -26,6 +27,23 @@ interface TableControlsProps<T> {
   setFilterOrder: (order: string[] | ((prevOrder: string[]) => string[])) => void;
   filterOrder: string[];
   columnFilters: Record<string, any>;
+
+  // Table settings props
+  columns?: any[];
+  visibleColumns?: any[];
+  onToggleColumnVisibility?: (columnKey: string) => void;
+  onRefreshData?: () => void;
+  onExportData?: (format: 'csv' | 'excel' | 'pdf') => void;
+  onPrint?: () => void;
+
+  // Table appearance settings
+  density?: 'compact' | 'normal' | 'relaxed';
+  onChangeDensity?: (density: 'compact' | 'normal' | 'relaxed') => void;
+  theme?: 'light' | 'dark' | 'site';
+  onChangeTheme?: (theme: 'light' | 'dark' | 'site') => void;
+
+  // Flag to show settings panel
+  showSettings?: boolean;
 }
 
 function TableControls<T>({
@@ -50,6 +68,23 @@ function TableControls<T>({
   setFilterOrder,
   filterOrder,
   columnFilters,
+
+  // Table settings props
+  columns = [],
+  visibleColumns = [],
+  onToggleColumnVisibility,
+  onRefreshData,
+  onExportData,
+  onPrint,
+
+  // Table appearance settings
+  density = 'normal',
+  onChangeDensity,
+  theme = 'light',
+  onChangeTheme,
+
+  // Flag to show settings panel
+  showSettings = true,
 }: TableControlsProps<T>) {
   const handleItemsPerPageChange = (newItemsPerPage: number) => {
     setItemsPerPage(newItemsPerPage);
@@ -59,16 +94,16 @@ function TableControls<T>({
   // Format filter display value for the summary display
   const formatFilterDisplayValue = (value: any): string => {
     if (value === null || value === undefined) return 'Not set';
-    
+
     if (typeof value === 'boolean') {
       return value ? 'Yes' : 'No';
     } 
-    
+
     if (typeof value === 'object') {
       if (Array.isArray(value)) {
         return `${value.length} selected`;
       }
-      
+
       if (value.term !== undefined) {
         const methodDisplay: Record<string, string> = {
           'contains': 'contains',
@@ -80,10 +115,10 @@ function TableControls<T>({
           'isNotEmpty': 'is not empty',
           'regex': 'matches regex'
         };
-        
+
         return value.method ? `${methodDisplay[value.method] || value.method} "${value.term}"` : `contains "${value.term}"`;
       }
-      
+
       if (value.start || value.end) {
         const start = value.start ? new Date(value.start).toLocaleDateString() : 'any';
         const end = value.end ? new Date(value.end).toLocaleDateString() : 'any';
@@ -95,10 +130,10 @@ function TableControls<T>({
         const max = value.max !== undefined ? value.max : 'any';
         return `${min} to ${max}`;
       }
-      
+
       return JSON.stringify(value);
     }
-    
+
     return String(value);
   };
 
@@ -296,17 +331,36 @@ function TableControls<T>({
           )}
         </div>
 
-        {showTableSizeControls && (
-          <PageSizeControl
-            itemsPerPage={itemsPerPage}
-            setItemsPerPage={handleItemsPerPageChange}
-            options={rowsPerPageOptions.map(size => ({
-              size, 
-              available: size <= Math.max(...rowsPerPageOptions, totalItems)
-            }))}
-            label="Rows per page:"
-          />
-        )}
+        <div className="flex items-center space-x-2">
+          {showTableSizeControls && (
+            <PageSizeControl
+              itemsPerPage={itemsPerPage}
+              setItemsPerPage={handleItemsPerPageChange}
+              options={rowsPerPageOptions.map(size => ({
+                size, 
+                available: size <= Math.max(...rowsPerPageOptions, totalItems)
+              }))}
+              label="Rows per page:"
+            />
+          )}
+
+          {showSettings && (
+            <TableSettings
+              columns={columns}
+              visibleColumns={visibleColumns}
+              onToggleColumnVisibility={onToggleColumnVisibility}
+              onResetAllFilters={resetColumnFilters}
+              onClearAllSorting={handleClearAllSorting}
+              onRefreshData={onRefreshData}
+              onExportData={onExportData}
+              onPrint={onPrint}
+              density={density}
+              onChangeDensity={onChangeDensity}
+              theme={theme}
+              onChangeTheme={onChangeTheme}
+            />
+          )}
+        </div>
       </div>
 
       <TablePagination
