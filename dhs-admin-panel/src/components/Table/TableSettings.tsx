@@ -128,14 +128,6 @@ function TableSettings<T>({
                     >
                       Show All
                     </button>
-                    <button
-                      className="text-xs text-indigo-600 hover:text-indigo-800 dark:text-indigo-400 dark:hover:text-indigo-300"
-                      onClick={() => visibleColumns.forEach(col => {
-                        if (!col.hidden && col.hideable !== false) onToggleColumnVisibility(col.key);
-                      })}
-                    >
-                      Hide All
-                    </button>
                   </div>
                 </div>
 

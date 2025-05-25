@@ -17,6 +17,21 @@ interface TableBodyProps<T> {
   onBulkEdit?: (selectedItems: T[], columnKey: string, newValue: any) => Promise<void>;
   onEdit?: (item: T) => void;
   onDelete?: (item: T) => void;
+
+  // Table settings props
+  columns?: ITableColumn<T>[];
+  onToggleColumnVisibility?: (columnKey: string) => void;
+  onResetAllFilters?: () => void;
+  onClearAllSorting?: () => void;
+  onRefreshData?: () => void;
+  onExportData?: (format: 'csv' | 'excel' | 'pdf') => void;
+  onPrint?: () => void;
+
+  // Table appearance settings
+  density?: 'compact' | 'normal' | 'relaxed';
+  onChangeDensity?: (density: 'compact' | 'normal' | 'relaxed') => void;
+  theme?: 'light' | 'dark' | 'site';
+  onChangeTheme?: (theme: 'light' | 'dark' | 'site') => void;
 }
 
 function TableBody<T>({
@@ -33,6 +48,21 @@ function TableBody<T>({
   onBulkEdit,
   onEdit,
   onDelete,
+
+  // Table settings props
+  columns = [],
+  onToggleColumnVisibility,
+  onResetAllFilters,
+  onClearAllSorting,
+  onRefreshData,
+  onExportData,
+  onPrint,
+
+  // Table appearance settings
+  density = 'normal',
+  onChangeDensity,
+  theme = 'light',
+  onChangeTheme,
 }: TableBodyProps<T>) {
   return (
     <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
@@ -88,6 +118,21 @@ function TableBody<T>({
               onBulkEdit={onBulkEdit}
               onEdit={onEdit}
               onDelete={onDelete}
+
+              // Table settings props
+              columns={columns}
+              onToggleColumnVisibility={onToggleColumnVisibility}
+              onResetAllFilters={onResetAllFilters}
+              onClearAllSorting={onClearAllSorting}
+              onRefreshData={onRefreshData}
+              onExportData={onExportData}
+              onPrint={onPrint}
+
+              // Table appearance settings
+              density={density}
+              onChangeDensity={onChangeDensity}
+              theme={theme}
+              onChangeTheme={onChangeTheme}
             />
           ))}
 

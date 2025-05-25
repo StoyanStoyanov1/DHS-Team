@@ -277,13 +277,24 @@ export default function Table<T>({
 
   // Handle toggling column visibility
   const handleToggleColumnVisibility = (columnKey: string) => {
+    // Check if we're trying to hide a column
+    const column = columns.find(col => col.key === columnKey);
+    if (column && !column.hidden) {
+      // Count currently visible columns
+      const visibleColumnCount = columns.filter(col => !col.hidden).length;
+      // Only allow hiding if there will still be at least 2 visible columns
+      if (visibleColumnCount <= 2) {
+        console.warn('Cannot hide column: At least 2 columns must remain visible');
+        return;
+      }
+    }
+
     setColumns(prevColumns => 
       prevColumns.map(col => 
         col.key === columnKey ? { ...col, hidden: !col.hidden } : col
       )
     );
 
-    const column = columns.find(col => col.key === columnKey);
     if (column && !column.hidden && columnFilters[columnKey] !== undefined) {
       handleColumnFilterChange(columnKey, null);
     }
@@ -966,21 +977,6 @@ export default function Table<T>({
               />
             )}
 
-            {/* Table Settings Component */}
-            <TableSettings
-              columns={columns}
-              visibleColumns={visibleColumns}
-              onToggleColumnVisibility={handleToggleColumnVisibility}
-              onResetAllFilters={resetColumnFilters}
-              onClearAllSorting={handleClearAllSorting}
-              onRefreshData={handleRefreshData}
-              onExportData={handleExportData}
-              onPrint={handlePrint}
-              density={density}
-              onChangeDensity={handleChangeDensity}
-              theme={theme}
-              onChangeTheme={handleChangeTheme}
-            />
           </div>
         </div>
 
@@ -1029,6 +1025,19 @@ export default function Table<T>({
               onSelectCurrentPage={selectCurrentPageItems}
               onSelectAll={selectAllItems}
               onClearSelection={clearSelection}
+
+              // TableSettings props
+              onResetAllFilters={resetColumnFilters}
+              onClearAllSorting={handleClearAllSorting}
+              onRefreshData={handleRefreshData}
+              onExportData={handleExportData}
+              onPrint={handlePrint}
+
+              // Table appearance settings
+              density={density}
+              onChangeDensity={handleChangeDensity}
+              theme={theme}
+              onChangeTheme={handleChangeTheme}
             />
 
             <TableBody
@@ -1045,6 +1054,21 @@ export default function Table<T>({
               onBulkEdit={onBulkEdit}
               onEdit={handleEdit}
               onDelete={onDelete}
+
+              // Table settings props
+              columns={columns}
+              onToggleColumnVisibility={handleToggleColumnVisibility}
+              onResetAllFilters={resetColumnFilters}
+              onClearAllSorting={handleClearAllSorting}
+              onRefreshData={handleRefreshData}
+              onExportData={handleExportData}
+              onPrint={handlePrint}
+
+              // Table appearance settings
+              density={density}
+              onChangeDensity={handleChangeDensity}
+              theme={theme}
+              onChangeTheme={handleChangeTheme}
             />
           </table>
         </div>

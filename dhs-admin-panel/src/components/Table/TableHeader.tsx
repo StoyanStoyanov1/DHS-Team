@@ -3,6 +3,7 @@ import { ITableColumn, SortDirection, SortCriterion } from './interfaces';
 import { ArrowUp, Settings } from 'lucide-react';
 import ColumnMenu from './ColumnMenu';
 import SelectionOptionsMenu from './SelectionOptionsMenu';
+import TableSettings from './TableSettings';
 
 interface TableHeaderProps<T> {
   columns: ITableColumn<T>[];
@@ -27,6 +28,19 @@ interface TableHeaderProps<T> {
   onSelectCurrentPage: () => void;
   onSelectAll: () => void;
   onClearSelection: () => void;
+
+  // TableSettings props
+  onResetAllFilters: () => void;
+  onClearAllSorting: () => void;
+  onRefreshData?: () => void;
+  onExportData?: (format: 'csv' | 'excel' | 'pdf') => void;
+  onPrint?: () => void;
+
+  // Table appearance settings
+  density: 'compact' | 'normal' | 'relaxed';
+  onChangeDensity: (density: 'compact' | 'normal' | 'relaxed') => void;
+  theme: 'light' | 'dark' | 'site';
+  onChangeTheme: (theme: 'light' | 'dark' | 'site') => void;
 }
 
 function TableHeader<T>({
@@ -52,6 +66,19 @@ function TableHeader<T>({
   onSelectCurrentPage,
   onSelectAll,
   onClearSelection,
+
+  // TableSettings props
+  onResetAllFilters,
+  onClearAllSorting,
+  onRefreshData,
+  onExportData,
+  onPrint,
+
+  // Table appearance settings
+  density,
+  onChangeDensity,
+  theme,
+  onChangeTheme,
 }: TableHeaderProps<T>) {
   const renderSortIndicator = (columnKey: string) => {
     if (!multiSort) {
@@ -239,7 +266,20 @@ function TableHeader<T>({
           className="w-12 px-4 py-3 text-center text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider border-r border-gray-200 dark:border-gray-700 table-column-header transition-colors duration-200 shadow-sm"
         >
           <div className="flex items-center justify-center">
-            <Settings size={18} className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300" />
+            <TableSettings
+              columns={columns}
+              visibleColumns={visibleColumns}
+              onToggleColumnVisibility={handleToggleColumnVisibility}
+              onResetAllFilters={onResetAllFilters}
+              onClearAllSorting={onClearAllSorting}
+              onRefreshData={onRefreshData}
+              onExportData={onExportData}
+              onPrint={onPrint}
+              density={density}
+              onChangeDensity={onChangeDensity}
+              theme={theme}
+              onChangeTheme={onChangeTheme}
+            />
           </div>
         </th>
       </tr>

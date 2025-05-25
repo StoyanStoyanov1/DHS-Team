@@ -2,7 +2,6 @@ import React from 'react';
 import { FilterIcon, RotateCcw, Hash } from 'lucide-react';
 import TablePagination from './TablePagination';
 import PageSizeControl from './PageSizeControl';
-import TableSettings from './TableSettings';
 import { SortCriterion } from './interfaces';
 
 interface TableControlsProps<T> {
@@ -344,22 +343,6 @@ function TableControls<T>({
             />
           )}
 
-          {showSettings && (
-            <TableSettings
-              columns={columns}
-              visibleColumns={visibleColumns}
-              onToggleColumnVisibility={onToggleColumnVisibility}
-              onResetAllFilters={resetColumnFilters}
-              onClearAllSorting={handleClearAllSorting}
-              onRefreshData={onRefreshData}
-              onExportData={onExportData}
-              onPrint={onPrint}
-              density={density}
-              onChangeDensity={onChangeDensity}
-              theme={theme}
-              onChangeTheme={onChangeTheme}
-            />
-          )}
         </div>
       </div>
 
