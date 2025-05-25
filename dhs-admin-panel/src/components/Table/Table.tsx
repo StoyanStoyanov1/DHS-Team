@@ -31,6 +31,7 @@ import TableContextMenu from './TableContextMenu';
 import BulkEditBar from './BulkEditBar';
 import DeleteConfirmationDialog from './DeleteConfirmationDialog';
 import { EditConfirmationPortal } from './TableRow';
+import EditRowModal from './EditRowModal';
 import { Eye, PencilIcon, Trash2, RotateCcw } from 'lucide-react';
 import { useTableFilters } from './hooks/useTableFilters';
 import { useTableSort } from './hooks/useTableSort';
@@ -80,6 +81,7 @@ export default function Table<T>({
   const [showBulkEditBar, setShowBulkEditBar] = useState(false);
   const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [editingItem, setEditingItem] = useState<T | null>(null);
 
   const currentPage = externalCurrentPage ?? internalCurrentPage;
   const setCurrentPage = externalSetCurrentPage ?? setInternalCurrentPage;
@@ -313,6 +315,11 @@ export default function Table<T>({
     }
   };
 
+  // Handle edit for a single item
+  const handleEdit = (item: T) => {
+    setEditingItem(item);
+  };
+
   // Add CSS for animation and auto-resize columns
   useEffect(() => {
     addTableStyles();
@@ -531,7 +538,7 @@ export default function Table<T>({
               onToggleSelectItem={toggleSelectItem}
               onContextMenu={handleCellContextMenu}
               onBulkEdit={onBulkEdit}
-              onEdit={onEdit}
+              onEdit={handleEdit}
               onDelete={onDelete}
             />
           </table>
@@ -624,6 +631,40 @@ export default function Table<T>({
 
       {/* Edit Confirmation Portal - renders dialogs outside the table structure */}
       <EditConfirmationPortal />
+
+      {/* Edit Row Modal */}
+      {editingItem && (
+        <EditRowModal
+          isOpen={!!editingItem}
+          item={editingItem}
+          columns={columns}
+          onSave={(updatedItem) => {
+            if (onBulkEdit) {
+              // Create an array of promises for each field that changed
+              const updatePromises = Object.keys(updatedItem).map(key => {
+                // Skip if the value hasn't changed
+                if ((editingItem as any)[key] === (updatedItem as any)[key]) {
+                  return Promise.resolve();
+                }
+                // Update the field
+                return onBulkEdit([editingItem], key, (updatedItem as any)[key]);
+              });
+
+              // Wait for all updates to complete
+              Promise.all(updatePromises)
+                .then(() => {
+                  setEditingItem(null);
+                })
+                .catch(error => {
+                  console.error('Failed to update item:', error);
+                });
+            }
+          }}
+          onCancel={() => {
+            setEditingItem(null);
+          }}
+        />
+      )}
     </div>
   );
 }
