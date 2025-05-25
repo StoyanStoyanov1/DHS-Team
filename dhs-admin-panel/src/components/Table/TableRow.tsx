@@ -16,6 +16,7 @@ interface TableRowProps<T> {
   onBulkEdit?: (selectedItems: T[], columnKey: string, newValue: any) => Promise<void>;
   onEdit?: (item: T) => void;
   onDelete?: (item: T) => void;
+  handleShowConfirmation?: (columnKey: string, newValue: any) => void;
 }
 
 function TableRow<T>({
@@ -31,6 +32,7 @@ function TableRow<T>({
   onBulkEdit,
   onEdit,
   onDelete,
+  handleShowConfirmation,
 }: TableRowProps<T>) {
   // Wrap the component in a fragment to include the confirmation dialog
   // State to track which cell is being edited
@@ -46,14 +48,6 @@ function TableRow<T>({
   // State for row actions menu
   const [isActionsMenuOpen, setIsActionsMenuOpen] = useState<boolean>(false);
 
-  // State for edit confirmation dialog
-  const [showConfirmDialog, setShowConfirmDialog] = useState<boolean>(false);
-  const [pendingEdit, setPendingEdit] = useState<{
-    columnKey: string;
-    oldValue: any;
-    newValue: any;
-    fieldName: string;
-  } | null>(null);
 
   // Refs for dropdown and date picker to detect clicks outside
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -129,7 +123,37 @@ function TableRow<T>({
     function handleClickOutside(event: MouseEvent) {
       // Handle clicks outside dropdown
       if (isDropdownOpen && dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-        // Close the dropdown and exit edit mode without applying changes
+        // Check if there are changes before closing
+        if (editingCell && handleShowConfirmation) {
+          const column = visibleColumns.find(col => col.key === editingCell);
+          if (column) {
+            const oldValue = (item as any)[editingCell];
+            let newValue;
+
+            // Get the new value based on the field type
+            if (column.fieldDataType === 'boolean') {
+              newValue = Boolean(editValue === 'true');
+            } else if (column.fieldDataType === 'date') {
+              newValue = dateValue?.start || null;
+            } else {
+              newValue = editValue;
+            }
+
+            // Check if the value has changed
+            const isValueChanged = JSON.stringify(oldValue) !== JSON.stringify(newValue);
+
+            // If the value has changed, show confirmation dialog
+            if (isValueChanged) {
+              handleShowConfirmation(editingCell, newValue);
+              setIsDropdownOpen(false);
+              setEditingCell(null);
+              setFocusedOptionIndex(-1);
+              return;
+            }
+          }
+        }
+
+        // If no changes or no confirmation handler, just close
         setIsDropdownOpen(false);
         setEditingCell(null);
         setFocusedOptionIndex(-1);
@@ -141,6 +165,28 @@ function TableRow<T>({
         // Check if click is outside the date input field
         const datePickerElement = datePickerRef.current;
         if (datePickerElement && !datePickerElement.contains(event.target as Node)) {
+          // Check if there are changes before closing
+          if (handleShowConfirmation && dateValue?.start) {
+            const oldValue = (item as any)[editingCell];
+            const newValue = dateValue.start;
+
+            // Check if the value has changed
+            const oldDate = oldValue ? new Date(oldValue) : null;
+            const isValueChanged = !oldDate || 
+              oldDate.getFullYear() !== newValue.getFullYear() || 
+              oldDate.getMonth() !== newValue.getMonth() || 
+              oldDate.getDate() !== newValue.getDate();
+
+            // If the value has changed, show confirmation dialog
+            if (isValueChanged) {
+              handleShowConfirmation(editingCell, newValue);
+              setEditingCell(null);
+              setDateValue(null);
+              return;
+            }
+          }
+
+          // If no changes or no confirmation handler, just close
           setEditingCell(null);
           setDateValue(null);
         }
@@ -158,28 +204,60 @@ function TableRow<T>({
           if (focusedOptionIndex >= 0 && focusedOptionIndex < dropdownOptions.length) {
             // If an option is focused, select it
             setEditValue(dropdownOptions[focusedOptionIndex].value);
-            if (onBulkEdit) {
+            if (handleShowConfirmation) {
               const column = visibleColumns.find(col => col.key === editingCell);
               // Convert string 'true'/'false' to boolean for boolean fields
               const finalValue = column && column.fieldDataType === 'boolean' 
                 ? dropdownOptions[focusedOptionIndex].value === 'true' 
                 : dropdownOptions[focusedOptionIndex].value;
-              onBulkEdit([item], editingCell, finalValue);
+              handleShowConfirmation(editingCell, finalValue);
             }
-          } else if (onBulkEdit) {
+          } else if (handleShowConfirmation) {
             // Otherwise use the current edit value
             const column = visibleColumns.find(col => col.key === editingCell);
             // Convert string 'true'/'false' to boolean for boolean fields
             const finalValue = column && column.fieldDataType === 'boolean' 
               ? editValue === 'true' 
               : editValue;
-            onBulkEdit([item], editingCell, finalValue);
+            handleShowConfirmation(editingCell, finalValue);
           }
           setIsDropdownOpen(false);
           setEditingCell(null);
           setFocusedOptionIndex(-1);
           event.preventDefault();
         } else if (event.key === 'Escape') {
+          // Check if there are changes before closing
+          if (handleShowConfirmation) {
+            const column = visibleColumns.find(col => col.key === editingCell);
+            if (column) {
+              const oldValue = (item as any)[editingCell];
+              let newValue;
+
+              // Get the new value based on the field type
+              if (column.fieldDataType === 'boolean') {
+                newValue = Boolean(editValue === 'true');
+              } else if (column.fieldDataType === 'date') {
+                newValue = dateValue?.start || null;
+              } else {
+                newValue = editValue;
+              }
+
+              // Check if the value has changed
+              const isValueChanged = JSON.stringify(oldValue) !== JSON.stringify(newValue);
+
+              // If the value has changed, show confirmation dialog
+              if (isValueChanged) {
+                handleShowConfirmation(editingCell, newValue);
+                setIsDropdownOpen(false);
+                setEditingCell(null);
+                setFocusedOptionIndex(-1);
+                event.preventDefault();
+                return;
+              }
+            }
+          }
+
+          // If no changes or no confirmation handler, just close
           setIsDropdownOpen(false);
           setEditingCell(null);
           setFocusedOptionIndex(-1);
@@ -226,53 +304,6 @@ function TableRow<T>({
     };
   }, [isDropdownOpen, editingCell, editValue, item, onBulkEdit, dropdownOptions, focusedOptionIndex, visibleColumns, isActionsMenuOpen]);
 
-  // Function to handle showing the confirmation dialog
-  const handleShowConfirmation = (columnKey: string, newValue: any) => {
-    const column = visibleColumns.find(col => col.key === columnKey);
-    if (!column) return;
-
-    // Get the current value from the item
-    const oldValue = (item as any)[columnKey];
-
-    // Get a user-friendly field name
-    const fieldName = column.header || columnKey;
-
-    // Store the pending edit
-    setPendingEdit({
-      columnKey,
-      oldValue,
-      newValue,
-      fieldName
-    });
-
-    // Show the confirmation dialog
-    setShowConfirmDialog(true);
-  };
-
-  // Function to handle confirming the edit
-  const handleConfirmEdit = () => {
-    if (!pendingEdit || !onBulkEdit) return;
-
-    // Apply the edit
-    onBulkEdit([item], pendingEdit.columnKey, pendingEdit.newValue);
-
-    // Reset state
-    setShowConfirmDialog(false);
-    setPendingEdit(null);
-    setEditingCell(null);
-    setIsDropdownOpen(false);
-    setFocusedOptionIndex(-1);
-  };
-
-  // Function to handle canceling the edit
-  const handleCancelEdit = () => {
-    // Reset state
-    setShowConfirmDialog(false);
-    setPendingEdit(null);
-    setEditingCell(null);
-    setIsDropdownOpen(false);
-    setFocusedOptionIndex(-1);
-  };
 
   return (
     <tr 
@@ -364,8 +395,8 @@ function TableRow<T>({
                 const initialDate = dateValue?.start ? formatDateForInput(dateValue.start) : '';
 
                 const applyDateChange = () => {
-                  if (dateValue?.start && onBulkEdit) {
-                    onBulkEdit([item], editingCell, dateValue.start);
+                  if (dateValue?.start && handleShowConfirmation) {
+                    handleShowConfirmation(editingCell, dateValue.start);
                   }
                   setEditingCell(null);
                 };
@@ -403,8 +434,8 @@ function TableRow<T>({
                     ref={dropdownRef}
                     onKeyDown={(e) => {
                       if (e.key === 'Enter') {
-                        if (onBulkEdit && editingCell) {
-                          onBulkEdit([item], editingCell, editValue);
+                        if (handleShowConfirmation && editingCell) {
+                          handleShowConfirmation(editingCell, editValue);
                         }
                         setIsDropdownOpen(false);
                         setEditingCell(null);
@@ -426,13 +457,13 @@ function TableRow<T>({
                       tabIndex={0}
                       onKeyDown={(e) => {
                         if (e.key === 'Enter') {
-                          if (onBulkEdit && editingCell) {
+                          if (handleShowConfirmation && editingCell) {
                             const column = visibleColumns.find(col => col.key === editingCell);
                             // Convert string 'true'/'false' to boolean for boolean fields
                             const finalValue = column && column.fieldDataType === 'boolean' 
-                              ? editValue === 'true' 
+                              ? Boolean(editValue === 'true')
                               : editValue;
-                            onBulkEdit([item], editingCell, finalValue);
+                            handleShowConfirmation(editingCell, finalValue);
                           }
                           setIsDropdownOpen(false);
                           setEditingCell(null);
@@ -442,7 +473,11 @@ function TableRow<T>({
                         }
                       }}
                     >
-                      <span>{editValue || 'Select option'}</span>
+                      <span>
+                        {currentColumn && currentColumn.fieldDataType === 'boolean'
+                          ? dropdownOptions.find(option => option.value === editValue)?.label || editValue
+                          : editValue || 'Select option'}
+                      </span>
                       <span className="absolute inset-y-0 right-0 flex items-center pr-4 pointer-events-none">
                         <svg className="h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                           <path fillRule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clipRule="evenodd" />
@@ -472,18 +507,42 @@ function TableRow<T>({
                               onKeyDown={(e) => {
                                 if (e.key === 'Enter') {
                                   setEditValue(option.value);
-                                  if (onBulkEdit && editingCell) {
+                                  if (handleShowConfirmation && editingCell) {
                                     const column = visibleColumns.find(col => col.key === editingCell);
                                     // Convert string 'true'/'false' to boolean for boolean fields
                                     const finalValue = column && column.fieldDataType === 'boolean' 
-                                      ? option.value === 'true' 
+                                      ? Boolean(option.value === 'true')
                                       : option.value;
-                                    onBulkEdit([item], editingCell, finalValue);
+                                    handleShowConfirmation(editingCell, finalValue);
                                   }
                                   setIsDropdownOpen(false);
                                   setEditingCell(null);
                                   setFocusedOptionIndex(-1);
                                 } else if (e.key === 'Escape') {
+                                  // Check if there are changes before closing
+                                  if (handleShowConfirmation) {
+                                    const column = visibleColumns.find(col => col.key === editingCell);
+                                    if (column) {
+                                      const oldValue = (item as any)[editingCell];
+                                      const newValue = column.fieldDataType === 'boolean' 
+                                        ? Boolean(editValue === 'true')
+                                        : editValue;
+
+                                      // Check if the value has changed
+                                      const isValueChanged = JSON.stringify(oldValue) !== JSON.stringify(newValue);
+
+                                      // If the value has changed, show confirmation dialog
+                                      if (isValueChanged) {
+                                        handleShowConfirmation(editingCell, newValue);
+                                        setIsDropdownOpen(false);
+                                        setEditingCell(null);
+                                        setFocusedOptionIndex(-1);
+                                        return;
+                                      }
+                                    }
+                                  }
+
+                                  // If no changes or no confirmation handler, just close
                                   setIsDropdownOpen(false);
                                   setEditingCell(null);
                                   setFocusedOptionIndex(-1);
@@ -517,28 +576,49 @@ function TableRow<T>({
                   value={editValue}
                   onChange={(e) => setEditValue(e.target.value)}
                   onBlur={() => {
-                    if (onBulkEdit && editingCell) {
+                    if (handleShowConfirmation && editingCell) {
                       const column = visibleColumns.find(col => col.key === editingCell);
                       // Convert string 'true'/'false' to boolean for boolean fields
                       const finalValue = column && column.fieldDataType === 'boolean' 
-                        ? editValue === 'true' 
+                        ? Boolean(editValue === 'true')
                         : editValue;
-                      onBulkEdit([item], editingCell, finalValue);
+                      handleShowConfirmation(editingCell, finalValue);
                     }
                     setEditingCell(null);
                   }}
                   onKeyDown={(e) => {
                     if (e.key === 'Enter') {
-                      if (onBulkEdit && editingCell) {
+                      if (handleShowConfirmation && editingCell) {
                         const column = visibleColumns.find(col => col.key === editingCell);
                         // Convert string 'true'/'false' to boolean for boolean fields
                         const finalValue = column && column.fieldDataType === 'boolean' 
-                          ? editValue === 'true' 
+                          ? Boolean(editValue === 'true')
                           : editValue;
-                        onBulkEdit([item], editingCell, finalValue);
+                        handleShowConfirmation(editingCell, finalValue);
                       }
                       setEditingCell(null);
                     } else if (e.key === 'Escape') {
+                      // Check if there are changes before closing
+                      if (handleShowConfirmation) {
+                        const column = visibleColumns.find(col => col.key === editingCell);
+                        if (column) {
+                          const oldValue = (item as any)[editingCell];
+                          const newValue = column.fieldDataType === 'boolean' 
+                            ? Boolean(editValue === 'true')
+                            : editValue;
+
+                          // Check if the value has changed
+                          const isValueChanged = JSON.stringify(oldValue) !== JSON.stringify(newValue);
+
+                          // If the value has changed, show confirmation dialog
+                          if (isValueChanged) {
+                            handleShowConfirmation(editingCell, newValue);
+                            return;
+                          }
+                        }
+                      }
+
+                      // If no changes or no confirmation handler, just close
                       setEditingCell(null);
                     }
                   }}
@@ -690,15 +770,35 @@ function TableRowWithConfirmation<T>(props: TableRowProps<T>) {
     // Get the current value from the item
     const oldValue = (props.item as any)[columnKey];
 
+    // Check if the value has actually changed
+    const isValueChanged = JSON.stringify(oldValue) !== JSON.stringify(newValue);
+
+    // If the value hasn't changed, apply the edit without showing confirmation
+    if (!isValueChanged) {
+      if (props.onBulkEdit) {
+        props.onBulkEdit([props.item], columnKey, newValue);
+      }
+      return;
+    }
+
     // Get a user-friendly field name
     const fieldName = column.header || columnKey;
+
+    // For boolean fields, use the column's labelTrue and labelFalse properties
+    let displayOldValue = oldValue;
+    let displayNewValue = newValue;
+
+    if (column.fieldDataType === 'boolean') {
+      displayOldValue = oldValue ? (column.labelTrue || 'Active') : (column.labelFalse || 'Inactive');
+      displayNewValue = newValue ? (column.labelTrue || 'Active') : (column.labelFalse || 'Inactive');
+    }
 
     // Set the global edit confirmation state
     setGlobalEditConfirmation({
       isOpen: true,
       fieldName,
-      oldValue,
-      newValue,
+      oldValue: displayOldValue,
+      newValue: displayNewValue,
       onConfirm: () => {
         if (props.onBulkEdit) {
           props.onBulkEdit([props.item], columnKey, newValue);
@@ -720,7 +820,7 @@ function TableRowWithConfirmation<T>(props: TableRowProps<T>) {
     : undefined;
 
   // Only render the TableRow, not the dialog
-  return <TableRow {...props} onBulkEdit={onBulkEditWithConfirmation} />;
+  return <TableRow {...props} onBulkEdit={props.onBulkEdit} handleShowConfirmation={handleShowConfirmation} />;
 }
 
 export default TableRowWithConfirmation;
