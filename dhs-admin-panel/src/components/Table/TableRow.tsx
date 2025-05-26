@@ -156,7 +156,7 @@ function TableRow<T>({
       // Handle clicks outside dropdown
       if (isDropdownOpen && dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
         // Check if there are changes before closing
-        if (editingCell && handleShowConfirmation) {
+        if (editingCell !== null && handleShowConfirmation) {
           const column = visibleColumns.find(col => col.key === editingCell);
           if (column) {
             const oldValue = (item as any)[editingCell];
@@ -198,7 +198,7 @@ function TableRow<T>({
         const datePickerElement = datePickerRef.current;
         if (datePickerElement && !datePickerElement.contains(event.target as Node)) {
           // Check if there are changes before closing
-          if (handleShowConfirmation) {
+          if (handleShowConfirmation && editingCell !== null) {
             const oldValue = (item as any)[editingCell];
             const newValue = dateValue?.start || null;
 
@@ -275,7 +275,7 @@ function TableRow<T>({
           event.preventDefault();
         } else if (event.key === 'Escape') {
           // Check if there are changes before closing
-          if (handleShowConfirmation) {
+          if (handleShowConfirmation && editingCell !== null) {
             const column = visibleColumns.find(col => col.key === editingCell);
             if (column) {
               const oldValue = (item as any)[editingCell];
@@ -443,7 +443,7 @@ function TableRow<T>({
                 const initialDate = dateValue?.start ? formatDateForInput(dateValue.start) : '';
 
                 const applyDateChange = () => {
-                  if (handleShowConfirmation) {
+                  if (handleShowConfirmation && editingCell !== null) {
                     const oldValue = (item as any)[editingCell];
                     const newValue = dateValue?.start || null;
 
@@ -497,7 +497,7 @@ function TableRow<T>({
                             applyDateChange();
                           } else if (e.key === 'Escape') {
                             // Check if there are changes before closing
-                            if (handleShowConfirmation) {
+                            if (handleShowConfirmation && editingCell !== null) {
                               const oldValue = (item as any)[editingCell];
                               const newValue = dateValue?.start || null;
 
@@ -638,7 +638,7 @@ function TableRow<T>({
                                   setFocusedOptionIndex(-1);
                                 } else if (e.key === 'Escape') {
                                   // Check if there are changes before closing
-                                  if (handleShowConfirmation) {
+                                  if (handleShowConfirmation && editingCell !== null) {
                                     const column = visibleColumns.find(col => col.key === editingCell);
                                     if (column) {
                                       const oldValue = (item as any)[editingCell];
@@ -717,7 +717,7 @@ function TableRow<T>({
                       setEditingCell(null);
                     } else if (e.key === 'Escape') {
                       // Check if there are changes before closing
-                      if (handleShowConfirmation) {
+                      if (handleShowConfirmation && editingCell !== null) {
                         const column = visibleColumns.find(col => col.key === editingCell);
                         if (column) {
                           const oldValue = (item as any)[editingCell];

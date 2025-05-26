@@ -1,4 +1,13 @@
+import React from 'react';
 import { ITableColumn } from '../interfaces';
+
+// Declare the jspdf property on the Window interface
+declare global {
+  interface Window {
+    jspdf: any;
+    html2canvas: any;
+  }
+}
 
 /**
  * Service for handling table data export functionality
@@ -246,7 +255,7 @@ export class TableExportService<T> {
    */
   public printTable(data: T[], columns: ITableColumn<T>[], title: string = 'Table Print'): void {
     const htmlContent = this.createHtmlContent(data, columns, title);
-    
+
     // Create a hidden iframe for printing
     const iframe = document.createElement('iframe');
     iframe.style.position = 'fixed';
@@ -293,7 +302,7 @@ export class TableExportService<T> {
    */
   public exportToPdf(data: T[], columns: ITableColumn<T>[], title: string = 'Table Export'): void {
     const htmlContent = this.createHtmlContent(data, columns, title);
-    
+
     // Create a container for the PDF content
     const container = document.createElement('div');
     container.style.position = 'absolute';

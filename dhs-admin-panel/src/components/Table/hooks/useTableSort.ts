@@ -16,14 +16,14 @@ export interface UseTableSortReturn<T> {
   sortKey: string | undefined;
   sortDirection: SortDirection;
   sortCriteria: SortCriterion[];
-  setSortCriteria: (criteria: SortCriterion[]) => void;
+  setSortCriteria: React.Dispatch<React.SetStateAction<SortCriterion[]>>;
   setSortKey: (key: string | undefined) => void;
   setSortDirection: (direction: SortDirection) => void;
   handleSort: (columnKey: string) => void;
   handleRemoveSortCriterion: (index: number) => void;
   handleClearAllSorting: () => void;
   showSortCriteriaSummary: boolean;
-  setShowSortCriteriaSummary: (show: boolean) => void;
+  setShowSortCriteriaSummary: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 export function useTableSort<T>({

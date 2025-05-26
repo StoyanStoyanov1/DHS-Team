@@ -162,18 +162,18 @@ export class TableAppearanceService {
   ): boolean {
     if (theme === 'dark') return true;
     if (theme === 'light') return false;
-    
+
     // For 'site', use the site's theme
     if (theme === 'site') {
       if (siteTheme === 'dark') return true;
       if (siteTheme === 'light') return false;
-      
+
       // If siteTheme is 'system', check system preference
       if (siteTheme === 'system') {
         return window.matchMedia('(prefers-color-scheme: dark)').matches;
       }
     }
-    
+
     // Fallback to system preference (should not happen with current options)
     return window.matchMedia('(prefers-color-scheme: dark)').matches;
   }
@@ -194,7 +194,7 @@ export class TableAppearanceService {
 
       const headerCells = table.querySelectorAll('thead th');
       const rows = table.querySelectorAll('tbody tr');
-      
+
       // Skip if no header cells or rows
       if (!headerCells.length || !rows.length) return;
 
@@ -210,7 +210,7 @@ export class TableAppearanceService {
         // Find max content width in column cells
         let maxCellWidth = 0;
         rows.forEach(row => {
-          const cell = row.cells[columnIndex];
+          const cell = (row as HTMLTableRowElement).cells[columnIndex];
           if (cell) {
             const cellContent = cell.textContent || '';
             const cellWidth = this.getTextWidth(cellContent) + (columnPadding || 40);
@@ -220,7 +220,7 @@ export class TableAppearanceService {
 
         // Use the larger of header width or max cell width
         let optimalWidth = Math.max(headerWidth, maxCellWidth);
-        
+
         // Apply min/max constraints if provided
         if (minColumnWidth !== undefined) {
           optimalWidth = Math.max(optimalWidth, minColumnWidth);
@@ -243,7 +243,7 @@ export class TableAppearanceService {
     const canvas = document.createElement('canvas');
     const context = canvas.getContext('2d');
     if (!context) return 0;
-    
+
     // Use a standard font size and family
     context.font = '14px Arial, sans-serif';
     const metrics = context.measureText(text);

@@ -26,18 +26,18 @@ function TablePresenter<T>() {
     sortedData,
     paginatedData,
     emptyRows,
-    
+
     // Columns
     columns,
     visibleColumns,
     handleToggleColumnVisibility,
-    
+
     // Filtering
     columnFilters,
     handleColumnFilterChange,
     resetColumnFilters,
     activeColumnFilterCount,
-    
+
     // Sorting
     sortKey,
     sortDirection,
@@ -49,14 +49,14 @@ function TablePresenter<T>() {
     setShowSortCriteriaSummary,
     setSortCriteria,
     handleSortDrop,
-    
+
     // Pagination
     currentPage,
     setCurrentPage,
     itemsPerPage,
     setItemsPerPage,
     totalPages,
-    
+
     // Selection
     selectedItems,
     selectedItemIds,
@@ -67,45 +67,47 @@ function TablePresenter<T>() {
     clearSelection,
     selectCurrentPageItems,
     selectAllItems,
-    
+
     // Context menu
     contextMenuPosition,
     handleTableRightClick,
     handleCellContextMenu,
     handleCloseContextMenu,
-    
+
     // Bulk edit
     showBulkEditBar,
     setShowBulkEditBar,
     handleBulkEdit,
-    
+
     // Delete
     showDeleteConfirmation,
     setShowDeleteConfirmation,
-    
+
     // Edit
     editingItem,
     setEditingItem,
     handleEdit,
-    
+
     // Appearance
     density,
+    setDensity,
     theme,
+    setTheme,
     showGridLines,
     stripedRows,
     highlightOnHover,
     stickyHeader,
     effectiveTheme,
     tableClassNames,
-    
+
     // Refresh
     isRefreshing,
     handleRefreshData,
-    
+
     // Export
     handleExportData,
     handlePrint,
-    
+
     // Other
     keyExtractor,
     emptyMessage,
@@ -117,10 +119,10 @@ function TablePresenter<T>() {
     onDelete,
     itemType,
   } = useTableContext<T>();
-  
+
   // Create a ref for the table element
   const tableRef = useRef<HTMLDivElement>(null);
-  
+
   // Helper function to format filter display values
   const formatFilterDisplayValue = (value: any, columnKey: string): string => {
     if (value === null || value === undefined) return 'Not set';
@@ -177,7 +179,7 @@ function TablePresenter<T>() {
 
     return String(value);
   };
-  
+
   return (
     <div className="space-y-4">
       <div 
@@ -318,6 +320,8 @@ function TablePresenter<T>() {
               // Table appearance settings
               density={density}
               theme={theme}
+              onChangeDensity={setDensity}
+              onChangeTheme={setTheme}
             />
 
             <TableBody
@@ -347,6 +351,8 @@ function TablePresenter<T>() {
               // Table appearance settings
               density={density}
               theme={theme}
+              onChangeDensity={setDensity}
+              onChangeTheme={setTheme}
             />
           </table>
         </div>
