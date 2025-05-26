@@ -411,7 +411,9 @@ export default function Table<T>({
       onExportData(format);
     } else {
       // Default export implementation
-      const exportData = sortedData.map(item => {
+      // Use selected items if any are selected, otherwise use current page data
+      const dataToExport = selectedItems.length > 0 ? selectedItems : paginatedData;
+      const exportData = dataToExport.map(item => {
         const row: Record<string, any> = {};
         visibleColumns.forEach(col => {
           // Get the raw value for the column
@@ -508,8 +510,8 @@ export default function Table<T>({
           let fileName = 'table-export';
 
           // If there's data, try to use the name property from the first item
-          if (sortedData.length > 0 && typeof sortedData[0] === 'object' && sortedData[0] !== null) {
-            const firstItem = sortedData[0] as any;
+          if (dataToExport.length > 0 && typeof dataToExport[0] === 'object' && dataToExport[0] !== null) {
+            const firstItem = dataToExport[0] as any;
             if (firstItem.name) {
               fileName = firstItem.name;
             } else if (firstItem.title) {
@@ -524,6 +526,9 @@ export default function Table<T>({
           container.style.position = 'absolute';
           container.style.left = '-9999px';
           container.style.top = '-9999px';
+          container.style.backgroundColor = 'white';
+          container.style.color = 'black';
+          container.className = 'light'; // Ensure light theme
           document.body.appendChild(container);
 
           // Create a clean table with all rows and all columns, with header
@@ -537,9 +542,9 @@ export default function Table<T>({
           });
           tableHTML += '</tr></thead>';
 
-          // Add all rows (not just current page)
+          // Use the dataToExport variable defined earlier
           tableHTML += '<tbody>';
-          sortedData.forEach((item, index) => {
+          dataToExport.forEach((item, index) => {
             tableHTML += '<tr>';
             // Add row number cell
             tableHTML += `<td>${index + 1}</td>`;
@@ -580,7 +585,7 @@ export default function Table<T>({
           tableHTML += '</tbody></table>';
 
           // Add total count of items
-          const totalItemsText = `<div class="total-items">Total items: ${sortedData.length}</div>`;
+          const totalItemsText = `<div class="total-items">Total items: ${dataToExport.length}</div>`;
 
           // Create styles for the PDF
           const styles = `
@@ -588,37 +593,43 @@ export default function Table<T>({
               body {
                 font-family: Arial, sans-serif;
                 margin: 20px;
+                background-color: white !important;
+                color: black !important;
               }
               .pdf-table {
                 border-collapse: collapse;
                 width: 100%;
                 margin-bottom: 10px;
+                background-color: white !important;
+                color: black !important;
               }
               .pdf-table th, .pdf-table td {
                 padding: 8px;
                 text-align: left;
                 border: 1px solid #ddd;
+                background-color: white !important;
+                color: black !important;
               }
               .pdf-table th {
-                background-color: #f2f2f2;
+                background-color: #f2f2f2 !important;
                 font-weight: bold;
+                color: black !important;
               }
-              .dark .pdf-table th {
-                background-color: #333;
-                color: white;
-              }
-              .dark .pdf-table td {
-                background-color: #444;
-                color: white;
-              }
-              .dark {
-                background-color: #333;
-                color: white;
-              }
+              /* Always use light theme for PDF exports */
               .total-items {
                 margin-top: 10px;
                 font-weight: bold;
                 text-align: right;
+                color: black !important;
+              }
+              /* Override any dark theme styles */
+              .dark, .dark * {
+                background-color: white !important;
+                color: black !important;
+              }
+              * {
+                background-color: white !important;
+                color: black !important;
               }
             </style>
           `;
@@ -631,7 +642,7 @@ export default function Table<T>({
                 <title>${fileName}</title>
                 ${styles}
               </head>
-              <body class="${effectiveTheme === 'dark' ? 'dark' : 'light'}">
+              <body class="light">
                 ${tableHTML}
                 ${totalItemsText}
               </body>
@@ -652,7 +663,13 @@ export default function Table<T>({
                 (window as any).html2canvas(element, {
                   scale: 2, // Higher scale for better quality
                   useCORS: true,
-                  logging: false
+                  logging: false,
+                  backgroundColor: '#ffffff', // Force white background
+                  removeContainer: false, // Keep the container to ensure styles are applied
+                  ignoreElements: (element: Element) => {
+                    // Ignore elements with dark theme classes
+                    return element.classList.contains('dark');
+                  }
                 }).then((canvas: HTMLCanvasElement) => {
                   resolve(canvas);
                 }).catch((error: any) => {
@@ -867,9 +884,10 @@ export default function Table<T>({
         });
         printTableHTML += '</tr></thead>';
 
-        // Add all rows (not just current page)
+        // Use selected items if any are selected, otherwise use current page data
+        const dataToPrint = selectedItems.length > 0 ? selectedItems : paginatedData;
         printTableHTML += '<tbody>';
-        sortedData.forEach((item, index) => {
+        dataToPrint.forEach((item, index) => {
           printTableHTML += '<tr>';
           // Add row number cell
           printTableHTML += `<td>${index + 1}</td>`;
@@ -910,7 +928,7 @@ export default function Table<T>({
         printTableHTML += '</tbody></table>';
 
         // Add total count of printed items
-        const totalItemsText = `<div class="total-items">Total items: ${sortedData.length}</div>`;
+        const totalItemsText = `<div class="total-items">Total items: ${dataToPrint.length}</div>`;
 
         // Create print-friendly styles
         const styles = `
@@ -933,18 +951,7 @@ export default function Table<T>({
               background-color: #f2f2f2;
               font-weight: bold;
             }
-            .dark .print-table th {
-              background-color: #333;
-              color: white;
-            }
-            .dark .print-table td {
-              background-color: #444;
-              color: white;
-            }
-            .dark {
-              background-color: #333;
-              color: white;
-            }
+            /* Always use light theme for printing */
             .total-items {
               margin-top: 10px;
               font-weight: bold;
@@ -973,7 +980,7 @@ export default function Table<T>({
                 <title>Table Print</title>
                 ${styles}
               </head>
-              <body class="${effectiveTheme === 'dark' ? 'dark' : ''}">
+              <body class="light">
                 ${printTableHTML}
                 ${totalItemsText}
               </body>
