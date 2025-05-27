@@ -1,5 +1,5 @@
 import { ReactNode } from 'react';
-import { FilterGroup, SelectedFilters } from '../Filter/interfaces';
+import { FilterGroup, SelectedFilters } from './Filter';
 import { EditableColumn } from './BulkEditBar';
 
 export type SortDirection = 'asc' | 'desc' | null;

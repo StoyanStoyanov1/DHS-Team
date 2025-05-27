@@ -1,5 +1,5 @@
 import React from 'react';
-import { ITableColumn } from '../Table/interfaces';
+import { ITableColumn } from '../../Table/interfaces';
 import ColumnSearchFilter from './ColumnSearchFilter';
 import BooleanColumnFilter from './BooleanColumnFilter';
 import DateRangeFilter from './DateRangeFilter';

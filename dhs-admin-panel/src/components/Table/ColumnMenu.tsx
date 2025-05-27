@@ -4,9 +4,7 @@ import {
   Eye, EyeOff, Filter as FilterIcon , X, Search as SearchIcon, 
   ListFilter, Calendar, Badge
 } from 'lucide-react';
-import { SelectedFilters } from '../Filter/interfaces';
-import FilterRenderer from '../Filter/FilterRenderer';
-import { DirectCalendarFilter } from '../Filter/DateRangeFilter';
+import { SelectedFilters, FilterRenderer, DirectCalendarFilter } from './Filter';
 
 interface ColumnMenuProps<T> {
   column: ITableColumn<T>;

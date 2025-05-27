@@ -14,7 +14,7 @@ import DeleteConfirmationDialog from './DeleteConfirmationDialog';
 import { EditConfirmationPortal } from './TableRow';
 import EditRowModal from './EditRowModal';
 import { RotateCcw } from 'lucide-react';
-import { ActiveFiltersDisplay } from '../Filter';
+import { ActiveFiltersDisplay } from './Filter';
 import SelectionActionsMenu from './SelectionActionsMenu';
 
 // TablePresenter component - handles the presentation logic

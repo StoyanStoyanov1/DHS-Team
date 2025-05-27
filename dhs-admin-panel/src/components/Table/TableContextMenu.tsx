@@ -15,8 +15,7 @@ import {
   CheckSquare,
   PencilIcon
 } from 'lucide-react';
-import { SelectedFilters } from '../Filter/interfaces';
-import FilterRenderer from '../Filter/FilterRenderer';
+import { SelectedFilters, FilterRenderer } from './Filter';
 import { isSortableColumn } from './utils';
 
 interface TableContextMenuProps<T> {

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { SortCriterion, ITableColumn } from '../Table/interfaces';
+import { SortCriterion, ITableColumn } from '../../Table/interfaces';
 import { ChevronDown, ChevronUp, XCircle, ArrowUpDown, SlidersHorizontal, GripVertical } from 'lucide-react';
 import { DragDropContext, Droppable, Draggable, DroppableProvided, DraggableProvided, DropResult } from '@hello-pangea/dnd';
 

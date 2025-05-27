@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { SearchMethod, SearchField } from '../Table/interfaces';
+import { SearchMethod, SearchField } from '../../Table/interfaces';
 import { 
   Search, ChevronDown, X, Check, Clock, 
   SlidersHorizontal, PlusCircle, Hash, Calendar
