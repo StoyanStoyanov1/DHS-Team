@@ -11,7 +11,7 @@ import TableContextMenu from './TableContextMenu';
 import TableSettings from './TableSettings';
 import BulkEditBar from './BulkEditBar';
 import DeleteConfirmationDialog from './DeleteConfirmationDialog';
-import { EditConfirmationPortal } from './TableRow';
+import { EditConfirmationPortal, DeleteConfirmationPortal } from './TableRow';
 import EditRowModal from './EditRowModal';
 import { RotateCcw } from 'lucide-react';
 import { ActiveFiltersDisplay } from './Filter';
@@ -444,6 +444,9 @@ function TablePresenter<T>() {
 
       {/* Edit Confirmation Portal - renders dialogs outside the table structure */}
       <EditConfirmationPortal />
+
+      {/* Delete Confirmation Portal - renders dialogs outside the table structure */}
+      <DeleteConfirmationPortal />
 
       {/* Edit Row Modal */}
       {editingItem && (

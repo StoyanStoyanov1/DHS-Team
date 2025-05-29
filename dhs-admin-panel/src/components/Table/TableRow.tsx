@@ -1035,7 +1035,6 @@ function TableRowWithConfirmation<T>(props: TableRowProps<T>) {
         onBulkEdit={props.onBulkEdit} 
         handleShowConfirmation={handleShowConfirmation}
       />
-      <DeleteConfirmationPortal />
     </>
   );
 }
