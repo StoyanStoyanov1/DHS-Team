@@ -1035,7 +1035,7 @@ function TableRowWithConfirmation<T>(props: TableRowProps<T>) {
   const processedItem = { ...props.item };
 
   // Process all properties of the item to convert Date objects to strings
-  Object.keys(processedItem).forEach(key => {
+  Object.keys(processedItem as object).forEach(key => {
     const value = (processedItem as any)[key];
     if (value instanceof Date) {
       // Convert Date objects to ISO string format

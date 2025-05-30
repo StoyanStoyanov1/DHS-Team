@@ -5,7 +5,7 @@ import Layout from '@/src/components/Layout';
 import Table from '@/src/components/Table';
 import type { ITableColumn } from '@/src/components/Table/interfaces';
 import DeleteConfirmationDialog from '@/src/components/Table/DeleteConfirmationDialog';
-import { FilterGroup, SelectedFilters } from '@/src/components/Filter/interfaces';
+import { FilterGroup, SelectedFilters } from '@/src/components/Table/Filter/interfaces';
 import { Edit, Trash2, FileText, MoreVertical, UserIcon, ShieldCheck, Activity } from 'lucide-react';
 import { User, mockUsers } from '@/src/data/mock/users';
 import ClientOnly from '@/src/components/ClientOnly';
@@ -159,8 +159,8 @@ function UsersListContent() {
   const handleAddItem = async (newUser: User): Promise<void> => {
     console.log('Add new user:', newUser);
     // Generate a new ID for the user
-    const newId = Math.max(...filteredUsers.map(u => parseInt(u.id))) + 1;
-    const userWithId = { ...newUser, id: newId.toString() };
+    const newId = Math.max(...filteredUsers.map(u => u.id)) + 1;
+    const userWithId = { ...newUser, id: newId };
 
     // Add the new user to the list
     setFilteredUsers(prev => [...prev, userWithId]);
