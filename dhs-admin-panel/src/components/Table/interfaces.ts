@@ -49,6 +49,15 @@ export interface ITableColumn<T> {
   searchFields?: SearchField[];
   fieldDataType?: 'text' | 'number' | 'date' | 'boolean' | 'array' | 'enum' | 'role';
   recentSearches?: string[];
+
+  // Validation properties
+  required?: boolean;
+  minLength?: number;
+  maxLength?: number;
+  pattern?: RegExp | string;
+  hideOnCreate?: boolean;
+  defaultValue?: any;
+  validate?: (value: any) => { isValid: boolean; message?: string } | boolean;
 }
 
 export interface ITableService<T> {

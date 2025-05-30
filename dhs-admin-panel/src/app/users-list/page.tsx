@@ -205,7 +205,15 @@ function UsersListContent() {
         { key: 'name', label: 'Name', path: 'name' }
       ],
       fieldDataType: 'text',
-      recentSearches: ['John', 'admin', 'support']
+      recentSearches: ['John', 'admin', 'support'],
+      // Validation properties
+      required: true,
+      minLength: 3,
+      validate: (value) => {
+        if (typeof value !== 'string') return { isValid: false, message: 'Name must be a string' };
+        if (value.length < 3) return { isValid: false, message: 'Name must be at least 3 characters' };
+        return { isValid: true };
+      }
     },
     {
       header: 'Email',
@@ -217,7 +225,17 @@ function UsersListContent() {
       searchFields: [
         { key: 'email', label: 'Email', path: 'email' }
       ],
-      fieldDataType: 'text'
+      fieldDataType: 'text',
+      // Validation properties
+      required: true,
+      pattern: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
+      validate: (value) => {
+        if (typeof value !== 'string') return { isValid: false, message: 'Email must be a string' };
+        if (!/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(value)) {
+          return { isValid: false, message: 'Please enter a valid email address' };
+        }
+        return { isValid: true };
+      }
     },
     {
       header: 'Role',
@@ -237,7 +255,9 @@ function UsersListContent() {
       defaultSelectAll: true,
       hideable: true,
       sortable: false,
-      fieldDataType: 'role'
+      fieldDataType: 'role',
+      // Validation properties
+      required: true
     },
     {
       header: 'Status',
@@ -255,7 +275,11 @@ function UsersListContent() {
       labelAll: 'All Statuses',
       hideable: true,
       sortable: false, // Disable sorting for Status
-      fieldDataType: 'boolean'
+      fieldDataType: 'boolean',
+      // Validation properties
+      required: true,
+      hideOnCreate: true, // Hide during creation
+      defaultValue: true // Default to active
     },
     {
       header: 'Last Login',
