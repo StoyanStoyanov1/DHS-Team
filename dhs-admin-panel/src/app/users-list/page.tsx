@@ -156,6 +156,19 @@ function UsersListContent() {
     setFilteredUsers(prev => prev.filter(u => u.id !== user.id));
   };
 
+  const handleAddItem = async (newUser: User): Promise<void> => {
+    console.log('Add new user:', newUser);
+    // Generate a new ID for the user
+    const newId = Math.max(...filteredUsers.map(u => parseInt(u.id))) + 1;
+    const userWithId = { ...newUser, id: newId.toString() };
+
+    // Add the new user to the list
+    setFilteredUsers(prev => [...prev, userWithId]);
+
+    // In a real app, you would call an API here
+    return new Promise<void>(resolve => setTimeout(resolve, 1000));
+  };
+
   const handleBulkEdit = async (selectedItems: User[], columnKey: string, newValue: any): Promise<void> => {
     console.log(`Bulk updating ${selectedItems.length} users:`, { columnKey, newValue });
 
@@ -324,6 +337,8 @@ function UsersListContent() {
           onBulkEdit={handleBulkEdit}
           onEdit={handleEdit}
           onDelete={handleDelete}
+          onAddItem={handleAddItem}
+          itemType="users"
         />
 
         {showDeleteConfirm && (

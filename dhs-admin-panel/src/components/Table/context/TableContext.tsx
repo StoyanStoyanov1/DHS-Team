@@ -23,6 +23,11 @@ interface TableContextType<T> {
   setColumns: React.Dispatch<React.SetStateAction<ITableColumn<T>[]>>;
   handleToggleColumnVisibility: (columnKey: string) => void;
 
+  // Add Item
+  isAddingItem: boolean;
+  setIsAddingItem: React.Dispatch<React.SetStateAction<boolean>>;
+  handleAddItem: (newItem: T) => void;
+
   // Filtering
   columnFilters: Record<string, any>;
   filterOrder: string[];
@@ -150,6 +155,7 @@ interface TableProviderProps<T> {
   onBulkEdit?: (selectedItems: T[], columnKey: string, newValue: any) => Promise<void>;
   onEdit?: (item: T) => void;
   onDelete?: (item: T) => void;
+  onAddItem?: (newItem: T) => Promise<void>;
   itemType?: string;
   density?: 'compact' | 'normal' | 'relaxed';
   theme?: 'light' | 'dark' | 'site';
@@ -184,6 +190,7 @@ export function TableProvider<T>({
   onBulkEdit,
   onEdit,
   onDelete,
+  onAddItem,
   itemType = 'items',
   density: propDensity = 'normal',
   theme: propTheme = 'site',
@@ -213,6 +220,7 @@ export function TableProvider<T>({
   const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [editingItem, setEditingItem] = useState<T | null>(null);
+  const [isAddingItem, setIsAddingItem] = useState(false);
 
   // State for appearance settings
   const [density, setDensity] = useState<'compact' | 'normal' | 'relaxed'>(propDensity);
@@ -409,6 +417,18 @@ export function TableProvider<T>({
     setEditingItem(item);
   };
 
+  // Handle adding a new item
+  const handleAddItem = async (newItem: T) => {
+    if (onAddItem) {
+      try {
+        await onAddItem(newItem);
+        setIsAddingItem(false);
+      } catch (error) {
+        console.error('Failed to add item:', error);
+      }
+    }
+  };
+
   // Refresh data handler
   const handleRefreshData = () => {
     // Set refreshing state to trigger animation
@@ -501,6 +521,11 @@ export function TableProvider<T>({
     visibleColumns,
     setColumns,
     handleToggleColumnVisibility,
+
+    // Add Item
+    isAddingItem,
+    setIsAddingItem,
+    handleAddItem,
 
     // Filtering
     columnFilters,

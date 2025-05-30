@@ -118,6 +118,7 @@ export interface ITableProps<T> {
   // Row action props
   onEdit?: (item: T) => void;
   onDelete?: (item: T) => void;
+  onAddItem?: (newItem: T) => Promise<void>;
 
   // Item type for delete confirmation dialog
   itemType?: string;

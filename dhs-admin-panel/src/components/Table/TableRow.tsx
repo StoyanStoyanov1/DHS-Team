@@ -751,9 +751,13 @@ function TableRow<T>({
                   // For boolean fields, display the user-friendly label
                   column.fieldDataType === 'boolean' ? 
                     (item as any)[column.key] ? (column.labelTrue || 'Active') : (column.labelFalse || 'Inactive') :
-                  // For date fields, format the date
-                  column.fieldDataType === 'date' && (item as any)[column.key] ?
+                  // For date fields or Date objects, format the date
+                  (column.fieldDataType === 'date' && (item as any)[column.key]) || 
+                  ((item as any)[column.key] instanceof Date) ?
                     new Date((item as any)[column.key]).toLocaleDateString('bg-BG', { day: '2-digit', month: '2-digit', year: 'numeric' }) :
+                  // Ensure any other value is converted to string if it's not null or undefined
+                  (item as any)[column.key] !== null && (item as any)[column.key] !== undefined ? 
+                    String((item as any)[column.key]) : 
                     (item as any)[column.key]
                 }
               </div>
@@ -1027,11 +1031,24 @@ function TableRowWithConfirmation<T>(props: TableRowProps<T>) {
       }
     : undefined;
 
+  // Ensure all Date objects in the item are converted to strings
+  const processedItem = { ...props.item };
+
+  // Process all properties of the item to convert Date objects to strings
+  Object.keys(processedItem).forEach(key => {
+    const value = (processedItem as any)[key];
+    if (value instanceof Date) {
+      // Convert Date objects to ISO string format
+      (processedItem as any)[key] = value.toISOString().split('T')[0];
+    }
+  });
+
   // Only render the TableRow, not the dialogs
   return (
     <>
       <TableRow 
         {...props} 
+        item={processedItem}
         onBulkEdit={props.onBulkEdit} 
         handleShowConfirmation={handleShowConfirmation}
       />

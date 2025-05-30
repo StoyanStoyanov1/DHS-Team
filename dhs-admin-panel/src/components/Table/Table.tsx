@@ -13,7 +13,8 @@ import BulkEditBar from './BulkEditBar';
 import DeleteConfirmationDialog from './DeleteConfirmationDialog';
 import { EditConfirmationPortal, DeleteConfirmationPortal } from './TableRow';
 import EditRowModal from './EditRowModal';
-import { RotateCcw } from 'lucide-react';
+import AddItemModal from './AddItemModal';
+import { RotateCcw, PlusCircle } from 'lucide-react';
 import { ActiveFiltersDisplay } from './Filter';
 import SelectionActionsMenu from './SelectionActionsMenu';
 
@@ -31,6 +32,11 @@ function TablePresenter<T>() {
     columns,
     visibleColumns,
     handleToggleColumnVisibility,
+
+    // Add Item
+    isAddingItem,
+    setIsAddingItem,
+    handleAddItem,
 
     // Filtering
     columnFilters,
@@ -241,6 +247,16 @@ function TablePresenter<T>() {
 
           {/* Add page size control to the top toolbar */}
           <div className="flex items-center space-x-2">
+            {/* Add new item button */}
+            <button
+              onClick={() => setIsAddingItem(true)}
+              className="inline-flex items-center px-3 py-1.5 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800 rounded-md transition-all duration-200"
+              title="Add new item"
+            >
+              <PlusCircle size={16} className="mr-1" />
+              Add {itemType.charAt(0).toUpperCase() + itemType.slice(1, -1)}
+            </button>
+
             {/* Refresh icon button - elegant circle design with animation */}
             <button
               onClick={handleRefreshData}
@@ -481,6 +497,16 @@ function TablePresenter<T>() {
           }}
         />
       )}
+
+      {/* Add Item Modal */}
+      <AddItemModal
+        isOpen={isAddingItem}
+        columns={columns}
+        onSave={handleAddItem}
+        onCancel={() => {
+          setIsAddingItem(false);
+        }}
+      />
     </div>
   );
 }
