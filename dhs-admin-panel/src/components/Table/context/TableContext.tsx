@@ -8,7 +8,17 @@ import { useTableSort } from '../hooks/useTableSort';
 import { useTableSelection } from '../hooks/useTableSelection';
 import { useTheme } from '../../ThemeProvider';
 
-// Define the context type
+/**
+ * TableContext provides state management and functionality for the Table component
+ * 
+ * This context follows the Container pattern and centralizes all the state and
+ * functionality needed by the Table component and its sub-components.
+ */
+
+/**
+ * Interface defining all the state and functions available in the TableContext
+ * @template T - The type of data items in the table
+ */
 interface TableContextType<T> {
   // Data
   data: T[];
@@ -129,10 +139,16 @@ interface TableContextType<T> {
   itemType: string;
 }
 
-// Create the context with a default value of undefined
+/**
+ * Create the context with a default value of undefined
+ * The actual value will be provided by the TableProvider
+ */
 const TableContext = createContext<TableContextType<any> | undefined>(undefined);
 
-// Provider props
+/**
+ * Props interface for the TableProvider component
+ * @template T - The type of data items in the table
+ */
 interface TableProviderProps<T> {
   children: ReactNode;
   data: T[];
@@ -167,7 +183,17 @@ interface TableProviderProps<T> {
   onPrint?: () => void;
 }
 
-// Provider component
+/**
+ * TableProvider component - provides state and functionality to the Table component
+ * 
+ * This component implements the Container part of the Container/Presenter pattern.
+ * It manages all the state and business logic for the Table component and provides
+ * it to child components through the TableContext.
+ * 
+ * @template T - The type of data items in the table
+ * @param props - The configuration props for the table
+ * @returns A context provider that wraps the table components
+ */
 export function TableProvider<T>({
   children,
   data,
@@ -635,7 +661,16 @@ export function TableProvider<T>({
   );
 }
 
-// Custom hook to use the table context
+/**
+ * Custom hook to access the table context
+ * 
+ * This hook provides access to all the state and functionality of the Table component.
+ * It must be used within a component that is a child of TableProvider.
+ * 
+ * @template T - The type of data items in the table
+ * @returns The table context with all state and functions
+ * @throws Error if used outside of a TableProvider
+ */
 export function useTableContext<T>() {
   const context = useContext(TableContext);
   if (context === undefined) {

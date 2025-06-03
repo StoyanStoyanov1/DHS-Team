@@ -18,7 +18,15 @@ import { RotateCcw, PlusCircle } from 'lucide-react';
 import { ActiveFiltersDisplay } from './Filter';
 import SelectionActionsMenu from './SelectionActionsMenu';
 
-// TablePresenter component - handles the presentation logic
+/**
+ * TablePresenter component - handles the presentation logic for the Table
+ * 
+ * This component is responsible for rendering the table UI based on the state
+ * and functions provided by the TableContext. It implements the presenter part
+ * of the Container/Presenter pattern.
+ * 
+ * @template T - The type of data items in the table
+ */
 function TablePresenter<T>() {
   // Get all the state and functions from the context
   const {
@@ -129,7 +137,16 @@ function TablePresenter<T>() {
   // Create a ref for the table element
   const tableRef = useRef<HTMLDivElement>(null);
 
-  // Helper function to format filter display values
+  /**
+   * Helper function to format filter values for display in the UI
+   * 
+   * This function converts various filter value types (boolean, object, array, etc.)
+   * into human-readable strings for display in the filter badges.
+   * 
+   * @param value - The filter value to format
+   * @param columnKey - The key of the column the filter belongs to
+   * @returns A formatted string representation of the filter value
+   */
   const formatFilterDisplayValue = (value: any, columnKey: string): string => {
     if (value === null || value === undefined) return 'Not set';
 
@@ -511,7 +528,28 @@ function TablePresenter<T>() {
   );
 }
 
-// Main Table component - handles the container logic
+/**
+ * Main Table component - a feature-rich data table for React applications
+ * 
+ * The Table component provides a comprehensive solution for displaying, sorting,
+ * filtering, and manipulating tabular data. It follows the Container/Presenter pattern
+ * where TableProvider handles the state and logic, while TablePresenter handles the UI.
+ * 
+ * Features:
+ * - Data display with customizable columns and cell rendering
+ * - Sorting (single and multi-column)
+ * - Filtering with multiple filter types
+ * - Pagination with customizable page sizes
+ * - Row selection with bulk actions
+ * - CRUD operations (add, edit, delete)
+ * - Export and print functionality
+ * - Customizable appearance (theme, density, etc.)
+ * - Context menu for additional actions
+ * 
+ * @template T - The type of data items in the table
+ * @param props - The table configuration props
+ * @returns A fully functional data table component
+ */
 export default function Table<T>(props: ITableProps<T>) {
   return (
     <TableProvider {...props}>
